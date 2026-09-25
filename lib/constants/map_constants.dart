@@ -1,0 +1,78 @@
+// 🗺️ Constantes do Mapa - Zonas Padrão
+
+/// Zonas padrão para o evento caso não haja dados salvos no backend
+/// Baseado na web version (front-pulyn/src/pages/display/DisplayMap.tsx)
+final List<Map<String, dynamic>> DEFAULT_ZONES = [
+  {
+    'id': 'zone-1',
+    'name': 'Zona Vermelha',
+    'x': 10,
+    'y': 10,
+    'w': 80,
+    'h': 80,
+    'color': '#FF6B6B',
+  },
+  {
+    'id': 'zone-2',
+    'name': 'Zona Azul',
+    'x': 100,
+    'y': 10,
+    'w': 80,
+    'h': 80,
+    'color': '#4ECDC4',
+  },
+  {
+    'id': 'zone-3',
+    'name': 'Zona Verde',
+    'x': 190,
+    'y': 10,
+    'w': 80,
+    'h': 80,
+    'color': '#95E1D3',
+  },
+  {
+    'id': 'zone-4',
+    'name': 'Zona Amarela',
+    'x': 280,
+    'y': 10,
+    'w': 80,
+    'h': 80,
+    'color': '#FFE66D',
+  },
+  {
+    'id': 'zone-5',
+    'name': 'Zona Laranja',
+    'x': 10,
+    'y': 110,
+    'w': 80,
+    'h': 80,
+    'color': '#FF9F43',
+  },
+  {
+    'id': 'zone-6',
+    'name': 'Zona Rosa',
+    'x': 100,
+    'y': 110,
+    'w': 80,
+    'h': 80,
+    'color': '#F368E0',
+  },
+  {
+    'id': 'zone-7',
+    'name': 'Zona Roxo',
+    'x': 190,
+    'y': 110,
+    'w': 80,
+    'h': 80,
+    'color': '#A29BFE',
+  },
+  {
+    'id': 'zone-8',
+    'name': 'Zona Turquesa',
+    'x': 280,
+    'y': 110,
+    'w': 80,
+    'h': 80,
+    'color': '#00B8A9',
+  },
+];

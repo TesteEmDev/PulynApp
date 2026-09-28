@@ -4,4 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    
+    <!-- ✅ Permissão de CÂMERA necessária para QR Scanner -->
+    <uses-permission android:name="android.permission.CAMERA"/>
 </manifest>

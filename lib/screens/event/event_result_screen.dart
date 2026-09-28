@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 /// 🎯 FASE 4: EVENT RESULT SCREEN
 /// Mostra quando: Evento tem status 'completed' (após encerramento)

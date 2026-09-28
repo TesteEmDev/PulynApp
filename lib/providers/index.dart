@@ -6,7 +6,6 @@ import 'auth_provider.dart';
 import 'websocket_provider.dart';
 import '../models/family_models.dart';
 import '../utils/logger.dart';
-import '../constants/map_constants.dart';
 
 // ✅ Exporta providers externos
 export 'auth_provider.dart' show apiServiceProvider, authProvider, authInitProvider;
@@ -291,7 +290,9 @@ final checkpointsByEventProvider = FutureProvider.family<List<Map<String, dynami
   final apiService = ref.read(apiServiceProvider);
   await apiService.init();
   
+  log.i('[CHECKPOINTS] 🔄 Buscando checkpoints para evento: $eventoId');
   final checkpoints = await apiService.getCheckpointsByEvent(eventoId);
+  log.i('[CHECKPOINTS] ✅ Retorno da API: ${checkpoints.length} checkpoints');
   
   // Salva no cache
   ref.read(checkpointsCacheProvider.notifier).setCheckpoints(eventoId, checkpoints);
@@ -300,12 +301,11 @@ final checkpointsByEventProvider = FutureProvider.family<List<Map<String, dynami
 });
 
 /// Provider para buscar zonas (áreas) do evento do backend
-/// Com fallback para localStorage e DEFAULT_ZONES (exatamente como web version)
 final zonesByEventProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, eventoId) async {
   try {
     if (eventoId.isEmpty) {
       log.w('[ZONES] ⚠️ eventoId vazio');
-      return List<Map<String, dynamic>>.from(DEFAULT_ZONES);
+      return [];
     }
     
     final apiService = ref.read(apiServiceProvider);
@@ -314,37 +314,23 @@ final zonesByEventProvider = FutureProvider.family<List<Map<String, dynamic>>, S
     log.i('[ZONES] 🔄 Buscando zonas do backend para evento: $eventoId');
     
     try {
-      // Busca zonas do endpoint (o Dio já inclui autenticação automática)
-      final response = await apiService.dio.get('/events/$eventoId/zones');
+      // Busca zonas usando o novo método getZonesByEvent
+      final zones = await apiService.getZonesByEvent(eventoId);
       
-      if (response.statusCode == 200) {
-        final zones = (response.data as List?)
-            ?.map((z) => Map<String, dynamic>.from(z as Map))
-            .toList() ?? [];
-        
-        if (zones.isNotEmpty) {
-          log.i('[ZONES] ✅ Zonas carregadas do backend: ${zones.length} áreas');
-          // Atualizar localStorage como cache (fallback futuro)
-          await _cacheZonesToStorage(apiService, eventoId, zones);
-          return zones;
-        } else {
-          log.i('[ZONES] 📝 Nenhuma zona no backend, tentando cache...');
-          final cached = await _loadZonesFromStorage(apiService, eventoId);
-          if (cached.isNotEmpty) {
-            log.i('[ZONES] ✅ Zonas carregadas do cache: ${cached.length} áreas');
-            return cached;
-          }
-          log.i('[ZONES] 📍 Usando zonas padrão');
-          return List<Map<String, dynamic>>.from(DEFAULT_ZONES);
-        }
+      if (zones.isNotEmpty) {
+        log.i('[ZONES] ✅ Zonas carregadas do backend: ${zones.length} áreas');
+        // Atualizar cache
+        await _cacheZonesToStorage(apiService, eventoId, zones);
+        return zones;
       } else {
-        log.w('[ZONES] ⚠️ Erro na resposta do backend: ${response.statusCode}');
+        log.i('[ZONES] 📝 Nenhuma zona no backend');
+        // Tentar cache
         final cached = await _loadZonesFromStorage(apiService, eventoId);
         if (cached.isNotEmpty) {
-          log.i('[ZONES] ✅ Zonas carregadas do cache (fallback): ${cached.length} áreas');
+          log.i('[ZONES] ✅ Zonas carregadas do cache: ${cached.length} áreas');
           return cached;
         }
-        return List<Map<String, dynamic>>.from(DEFAULT_ZONES);
+        return [];
       }
     } catch (apiError) {
       log.w('[ZONES] ⚠️ Erro ao chamar API: $apiError');
@@ -354,19 +340,18 @@ final zonesByEventProvider = FutureProvider.family<List<Map<String, dynamic>>, S
         log.i('[ZONES] ✅ Zonas carregadas do cache (fallback após erro): ${cached.length} áreas');
         return cached;
       }
-      log.i('[ZONES] 📍 Usando zonas padrão após falha da API');
-      return List<Map<String, dynamic>>.from(DEFAULT_ZONES);
+      return [];
     }
   } catch (e, st) {
     log.e('[ZONES] ❌ Erro ao carregar zonas: $e');
     log.e('[ZONES] Stack: $st');
-    return List<Map<String, dynamic>>.from(DEFAULT_ZONES);
+    return [];
   }
 });
 
 /// Carrega zonas do cache (SharedPreferences)
 Future<List<Map<String, dynamic>>> _loadZonesFromStorage(
-  ApiService apiService,
+  dynamic apiService,
   String eventoId,
 ) async {
   try {
@@ -385,31 +370,18 @@ Future<List<Map<String, dynamic>>> _loadZonesFromStorage(
   }
   return [];
 }
-    
-    if (stored != null) {
-      final zones = (jsonDecode(stored) as List)
-          .map((z) => Map<String, dynamic>.from(z as Map))
-          .toList();
-      log.i('[ZONES] 📦 Zonas do cache: ${zones.length} áreas');
-      return zones;
-    }
-  } catch (e) {
-    log.w('[ZONES] ⚠️ Erro ao carregar cache: $e');
-  }
-  return [];
-}
 
 /// Salva zonas no cache (SharedPreferences)
 Future<void> _cacheZonesToStorage(
-  ApiService apiService,
+  dynamic apiService,
   String eventoId,
   List<Map<String, dynamic>> zones,
 ) async {
   try {
     final key = 'zones_$eventoId';
     final zonesJson = jsonEncode(zones);
-    await apiService._prefs.setString(key, zonesJson);
-    log.i('[ZONES] 💾 Zonas cacheadas com sucesso');
+    await apiService.prefs.setString(key, zonesJson);
+    log.i('[ZONES] � Zonas cacheadas com sucesso');
   } catch (e) {
     log.w('[ZONES] ⚠️ Erro ao cachear zonas: $e');
   }

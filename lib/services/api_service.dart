@@ -501,6 +501,19 @@ class ApiService {
     }
   }
 
+  /// ✅ GET /eventos/{eventoId}/zones - Zonas do evento
+  Future<List<Map<String, dynamic>>> getZonesByEvent(String eventoId) async {
+    try {
+      final response = await _dio.get('/eventos/$eventoId/zones');
+      
+      final data = _validateResponseList(response.data);
+      return data.map((item) => item as Map<String, dynamic>).toList();
+    } catch (e) {
+      log.e('[API] ❌ Erro ao buscar zonas: $e');
+      return [];
+    }
+  }
+
   /// ✅ GET /familias/active-event/checkpoints - Checkpoints do evento ativo
   Future<List<Map<String, dynamic>>> getActiveEventCheckpoints() async {
     try {
@@ -516,7 +529,16 @@ class ApiService {
   /// ✅ GET /checkpoints/evento/{eventoId} - Checkpoints de um evento específico (mesmo que admin usa)
   Future<List<Map<String, dynamic>>> getCheckpointsByEvent(String eventoId) async {
     try {
+      log.i('[API] 🔍 Buscando checkpoints para evento: $eventoId');
+      
+      if (eventoId.isEmpty) {
+        log.w('[API] ⚠️ eventoId está vazio!');
+        return [];
+      }
+      
       final response = await _dio.get('/checkpoints/evento/$eventoId');
+      
+      log.i('[API] ✅ Checkpoints carregados com sucesso: ${response.data}');
       
       final data = _validateResponseList(response.data);
       final checkpoints = data.map((item) => item as Map<String, dynamic>).toList()
@@ -533,9 +555,14 @@ class ApiService {
         })
         .toList();
       
+      log.i('[API] ✅ Checkpoints retornados: ${checkpoints.length}');
       return checkpoints;
     } catch (e) {
-      log.e('[API] ❌ Erro ao buscar checkpoints: $e');
+      log.e('[API] ❌ Erro ao buscar checkpoints para evento $eventoId: $e');
+      if (e is DioException) {
+        log.e('[API] 🔴 Status Code: ${e.response?.statusCode}');
+        log.e('[API] 📝 Response: ${e.response?.data}');
+      }
       return [];
     }
   }
@@ -672,6 +699,78 @@ class ApiService {
       rethrow;
     }
   }
+
+
+  /// ✅ POST /family/qrcode/validate - Vincular criança com QR code
+Future<Map<String, dynamic>> linkChildWithQRCode(String qrCodeValue) async {
+  try {
+    log.i('[API] 📱 Vinculando criança com QR: $qrCodeValue');
+    log.i('[API] 📊 URL: /family/qrcode/validate');
+    log.i('[API] 📦 Payload: {qrCodeValue: $qrCodeValue}');
+    
+    if (!_initialized) {
+      log.i('[API] ⏳ Inicializando ApiService...');
+      await init();
+    }
+    
+    final response = await _dio.post(
+      '/family/qrcode/validate',
+      data: {'qrCodeValue': qrCodeValue},
+    );
+    
+    log.i('[API] ✅ Resposta recebida com status: ${response.statusCode}');
+    log.i('[API] 📊 Dados brutos: ${response.data}');
+    log.i('[API] 📊 Tipo: ${response.data.runtimeType}');
+    
+    final data = _validateResponseData(response.data);
+    
+    // ✅ Validar que tem 'success' e 'linkedChild'
+    if (data['success'] != true) {
+      log.e('[API] ❌ Resposta não confirmou sucesso: ${data}');
+      throw DioException(
+        requestOptions: RequestOptions(path: '/family/qrcode/validate'),
+        error: data['error'] ?? 'Resposta sem confirmação de sucesso',
+        type: DioExceptionType.unknown,
+      );
+    }
+    
+    final linkedChild = data['linkedChild'];
+    if (linkedChild == null) {
+      log.e('[API] ❌ Falta "linkedChild" na resposta: ${data}');
+      throw DioException(
+        requestOptions: RequestOptions(path: '/family/qrcode/validate'),
+        error: 'Dados da criança ausentes na resposta',
+        type: DioExceptionType.unknown,
+      );
+    }
+    
+    log.i('[API] ✅ Criança vinculada com sucesso!');
+    log.i('[API] 👶 Criança: ${linkedChild['nickname'] ?? linkedChild['name']} (ID: ${linkedChild['id']})');
+    log.i('[API] 🎮 Evento: ${linkedChild['evento']}');
+    
+    return data;
+  } on DioException catch (e) {
+    log.e('[API] ❌ ERRO DIO ao vincular: ${e.message}');
+    log.e('[API] 🔴 Status Code: ${e.response?.statusCode}');
+    log.e('[API] 📝 Resposta do erro: ${e.response?.data}');
+    log.e('[API] 📍 Stack: ${StackTrace.current}');
+    
+    // Re-lançar com mensagem mais amigável
+    String userMessage = 'Erro ao vincular criança';
+    try {
+      if (e.response?.data is Map) {
+        userMessage = e.response?.data['error'] ?? userMessage;
+      }
+    } catch (_) {}
+    
+    throw Exception(userMessage);
+  } catch (e) {
+    log.e('[API] ❌ ERRO GENÉRICO ao vincular: $e');
+    log.e('[API] 📍 Tipo: ${e.runtimeType}');
+    log.e('[API] 📍 Stack: ${StackTrace.current}');
+    rethrow;
+  }
+}
 
   // WebSocket para atualizações em tempo real
   String getWebSocketUrl() => _baseUrl.replaceFirst('http', 'ws');

@@ -32,6 +32,8 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
+
+  permission_handler: ^11.4.0
   
   # State Management & Routing
   flutter_riverpod: ^2.5.1
@@ -52,6 +54,9 @@ dependencies:
   
   # Location
   geolocator: ^10.1.0
+  
+  # QR Code Scanner
+  mobile_scanner: ^7.4.2
 
 dev_dependencies:
   flutter_test:

@@ -66,5 +66,12 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- ✅ Permissões de Câmera para iOS -->
+	<key>NSCameraUsageDescription</key>
+	<string>Precisamos acessar sua câmera para escanear códigos QR e vincular seu filho. Essa permissão é necessária apenas para a vinculação.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Precisamos acessar sua galeria de fotos para QR Codes.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Permitir acesso à biblioteca de fotos para salvar QR Codes.</string>
 </dict>
 </plist>

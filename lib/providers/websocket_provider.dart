@@ -44,47 +44,43 @@ class WebSocketNotifier extends StateNotifier<AsyncValue<bool>> {
   Future<void> _initializeConnection() async {
     try {
       state = const AsyncValue.loading();
-      
-      // ✅ Precisa do evento ativo para conectar (igual frontend web)
-      final activeEventAsync = ref.read(activeEventProvider);
-      
-      await activeEventAsync.when(
-        loading: () => Future.delayed(const Duration(seconds: 2)),
-        error: (error, _) async {
-          log.e('[WebSocket] ❌ Erro ao obter evento ativo: $error');
-          state = AsyncValue.error(error, StackTrace.current);
-        },
-        data: (activeEvent) async {
-          if (activeEvent == null) {
-            log.w('[WebSocket] ⚠️ Nenhum evento ativo encontrado');
-            state = const AsyncValue.data(false);
-            return;
-          }
 
-          final eventoId = activeEvent['id'] as String;
-          final baseUrl = ApiConfig.getApiBaseUrl();
-          
-          // ✅ Obter token de autenticação do SharedPreferences
-          final apiService = ref.read(apiServiceProvider);
-          await apiService.init();
-          final token = await apiService.getStoredToken();
+      // ✅ Precisa do evento ativo para conectar (igual frontend web).
+      // NOTA: usar `.future` aqui — e não `.when(loading: ...)` — porque o
+      // provider quase sempre ainda está carregando logo após o login. O
+      // código antigo só esperava 2s uma vez e desistia pra sempre se o
+      // evento não tivesse chegado ainda nesse meio-tempo, sem nunca
+      // reconectar depois: o WebSocket simplesmente nunca conectava e o
+      // rastreio de avatar em tempo real não funcionava.
+      final activeEvent = await ref.read(activeEventProvider.future);
 
-          log.i('[WebSocket] Conectando ao evento $eventoId com auth: ${token != null}');
-          
-          // ✅ Conecta com formato igual ao frontend web
-          final success = await _webSocketService.connectWithAuth(baseUrl, token, eventoId);
+      if (activeEvent == null) {
+        log.w('[WebSocket] ⚠️ Nenhum evento ativo encontrado');
+        state = const AsyncValue.data(false);
+        return;
+      }
 
-          if (success) {
-            _isInitialized = true;
-            state = const AsyncValue.data(true);
-            log.i('[WebSocket] ✅ Conectado e sincronizando com evento $eventoId');
-            _setupEventHandlers();
-          } else {
-            state = const AsyncValue.data(false);
-          }
-        },
-      );
-      
+      final eventoId = activeEvent['id'] as String;
+      final baseUrl = ApiConfig.getApiBaseUrl();
+
+      // ✅ Obter token de autenticação do SharedPreferences
+      final apiService = ref.read(apiServiceProvider);
+      await apiService.init();
+      final token = await apiService.getStoredToken();
+
+      log.i('[WebSocket] Conectando ao evento $eventoId com auth: ${token != null}');
+
+      // ✅ Conecta com formato igual ao frontend web
+      final success = await _webSocketService.connectWithAuth(baseUrl, token, eventoId);
+
+      if (success) {
+        _isInitialized = true;
+        state = const AsyncValue.data(true);
+        log.i('[WebSocket] ✅ Conectado e sincronizando com evento $eventoId');
+        _setupEventHandlers();
+      } else {
+        state = const AsyncValue.data(false);
+      }
     } catch (e, st) {
       log.e('[WebSocket] ❌ Erro ao conectar: $e');
       state = AsyncValue.error(e, st);

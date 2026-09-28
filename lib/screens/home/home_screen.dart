@@ -6,6 +6,7 @@ import '../../models/family_models.dart';
 import '../../config/theme.dart';
 import '../qr_scan/qr_scanner_screen.dart';
 import '../../widgets/event_map_widget.dart';
+import '../../widgets/modern_bottom_nav.dart';
 import '../../utils/logger.dart';
 
 // ✅ Notifier para trigger manual de refresh
@@ -140,23 +141,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _buildProfileTab(context, ref),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: ModernBottomNav(
         currentIndex: _selectedIndex,
+        onTap: _onNavTap,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
+          ModernNavItem(
+            icon: Icons.home_outlined,
+            activeIcon: Icons.home_rounded,
             label: 'Início',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.trending_up_outlined),
+          ModernNavItem(
+            icon: Icons.emoji_events_outlined,
+            activeIcon: Icons.emoji_events_rounded,
             label: 'Ranking',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.star_outline),
+          ModernNavItem(
+            icon: Icons.person_outline_rounded,
+            activeIcon: Icons.person_rounded,
             label: 'Perfil',
           ),
         ],
-        onTap: _onNavTap,
       ),
     );
   }

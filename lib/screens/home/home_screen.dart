@@ -230,6 +230,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final childrenState = ref.watch(childrenRankingProvider);
 
     return childrenState.when(
+      // Mantém a lista atual na tela enquanto recarrega em segundo plano
+      // (a cada leitura o refresh dispara) — o spinner só vale na 1ª carga.
+      skipLoadingOnReload: true,
       loading: () => _buildLoadingList(),
       error: (_, _) => _buildErrorRanking('Erro ao carregar ranking'),
       data: (children) {
@@ -263,6 +266,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final childrenState = ref.watch(childrenRankingProvider);
 
     return childrenState.when(
+      skipLoadingOnReload: true,
       loading: () => _buildLoadingList(),
       error: (_, _) => _buildErrorRanking('Erro ao carregar times'),
       data: (children) {
@@ -398,6 +402,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         const SizedBox(height: 16),
         
         childrenAsyncValue.when(
+          // Sem isso, cada leitura trocava o mapa pelo spinner: o widget era
+          // destruído e recriado (perdendo as posições animadas dos avatares).
+          skipLoadingOnReload: true,
           loading: () => _buildMapLoadingState(),
           error: (error, _) => _buildMapErrorState(),
           data: (children) {
@@ -559,6 +566,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final childrenAsyncValue = ref.watch(childrenProvider);
 
     return childrenAsyncValue.when(
+      skipLoadingOnReload: true,
       loading: () => _buildLoadingState(),
       error: (error, _) => _buildErrorHome(error),
       data: (children) => _buildChildrenCards(context, children),

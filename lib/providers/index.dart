@@ -204,8 +204,13 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
   final scoreLog = scoreLogAsync.value ?? [];
 
   if (scoreLog.isNotEmpty) {
-    // Inverte a lista (mais recentes primeiro)
-    final sorted = [...scoreLog].reversed.toList();
+    // Mais recentes primeiro. O backend já devolve em ordem decrescente de
+    // created_at; inverter a lista (como era feito) fazia a criança voltar ao
+    // checkpoint MAIS ANTIGO ao reabrir o app. Ordena explicitamente.
+    DateTime createdAt(Map<String, dynamic> e) =>
+        DateTime.tryParse('${e['created_at'] ?? e['createdAt'] ?? ''}') ??
+        DateTime.fromMillisecondsSinceEpoch(0);
+    final sorted = [...scoreLog]..sort((a, b) => createdAt(b).compareTo(createdAt(a)));
 
     for (final entry in sorted) {
       try {
@@ -534,95 +539,3 @@ class RealtimeTrackingNotifier extends StateNotifier<Map<String, CheckpointReadi
     }
   }
 }
-
-
-/// 🎯 PROVIDER PARA RASTREIO: Calcula posições de avatares baseado em scoreLog
-/// 
-/// Regra: Avatar é posicionado no último checkpoint que a criança conquistou
-/// Aplicável para: Zone Conquest, Treasure Hunt, Monster Hunt
-final avatarTrackingPositionsProvider = Provider.autoDispose<Map<String, Map<String, dynamic>>>((ref) {
-  final childrenAsync = ref.watch(mapChildrenRealtimeProvider);
-  // ✅ Já combina histórico (scoreLog/pontuacoes) com leituras em tempo real
-  // via WebSocket (TERRITORY_CONQUERED), que cobrem os 3 jogos.
-  final lastCheckpointByChild = ref.watch(childLastCheckpointProvider);
-  final checkpointsAsync = ref.watch(checkpointsByEventProvider(ref.watch(activeEventProvider).value?['id'] as String? ?? ''));
-
-  return childrenAsync.whenData((children) {
-    return checkpointsAsync.whenData((checkpoints) {
-      final positions = <String, Map<String, dynamic>>{};
-
-      log.i('[TRACKING] 🎯 Calculando posições para ${children.length} crianças');
-
-      final checkpointSlots = <String, int>{}; // Conta quantas crianças já estão em cada checkpoint
-
-      for (final child in children) {
-        final lastInfo = lastCheckpointByChild[child.id];
-        final checkpointId = lastInfo?['checkpointId'];
-
-        final checkpoint = checkpointId != null
-            ? checkpoints.firstWhere(
-                (cp) => cp['id'].toString() == checkpointId.toString(),
-                orElse: () => <String, dynamic>{},
-              )
-            : <String, dynamic>{};
-        final mapX = checkpoint['map_x'] ?? checkpoint['mapX'];
-        final mapY = checkpoint['map_y'] ?? checkpoint['mapY'];
-
-        if (mapX != null && mapY != null) {
-          // Avatar vai para o checkpoint
-          final baseX = (mapX as num).toDouble();
-          final baseY = (mapY as num).toDouble();
-          final slot = checkpointSlots[checkpointId] ?? 0;
-          checkpointSlots[checkpointId] = slot + 1;
-
-          // Distribuir avatares em volta do checkpoint (não sobrepor)
-          final offsets = [-35.0, 0.0, 35.0];
-          final offsetX = offsets[slot % offsets.length];
-          final row = (slot / 3).floor();
-
-          positions[child.id] = {
-            'x': baseX + offsetX,
-            'y': baseY + 68 + (row * 50),
-            'checkpointId': checkpointId,
-            'checkpointName': lastInfo?['checkpointName'],
-          };
-
-          log.i('[TRACKING] 📍 ${child.nickname}: checkpoint=${lastInfo?['checkpointName']} @ (${baseX + offsetX}, ${baseY + 68 + (row * 50)})');
-        } else {
-          // Se não tem leitura, coloca em posição padrão (centro do mapa)
-          positions[child.id] = {
-            'x': 225.0, // Centro da largura (450/2)
-            'y': 160.0, // Centro da altura (320/2)
-            'checkpointId': null,
-            'checkpointName': 'Centro',
-          };
-
-          log.i('[TRACKING] 📍 ${child.nickname}: sem leitura, posicionado no centro');
-        }
-      }
-
-      log.i('[TRACKING] ✅ Posições calculadas para ${positions.length} crianças');
-      return positions;
-    }).value ?? {};
-  }).value ?? {};
-});
-
-/// Provider que retorna posições em tempo real quando scoreLog muda
-/// (dispara recalcuação automática)
-final liveAvatarPositionsProvider = StreamProvider.autoDispose<Map<String, Map<String, dynamic>>>((ref) async* {
-  // Emitir valor inicial
-  final initialPositions = ref.read(avatarTrackingPositionsProvider);
-  yield initialPositions;
-  
-  // Escutar mudanças no scoreLog
-  ref.listen(scoreLogProvider, (previous, next) {
-    log.i('[TRACKING] 🔄 scoreLog mudou, recalculando posições...');
-  });
-  
-  // Polling periódico para garantir sincronização
-  while (true) {
-    await Future.delayed(const Duration(seconds: 2));
-    final positions = ref.read(avatarTrackingPositionsProvider);
-    yield positions;
-  }
-});

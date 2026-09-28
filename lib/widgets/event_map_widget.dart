@@ -88,7 +88,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   late Animation<double> _zoomAnimation;
   
   // 🗺️ Posições dos avatares com animação
-  late AnimationController _avatarMoveController;
+  // Um controller por criança: se dois avatares andam ao mesmo tempo, um não
+  // cancela o outro (com um controller compartilhado, o `forward(from: 0)` de
+  // um interrompia o do outro e deixava listeners órfãos movendo o avatar).
+  final Map<String, AnimationController> _avatarAnims = {};
   final Map<String, AvatarPosition> _avatarPositions = {};
   final Map<String, Offset> _avatarTargets = {};
   
@@ -121,11 +124,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       vsync: this,
     );
     
-    _avatarMoveController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    
     _pulseAnimation = Tween<double>(
       begin: 1.0,
       end: 1.3,
@@ -151,15 +149,14 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         ref.read(mapRefreshProvider.notifier).refresh();
       });
       
-      // Só refresca os dados — a animação do avatar vem de
-      // CHILD_CHECKPOINT_PASSED (enviado pelo backend em TODOS os jogos).
       ref.read(webSocketServiceProvider).on('TERRITORY_CONQUERED', (data) {
         ref.read(mapRefreshProvider.notifier).refresh();
       });
 
+      // O avatar se move sozinho: CHILD_CHECKPOINT_PASSED atualiza o último
+      // checkpoint da criança (realtimeCheckpointTrackingProvider), o build
+      // recalcula o alvo e _syncAvatarTargets anima até o centro do checkpoint.
       ref.read(webSocketServiceProvider).on('CHILD_CHECKPOINT_PASSED', (data) {
-        log.i('📍 [EVENT_MAP_WIDGET] CHILD_CHECKPOINT_PASSED RECEBIDO! Data: $data');
-        _handleTerritoryConquered(data);
         ref.read(mapRefreshProvider.notifier).refresh();
       });
       
@@ -175,7 +172,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   void dispose() {
     _pulseController.dispose();
     _zoomController.dispose();
-    _avatarMoveController.dispose();
+    for (final controller in _avatarAnims.values) {
+      controller.dispose();
+    }
+    _avatarAnims.clear();
     _transformController.dispose();
     super.dispose();
   }
@@ -216,278 +216,97 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     }
   }
 
-  /// 🎯 Gerencia o movimento do avatar quando um território é conquistado
-  /// Suporta todos os tipos de jogos: zone_conquest, treasure_hunt, monster_hunt
-  void _handleTerritoryConquered(Map<String, dynamic> data) {
-    try {
-      // 🔍 Debug completo do evento
-      log.i('🎯 [MAP] ========== TERRITORY_CONQUERED RECEBIDO ==========');
-      log.i('🎯 [MAP] Dados completos: $data');
-      
-      // Extrai dados do evento - suporta tanto o formato antigo quanto o novo
-      final criancaId = data['criancaId'] as String? ?? data['payload']?['criancaId'] as String?;
-      final criancaName = data['criancaName'] as String? ?? data['payload']?['criancaName'] as String?;
-      final checkpointId = data['checkpointId'] as String? ?? data['payload']?['checkpointId'] as String?;
-      final teamColor = (data['teamColor'] as String? ?? data['payload']?['teamColor'] as String?) ?? '#FF0000';
-      final gameType = (data['gameType'] as String? ?? data['payload']?['gameType'] as String?) ?? 'zone_conquest';
-      final mapX = data['mapX'] ?? data['payload']?['mapX'];
-      final mapY = data['mapY'] ?? data['payload']?['mapY'];
-      
-      log.i('🔍 [MAP] Dados extraídos:');
-      log.i('🔍 [MAP]   - criancaId: $criancaId');
-      log.i('🔍 [MAP]   - checkpointId: $checkpointId');
-      log.i('🔍 [MAP]   - criancaName: $criancaName');
-      log.i('🔍 [MAP]   - teamColor: $teamColor');
-      log.i('🔍 [MAP]   - gameType: $gameType');
-      log.i('🔍 [MAP]   - mapX: $mapX, mapY: $mapY');
-      
-      if (criancaId == null || checkpointId == null) {
-        log.w('❌ [MAP] Dados inválidos! criancaId=$criancaId, checkpointId=$checkpointId');
-        log.w('❌ [MAP] Payload structure: ${data.keys.toList()}');
-        return;
-      }
-      
-      log.i('✅ [MAP] Validação passou! Chamando animação para $gameType...');
-      
-      // 🎬 Anima o avatar em movimento
-      _animateAvatarToCheckpoint(
-        childId: criancaId,
-        childName: criancaName ?? 'Criança',
-        checkpointId: checkpointId,
-        teamColor: teamColor,
-        directMapX: (mapX as num?)?.toDouble(),
-        directMapY: (mapY as num?)?.toDouble(),
-      );
-      
-      log.i('✅ [MAP] Função de animação chamada para $criancaName no $gameType!');
-    } catch (e, st) {
-      log.e('🎯 [MAP] ❌ ERRO ao processar TERRITORY_CONQUERED: $e');
-      log.e('🎯 [MAP] Stack: $st');
+  /// 📍 Alvo de cada avatar: o CENTRO do checkpoint onde a criança está, no
+  /// mesmo ponto em que o marcador do checkpoint é desenhado (o círculo do
+  /// checkpoint e o do avatar têm 40px, então o avatar cobre o checkpoint).
+  /// Só quando mais de uma criança está no mesmo ponto elas são afastadas
+  /// lado a lado, para nenhuma ficar escondida atrás da outra.
+  Map<String, Offset> _computeAvatarTargets(List<Map<String, dynamic>> childPositions) {
+    final byPoint = <String, List<String>>{};
+    final base = <String, Offset>{};
+
+    for (final p in childPositions) {
+      final id = (p['child'] as Child).id;
+      final x = (p['x'] as num).toDouble();
+      final y = (p['y'] as num).toDouble();
+      base[id] = Offset(x, y);
+      byPoint.putIfAbsent('${x.round()}:${y.round()}', () => []).add(id);
     }
+
+    const spacing = 14.0;
+    final targets = <String, Offset>{};
+    for (final ids in byPoint.values) {
+      for (var i = 0; i < ids.length; i++) {
+        final dx = (i - (ids.length - 1) / 2) * spacing;
+        targets[ids[i]] = base[ids[i]]! + Offset(dx, 0);
+      }
+    }
+    return targets;
   }
-  
-  /// 🎬 Anima um avatar movendo de sua posição atual para um checkpoint
-  /// Suporta ambos: buscar coordenadas do banco OU usar coordenadas diretas do evento
-  Future<void> _animateAvatarToCheckpoint({
-    required String childId,
-    required String childName,
-    required String checkpointId,
-    required String teamColor,
-    double? directMapX,
-    double? directMapY,
-  }) async {
-    try {
-      log.i('🎬 [MAP] ========== INICIANDO ANIMAÇÃO ==========');
-      log.i('🎬 [MAP] Criança: $childName ($childId)');
-      log.i('🎬 [MAP] Checkpoint alvo: $checkpointId');
-      log.i('🎬 [MAP] Coordenadas diretas: directMapX=$directMapX, directMapY=$directMapY');
-      
-      // Se ainda não existe posição para este filho, cria uma posição inicial genérica
-      if (!_avatarPositions.containsKey(childId)) {
-        _avatarPositions[childId] = AvatarPosition(
-          childId: childId,
-          childName: childName,
-          teamColor: teamColor,
-          x: mapWidth / 2,
-          y: mapHeight / 2,
-        );
-        log.i('🎯 [MAP] Criada posição inicial em center: (${mapWidth / 2}, ${mapHeight / 2})');
-      }
-      
-      // 📍 Calcula a posição alvo do checkpoint
-      late Offset checkpointPos;
-      
-      // ✨ NOVO: Se as coordenadas foram enviadas diretamente no evento, usa elas primeiro
-      if (directMapX != null && directMapY != null && directMapX >= 0 && directMapY >= 0) {
-        checkpointPos = Offset(directMapX, directMapY);
-        log.i('✅ [MAP] Coordenadas diretas do evento: ($directMapX, $directMapY) pixels');
-      } else {
-        // Fallback: Buscar do checkpoint no cache/API
-        Map<String, dynamic>? checkpoint;
-        String foundEventId = '';
-        
-        try {
-          // Tenta ler o evento ativo SINCRONAMENTE (se já foi carregado)
-          final activeEventAsync = ref.read(activeEventProvider);
-          
-          log.i('📊 [MAP] Tipo de activeEventAsync: ${activeEventAsync.runtimeType}');
-          
-          if (activeEventAsync is AsyncData && activeEventAsync.value != null) {
-            final event = activeEventAsync.value!;
-            foundEventId = event['id'] as String;
-            log.i('✅ [MAP] Evento encontrado: $foundEventId');
-            
-            // Tenta ler checkpoints SINCRONAMENTE (se já foram carregados)
-            final checkpointsAsync = ref.read(checkpointsByEventProvider(foundEventId));
-            
-            log.i('📊 [MAP] Tipo de checkpointsAsync: ${checkpointsAsync.runtimeType}');
-            
-            if (checkpointsAsync is AsyncData) {
-              final checkpoints = checkpointsAsync.value ?? [];
-              log.i('📊 [MAP] Checkpoints em cache: ${checkpoints.length}');
-              
-              if (checkpoints.isNotEmpty) {
-                checkpoint = checkpoints.firstWhere(
-                  (cp) => cp['id'].toString().toLowerCase() == checkpointId.toLowerCase(),
-                  orElse: () {
-                    log.w('❌ [MAP] Checkpoint $checkpointId não encontrado em ${checkpoints.length} disponíveis');
-                    // Debug: lista todos os IDs disponíveis
-                    log.i('📋 [MAP] IDs disponíveis: ${checkpoints.map((c) => '${c['id']} (${c['name']})').join(", ")}');
-                    return {};
-                  },
-                );
-                
-                if (checkpoint.isNotEmpty) {
-                  log.i('✅ [MAP] Checkpoint encontrado: ${checkpoint['name']}');
-                }
-              } else {
-                log.w('⚠️ [MAP] Nenhum checkpoint no cache!');
-                // 🔄 FALLBACK: Busca checkpoints diretamente da API se não estão em cache
-                log.i('🔄 [MAP] Tentando buscar checkpoints da API...');
-                final apiService = ref.read(apiServiceProvider);
-                await apiService.init();
-                final checkpointsFromApi = await apiService.getCheckpointsByEvent(foundEventId);
-                log.i('📍 [MAP] Checkpoints da API: ${checkpointsFromApi.length}');
-                
-                if (checkpointsFromApi.isNotEmpty) {
-                  checkpoint = checkpointsFromApi.firstWhere(
-                    (cp) => cp['id'].toString().toLowerCase() == checkpointId.toLowerCase(),
-                    orElse: () => {},
-                  );
-                  if (checkpoint.isNotEmpty) {
-                    log.i('✅ [MAP] Checkpoint encontrado via API!');
-                  }
-                }
-              }
-            } else {
-              log.w('⚠️ [MAP] checkpointsAsync não é AsyncData, é: ${checkpointsAsync.runtimeType}');
-              // 🔄 FALLBACK: Busca checkpoints diretamente da API
-              log.i('🔄 [MAP] Tentando buscar checkpoints da API (AsyncData failed)...');
-              final apiService = ref.read(apiServiceProvider);
-              await apiService.init();
-              final checkpointsFromApi = await apiService.getCheckpointsByEvent(foundEventId);
-              log.i('📍 [MAP] Checkpoints da API: ${checkpointsFromApi.length}');
-              
-              if (checkpointsFromApi.isNotEmpty) {
-                checkpoint = checkpointsFromApi.firstWhere(
-                  (cp) => cp['id'].toString().toLowerCase() == checkpointId.toLowerCase(),
-                  orElse: () => {},
-                );
-                if (checkpoint.isNotEmpty) {
-                  log.i('✅ [MAP] Checkpoint encontrado via API!');
-                }
-              }
-            }
-          } else {
-            log.w('⚠️ [MAP] activeEventAsync não é AsyncData ou value é null');
-            log.i('   Tipo: ${activeEventAsync.runtimeType}');
-          }
-        } catch (e) {
-          log.w('⚠️ [MAP] Erro ao buscar checkpoint: $e');
-        }
-        
-        if (checkpoint != null && checkpoint.isNotEmpty) {
-          // ✅ Usa coordenadas reais do checkpoint (em pixels, não percentual!)
-          final storedX = checkpoint['map_x'] ?? checkpoint['mapX'];
-          final storedY = checkpoint['map_y'] ?? checkpoint['mapY'];
-          
-          log.i('🔍 [MAP] Procurando coords: map_x=$storedX, map_y=$storedY');
-          
-          if (storedX != null && storedY != null) {
-            try {
-              final x = double.tryParse(storedX.toString());
-              final y = double.tryParse(storedY.toString());
-              
-              if (x != null && y != null && x.isFinite && y.isFinite) {
-                // ✅ As coords são EM PIXELS dentro do mapa (0-350 x 0-280)
-                checkpointPos = Offset(x, y);
-                log.i('✅ [MAP] Coords válidas: ($x, $y) pixels');
-              } else {
-                checkpointPos = Offset(mapWidth / 2, mapHeight / 2);
-                log.w('⚠️ [MAP] Parse falhou: x=$x, y=$y, usando center');
-              }
-            } catch (e) {
-              checkpointPos = Offset(mapWidth / 2, mapHeight / 2);
-              log.w('⚠️ [MAP] Erro ao parsear: $e');
-            }
-          } else {
-            checkpointPos = Offset(mapWidth / 2, mapHeight / 2);
-            log.w('⚠️ [MAP] Coords NULL, usando center');
-          }
+
+  /// Leva cada avatar até o alvo calculado. Chamado a cada build, mas só age
+  /// quando o alvo de uma criança mudou (nova leitura de checkpoint).
+  void _syncAvatarTargets(List<Map<String, dynamic>> childPositions, Map<String, Offset> targets) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      for (final p in childPositions) {
+        final child = p['child'] as Child;
+        final target = targets[child.id];
+        if (target == null || _avatarTargets[child.id] == target) continue;
+
+        final isFirstTime = !_avatarPositions.containsKey(child.id);
+        _avatarTargets[child.id] = target;
+
+        if (isFirstTime) {
+          // Primeira vez que vemos a criança (ex.: app reaberto): já nasce no
+          // lugar certo, sem atravessar o mapa.
+          setState(() {
+            _avatarPositions[child.id] = AvatarPosition(
+              childId: child.id,
+              childName: child.nickname.isNotEmpty ? child.nickname : child.name,
+              teamColor: child.teamColor,
+              x: target.dx,
+              y: target.dy,
+            );
+          });
         } else {
-          // Fallback - se checkpoint não encontrado
-          checkpointPos = Offset(mapWidth / 2, mapHeight / 2);
-          log.w('⚠️ [MAP] Checkpoint vazio, usando center');
+          _moveAvatarTo(child.id, target);
         }
       }
-      
-      _avatarTargets[childId] = checkpointPos;
-      
-      final currentPos = _avatarPositions[childId]!;
-      log.i('🎬 [MAP] Animação: (${currentPos.x}, ${currentPos.y}) → (${checkpointPos.dx}, ${checkpointPos.dy})');
-      
-      // 🎬 Anima a transição (800ms suave) COM ATUALIZAÇÃO DE POSIÇÃO DURANTE A ANIMAÇÃO
-      if (mounted) {
-        log.i('🎬 [MAP] Widget mounted, iniciando animação...');
-        
-        // Posição inicial e final
-        final startX = currentPos.x;
-        final startY = currentPos.y;
-        final endX = checkpointPos.dx;
-        final endY = checkpointPos.dy;
-        
-        // 🎬 Listener que atualiza a posição A CADA FRAME da animação
-        void onAnimationUpdate() {
-          if (mounted) {
-            final progress = _avatarMoveController.value; // 0.0 a 1.0
-            
-            final newX = startX + (endX - startX) * progress;
-            final newY = startY + (endY - startY) * progress;
-            
-            setState(() {
-              final current = _avatarPositions[childId];
-              if (current != null) {
-                _avatarPositions[childId] = current.copyWith(
-                  x: newX,
-                  y: newY,
-                );
-              }
-            });
-          }
-        }
-        
-        // Registra listener e inicia animação
-        _avatarMoveController.addListener(onAnimationUpdate);
-        
-        try {
-          await _avatarMoveController.forward(from: 0.0);
-        } finally {
-          // Remove listener após animação terminar
-          _avatarMoveController.removeListener(onAnimationUpdate);
-          
-          // Garante que posição final está correta
-          if (mounted) {
-            setState(() {
-              final current = _avatarPositions[childId];
-              if (current != null) {
-                _avatarPositions[childId] = current.copyWith(
-                  x: endX,
-                  y: endY,
-                );
-                log.i('✅ [MAP] Posição final atualizada!');
-              }
-            });
-          }
-        }
-      } else {
-        log.w('⚠️ [MAP] Widget NÃO mounted, animação cancelada');
+    });
+  }
+
+  /// 🎬 Anima o avatar da posição atual até [target] (800ms).
+  void _moveAvatarTo(String childId, Offset target) {
+    final avatar = _avatarPositions[childId];
+    if (avatar == null) return;
+
+    _avatarAnims.remove(childId)?.dispose();
+
+    final startX = avatar.x;
+    final startY = avatar.y;
+    final controller = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    final curve = CurvedAnimation(parent: controller, curve: Curves.easeInOutCubic);
+    _avatarAnims[childId] = controller;
+
+    controller.addListener(() {
+      if (!mounted) return;
+      setState(() {
+        avatar.x = startX + (target.dx - startX) * curve.value;
+        avatar.y = startY + (target.dy - startY) * curve.value;
+      });
+    });
+
+    controller.forward().whenComplete(() {
+      if (identical(_avatarAnims[childId], controller)) {
+        _avatarAnims.remove(childId);
+        controller.dispose();
       }
-      
-      log.i('✨ [MAP] ========== ANIMAÇÃO CONCLUÍDA ==========');
-    } catch (e, st) {
-      log.w('❌ [MAP] ❌ ERRO NA ANIMAÇÃO: $e');
-      log.w('❌ [MAP] Stack:\n$st');
-    }
+    });
   }
 
   /// 🎯 Mostra detalhes de checkpoint em bottom sheet
@@ -1073,28 +892,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
 
   @override
   Widget build(BuildContext context) {
-    // ✅ NOVO: Escutar mudanças no provider de posições (rastreio)
-    // NOTA: ref.listen() DEVE estar aqui no build(), não em initState()!
-    ref.listen<Map<String, Map<String, dynamic>>>(
-      avatarTrackingPositionsProvider,
-      (previous, next) {
-        if (previous == null) return; // Skip na primeira vez
-        
-        log.i('[TRACKING_LISTENER] 🔄 Posições atualizadas! ${next.length} crianças');
-        
-        // Para cada criança com nova posição
-        next.forEach((childId, posData) {
-          final newX = (posData['x'] as num?)?.toDouble() ?? 175.0;
-          final newY = (posData['y'] as num?)?.toDouble() ?? 140.0;
-          
-          log.i('[TRACKING_LISTENER] 📍 $childId → ($newX, $newY)');
-          
-          // Animar avatar para nova posição
-          _animateAvatarToPosition(childId, newX, newY);
-        });
-      },
-    );
-    
     // ✅ Carregar floor plan na primeira vez que o widget for construído
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_floorPlanUrl == null && widget.eventoId != null) {
@@ -1231,6 +1028,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       checkpoints,
       childLastCheckpoint,
     );
+
+    // 📍 Onde cada avatar deve ficar (centro do checkpoint) e animação até lá
+    final avatarTargets = _computeAvatarTargets(childPositions);
+    _syncAvatarTargets(childPositions, avatarTargets);
 
     return ClipRRect(
           borderRadius: BorderRadius.circular(16),
@@ -1524,11 +1325,14 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                               leftPixel = avatarPos.x - 20; // Avatar tem 40px de largura, centraliza
                               topPixel = avatarPos.y - 20;   // Avatar tem 40px de altura, centraliza
                             } else {
-                              // Avatar não foi movido - converte percentual para pixel
-                              final xPercent = childPos['x'] as double;
-                              final yPercent = childPos['y'] as double;
-                              leftPixel = (xPercent / 100) * mapWidth - 20;
-                              topPixel = (yPercent / 100) * mapHeight - 20;
+                              // Ainda sem posição animada (1º frame): usa o alvo
+                              // direto. x/y já são PIXELS do canvas 450x320 — o
+                              // código antigo tratava como percentual e jogava o
+                              // avatar pra fora do mapa.
+                              final target = avatarTargets[childData.id] ??
+                                  Offset((childPos['x'] as num).toDouble(), (childPos['y'] as num).toDouble());
+                              leftPixel = target.dx - 20;
+                              topPixel = target.dy - 20;
                             }
                             
                             try {
@@ -1750,60 +1554,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     );
   }
 
-  /// 🎯 NOVO: Anima avatar de sua posição atual para uma nova posição
-  /// Usado pelo avatarTrackingPositionsProvider para rastreio em tempo real
-  /// Muito mais simples que _animateAvatarToCheckpoint - apenas move para coordenadas diretas
-  Future<void> _animateAvatarToPosition(String childId, double newX, double newY) async {
-    try {
-      log.i('🎬 [ANIMATE_POS] Animando $childId para ($newX, $newY)');
-      
-      // Se não existe avatar para essa criança, criar um na posição atual
-      if (!_avatarPositions.containsKey(childId)) {
-        log.i('🎬 [ANIMATE_POS] Avatar $childId não existe, criando em posição inicial');
-        _avatarPositions[childId] = AvatarPosition(
-          childId: childId,
-          childName: 'Criança',
-          teamColor: '#FFFFFF',
-          x: mapWidth / 2,
-          y: mapHeight / 2,
-        );
-      }
-      
-      final currentAvatar = _avatarPositions[childId]!;
-      final startX = currentAvatar.x;
-      final startY = currentAvatar.y;
-      
-      log.i('🎬 [ANIMATE_POS] De ($startX, $startY) para ($newX, $newY)');
-      
-      // Reset e play da animação
-      _avatarMoveController.reset();
-      await _avatarMoveController.forward();
-      
-      // Animar suavemente com Tween
-      final animationX = Tween<double>(begin: startX, end: newX).animate(
-        CurvedAnimation(parent: _avatarMoveController, curve: Curves.easeInOutCubic),
-      );
-      
-      final animationY = Tween<double>(begin: startY, end: newY).animate(
-        CurvedAnimation(parent: _avatarMoveController, curve: Curves.easeInOutCubic),
-      );
-      
-      // Listener para atualizar posição durante animação
-      _avatarMoveController.addListener(() {
-        if (mounted) {
-          setState(() {
-            currentAvatar.x = animationX.value;
-            currentAvatar.y = animationY.value;
-          });
-        }
-      });
-      
-      log.i('✅ [ANIMATE_POS] Animação concluída para $childId');
-    } catch (e, st) {
-      log.e('❌ [ANIMATE_POS] Erro ao animar: $e');
-      log.e('❌ [ANIMATE_POS] Stack: $st');
-    }
-  }
 }
 
 /// 🎨 CustomPainter para desenhar padrão de piso do buffet

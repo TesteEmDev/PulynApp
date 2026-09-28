@@ -350,7 +350,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 const SizedBox(height: 48),
                 ElevatedButton.icon(
-                  onPressed: () => context.go('/manage-children'),
+                  onPressed: () => context.push('/manage-children'),
                   icon: const Icon(Icons.people_outline),
                   label: const Text('Gerenciar Crianças'),
                   style: ElevatedButton.styleFrom(

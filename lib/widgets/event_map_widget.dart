@@ -5,6 +5,7 @@ import '../models/family_models.dart';
 import '../config/theme.dart';
 import '../providers/index.dart';
 import '../utils/logger.dart';
+import '../utils/text_sanitizer.dart';
 
 /// Zone configuration para o mapa do buffet
 class ZoneConfig {
@@ -1175,7 +1176,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
             log.i('🎨 [MAP] Convertendo zona: ${zone['name']} (x:$x, y:$y, w:$w, h:$h)');
             
             return ZoneConfig(
-              name: zone['name'] ?? 'Zona Desconhecida',
+              name: sanitizeUtf16((zone['name'] ?? 'Zona Desconhecida').toString()),
               color: _getZoneColor(zone['color']),
               x: x,
               y: y,

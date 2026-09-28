@@ -4,6 +4,7 @@ import '../models/family_models.dart';
 import '../config/api_config.dart';
 import '../utils/network_helper.dart';
 import '../utils/logger.dart';
+import '../utils/text_sanitizer.dart';
 
 class ApiService {
   late Dio _dio;
@@ -326,8 +327,7 @@ class ApiService {
       String? sanitizeString(String? str) {
         if (str == null) return null;
         try {
-          // Tentar codificar/decodificar para limpar caracteres inválidos
-          return String.fromCharCodes(str.codeUnits);
+          return sanitizeUtf16(str);
         } catch (e) {
           return ''; // Fallback para string vazia
         }

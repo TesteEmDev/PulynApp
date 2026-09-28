@@ -188,19 +188,25 @@ final scoreLogProvider = StreamProvider.autoDispose<List<Map<String, dynamic>>>(
 });
 
 /// Provider que calcula o ÚLTIMO checkpoint conquistado de cada criança
+///
+/// ✅ Combina duas fontes:
+/// 1. scoreLogProvider (histórico via `pontuacoes`, alimentado por polling) —
+///    hoje só é gravado pelo fluxo de Zona (Zone Conquest).
+/// 2. realtimeCheckpointTrackingProvider (leituras via WebSocket
+///    TERRITORY_CONQUERED) — o backend já dispara esse evento para os 3
+///    jogos (Zona, Caça ao Tesouro, Caça ao Monstro), então é essa fonte
+///    que faz o rastreio funcionar em todos os jogos, não só na Zona.
 final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String, dynamic>>>((ref) {
   final scoreLogAsync = ref.watch(scoreLogProvider);
-  
-  return scoreLogAsync.whenData((scoreLog) {
-    final lastCheckpointMap = <String, Map<String, dynamic>>{};
-    
-    if (scoreLog.isEmpty) {
-      return lastCheckpointMap;
-    }
-    
+  final realtimeTracking = ref.watch(realtimeCheckpointTrackingProvider);
+
+  final lastCheckpointMap = <String, Map<String, dynamic>>{};
+  final scoreLog = scoreLogAsync.value ?? [];
+
+  if (scoreLog.isNotEmpty) {
     // Inverte a lista (mais recentes primeiro)
     final sorted = [...scoreLog].reversed.toList();
-    
+
     for (final entry in sorted) {
       try {
         // ✅ Tentar TODOS os possíveis nomes de campo
@@ -250,9 +256,21 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
         // sem log
       }
     }
-    
-    return lastCheckpointMap;
-  }).value ?? {};
+  }
+
+  // ✅ Sobrepõe com leituras em tempo real via WebSocket. Cobre Caça ao
+  // Tesouro e Caça ao Monstro, que hoje não gravam em `pontuacoes` (fonte
+  // usada acima) — sem isso, o avatar só se movia no jogo Zona.
+  realtimeTracking.forEach((childId, reading) {
+    lastCheckpointMap[childId] = {
+      'checkpointId': reading.checkpointId,
+      'checkpointName': reading.checkpointName,
+      'timestamp': reading.timestamp.toIso8601String(),
+      'points': reading.points,
+    };
+  });
+
+  return lastCheckpointMap;
 });
 
 /// Provider para cache de checkpoints por evento
@@ -398,14 +416,17 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
     
     // Escuta evento SCORE_UPDATE quando criança lê uma pulseira
     webSocketService.on('SCORE_UPDATE', (data) {
-      log.i('⚡ PULSEIRA LIDA - Criança: ${data['child_name'] ?? 'N/A'} | Checkpoint: ${data['checkpoint_name'] ?? 'N/A'} | Pontos: ${data['points'] ?? 0}');
-      
+      // ✅ O WebSocketService entrega a mensagem inteira ({type, payload}),
+      // não só o payload — os campos ficam dentro de data['payload'].
+      final payload = (data['payload'] as Map?)?.cast<String, dynamic>() ?? data;
+      log.i('⚡ PULSEIRA LIDA - Criança: ${payload['child_name'] ?? payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpoint_name'] ?? payload['checkpointName'] ?? 'N/A'} | Pontos: ${payload['points'] ?? 0}');
+
       try {
-        final childId = data['child_id'] ?? data['childId'];
-        final checkpointId = data['checkpoint_id'] ?? data['checkpointId'] ?? data['checkpoint'];
-        final checkpointName = data['checkpoint_name'] ?? data['checkpointName'] ?? '';
-        final points = data['points'] ?? 0;
-        
+        final childId = payload['criancaId'] ?? payload['crianca_id'] ?? payload['child_id'] ?? payload['childId'];
+        final checkpointId = payload['checkpointId'] ?? payload['checkpoint_id'] ?? payload['checkpoint'];
+        final checkpointName = payload['checkpointName'] ?? payload['checkpoint_name'] ?? '';
+        final points = payload['points'] ?? 0;
+
         if (childId != null && checkpointId != null) {
           notifier.updateChildCheckpoint(
             childId.toString(),
@@ -418,23 +439,28 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
         // erro silencioso
       }
     });
-    
-    // Escuta evento TERRITORY_CONQUERED (zona conquistada)
+
+    // Escuta evento TERRITORY_CONQUERED. Enviado pelo backend para os 3
+    // jogos (Zona, Caça ao Tesouro, Caça ao Monstro) sempre que um
+    // checkpoint é conquistado — não é exclusivo do jogo Zona.
     webSocketService.on('TERRITORY_CONQUERED', (data) {
-      log.i('🏆 TERRITÓRIO CONQUISTADO - Time: ${data['teamName'] ?? 'N/A'} | Checkpoint: ${data['checkpoint_name'] ?? 'N/A'}');
-      
+      // ✅ Mesmo bug do SCORE_UPDATE: os campos vêm dentro de data['payload'].
+      final payload = (data['payload'] as Map?)?.cast<String, dynamic>() ?? data;
+      log.i('🏆 TERRITÓRIO CONQUISTADO - Criança: ${payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpointId'] ?? 'N/A'}');
+
       try {
-        final childId = data['crianca_id'] ?? data['child_id'] ?? data['childId'];
-        final checkpointId = data['checkpoint_id'] ?? data['checkpointId'];
-        final checkpointName = data['checkpoint_name'] ?? data['checkpointName'] ?? '';
-        final teamColor = data['teamColor'] ?? '#FFFFFF';
-        
+        final childId = payload['criancaId'] ?? payload['crianca_id'] ?? payload['child_id'] ?? payload['childId'];
+        final checkpointId = payload['checkpointId'] ?? payload['checkpoint_id'];
+        final checkpointName = payload['checkpointName'] ?? payload['checkpoint_name'] ?? '';
+        final teamColor = payload['teamColor'] ?? '#FFFFFF';
+        final points = payload['points'] ?? 10;
+
         if (childId != null && checkpointId != null) {
           notifier.updateChildCheckpoint(
             childId.toString(),
             checkpointId.toString(),
             checkpointName.toString(),
-            10, // default points
+            points is num ? points.toInt() : 10,
             teamColor: teamColor.toString(),
           );
         }
@@ -515,95 +541,67 @@ class RealtimeTrackingNotifier extends StateNotifier<Map<String, CheckpointReadi
 /// Aplicável para: Zone Conquest, Treasure Hunt, Monster Hunt
 final avatarTrackingPositionsProvider = Provider.autoDispose<Map<String, Map<String, dynamic>>>((ref) {
   final childrenAsync = ref.watch(mapChildrenRealtimeProvider);
-  final scoreLogAsync = ref.watch(scoreLogProvider);
+  // ✅ Já combina histórico (scoreLog/pontuacoes) com leituras em tempo real
+  // via WebSocket (TERRITORY_CONQUERED), que cobrem os 3 jogos.
+  final lastCheckpointByChild = ref.watch(childLastCheckpointProvider);
   final checkpointsAsync = ref.watch(checkpointsByEventProvider(ref.watch(activeEventProvider).value?['id'] as String? ?? ''));
-  
+
   return childrenAsync.whenData((children) {
-    return scoreLogAsync.whenData((scoreLog) {
-      return checkpointsAsync.whenData((checkpoints) {
-        final positions = <String, Map<String, dynamic>>{};
-        
-        log.i('[TRACKING] 🎯 Calculando posições para ${children.length} crianças');
-        log.i('[TRACKING] 📊 Histórico de checkpoints: ${scoreLog.length} leituras');
-        
-        // Step 1: Encontrar último checkpoint de cada criança
-        final childLastCheckpoint = <String, Map<String, dynamic>>{};
-        
-        // Ordenar scoreLog por data (mais recentes primeiro)
-        final sorted = [...scoreLog];
-        sorted.sort((a, b) {
-          final aTime = DateTime.tryParse(a['timestamp']?.toString() ?? a['created_at']?.toString() ?? '')?.millisecondsSinceEpoch ?? 0;
-          final bTime = DateTime.tryParse(b['timestamp']?.toString() ?? b['created_at']?.toString() ?? '')?.millisecondsSinceEpoch ?? 0;
-          return bTime.compareTo(aTime);
-        });
-        
-        for (final entry in sorted) {
-          final childId = entry['childId'] ?? entry['child_id'];
-          if (childId == null || childLastCheckpoint.containsKey(childId)) continue;
-          
-          final checkpointId = entry['checkpointId'] ?? entry['checkpoint_id'] ?? entry['checkpoint'];
-          final checkpointName = entry['checkpointName'] ?? entry['checkpoint_name'] ?? 'Checkpoint';
-          
-          if (checkpointId != null) {
-            // Buscar coordenadas do checkpoint
-            final checkpoint = checkpoints.firstWhere(
-              (cp) => cp['id'].toString() == checkpointId.toString(),
-              orElse: () => <String, dynamic>{},
-            );
-            
-            childLastCheckpoint[childId] = {
-              'checkpointId': checkpointId,
-              'checkpointName': checkpointName,
-              'mapX': checkpoint['map_x'] ?? checkpoint['mapX'],
-              'mapY': checkpoint['map_y'] ?? checkpoint['mapY'],
-            };
-          }
+    return checkpointsAsync.whenData((checkpoints) {
+      final positions = <String, Map<String, dynamic>>{};
+
+      log.i('[TRACKING] 🎯 Calculando posições para ${children.length} crianças');
+
+      final checkpointSlots = <String, int>{}; // Conta quantas crianças já estão em cada checkpoint
+
+      for (final child in children) {
+        final lastInfo = lastCheckpointByChild[child.id];
+        final checkpointId = lastInfo?['checkpointId'];
+
+        final checkpoint = checkpointId != null
+            ? checkpoints.firstWhere(
+                (cp) => cp['id'].toString() == checkpointId.toString(),
+                orElse: () => <String, dynamic>{},
+              )
+            : <String, dynamic>{};
+        final mapX = checkpoint['map_x'] ?? checkpoint['mapX'];
+        final mapY = checkpoint['map_y'] ?? checkpoint['mapY'];
+
+        if (mapX != null && mapY != null) {
+          // Avatar vai para o checkpoint
+          final baseX = (mapX as num).toDouble();
+          final baseY = (mapY as num).toDouble();
+          final slot = checkpointSlots[checkpointId] ?? 0;
+          checkpointSlots[checkpointId] = slot + 1;
+
+          // Distribuir avatares em volta do checkpoint (não sobrepor)
+          final offsets = [-35.0, 0.0, 35.0];
+          final offsetX = offsets[slot % offsets.length];
+          final row = (slot / 3).floor();
+
+          positions[child.id] = {
+            'x': baseX + offsetX,
+            'y': baseY + 68 + (row * 50),
+            'checkpointId': checkpointId,
+            'checkpointName': lastInfo?['checkpointName'],
+          };
+
+          log.i('[TRACKING] 📍 ${child.nickname}: checkpoint=${lastInfo?['checkpointName']} @ (${baseX + offsetX}, ${baseY + 68 + (row * 50)})');
+        } else {
+          // Se não tem leitura, coloca em posição padrão (centro do mapa)
+          positions[child.id] = {
+            'x': 225.0, // Centro da largura (450/2)
+            'y': 160.0, // Centro da altura (320/2)
+            'checkpointId': null,
+            'checkpointName': 'Centro',
+          };
+
+          log.i('[TRACKING] 📍 ${child.nickname}: sem leitura, posicionado no centro');
         }
-        
-        log.i('[TRACKING] ✅ Último checkpoint encontrado para ${childLastCheckpoint.length} crianças');
-        
-        // Step 2: Calcular posição de cada criança
-        final checkpointSlots = <String, int>{}; // Conta quantas crianças já estão em cada checkpoint
-        
-        for (final child in children) {
-          final lastInfo = childLastCheckpoint[child.id];
-          
-          if (lastInfo != null && lastInfo['mapX'] != null && lastInfo['mapY'] != null) {
-            // Avatar vai para o checkpoint
-            final baseX = (lastInfo['mapX'] as num).toDouble();
-            final baseY = (lastInfo['mapY'] as num).toDouble();
-            final slot = checkpointSlots[lastInfo['checkpointId']] ?? 0;
-            checkpointSlots[lastInfo['checkpointId']] = slot + 1;
-            
-            // Distribuir avatares em volta do checkpoint (não sobrepor)
-            final offsets = [-35.0, 0.0, 35.0];
-            final offsetX = offsets[slot % offsets.length];
-            final row = (slot / 3).floor();
-            
-            positions[child.id] = {
-              'x': baseX + offsetX,
-              'y': baseY + 68 + (row * 50),
-              'checkpointId': lastInfo['checkpointId'],
-              'checkpointName': lastInfo['checkpointName'],
-            };
-            
-            log.i('[TRACKING] 📍 ${child.nickname}: checkpoint=${lastInfo['checkpointName']} @ (${baseX + offsetX}, ${baseY + 68 + (row * 50)})');
-          } else {
-            // Se não tem leitura, coloca em posição padrão (centro do mapa)
-            positions[child.id] = {
-              'x': 225.0, // Centro da largura (450/2)
-              'y': 160.0, // Centro da altura (320/2)
-              'checkpointId': null,
-              'checkpointName': 'Centro',
-            };
-            
-            log.i('[TRACKING] 📍 ${child.nickname}: sem leitura, posicionado no centro');
-          }
-        }
-        
-        log.i('[TRACKING] ✅ Posições calculadas para ${positions.length} crianças');
-        return positions;
-      }).value ?? {};
+      }
+
+      log.i('[TRACKING] ✅ Posições calculadas para ${positions.length} crianças');
+      return positions;
     }).value ?? {};
   }).value ?? {};
 });

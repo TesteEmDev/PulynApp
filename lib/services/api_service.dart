@@ -289,7 +289,12 @@ class ApiService {
   /// ✅ GET /leituras/eventos/{eventoId}/historico - Histórico de conquistas
   Future<List<Map<String, dynamic>>> getScoreHistory(String eventoId) async {
     try {
-      final response = await _dio.get('/leituras/eventos/$eventoId/historico');
+      final response = await _dio.get(
+        '/leituras/eventos/$eventoId/historico',
+        // allGames=1: inclui leituras de Tesouro/Monstro/Zone Conquest, que não
+        // gravam em `pontuacoes` — necessário pro rastreio do avatar.
+        queryParameters: {'allGames': '1'},
+      );
       final data = response.data;
       
       if (data is List) {

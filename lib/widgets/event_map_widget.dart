@@ -151,8 +151,14 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         ref.read(mapRefreshProvider.notifier).refresh();
       });
       
+      // Só refresca os dados — a animação do avatar vem de
+      // CHILD_CHECKPOINT_PASSED (enviado pelo backend em TODOS os jogos).
       ref.read(webSocketServiceProvider).on('TERRITORY_CONQUERED', (data) {
-        log.i('📍 [EVENT_MAP_WIDGET] TERRITORY_CONQUERED RECEBIDO! Data: $data');
+        ref.read(mapRefreshProvider.notifier).refresh();
+      });
+
+      ref.read(webSocketServiceProvider).on('CHILD_CHECKPOINT_PASSED', (data) {
+        log.i('📍 [EVENT_MAP_WIDGET] CHILD_CHECKPOINT_PASSED RECEBIDO! Data: $data');
         _handleTerritoryConquered(data);
         ref.read(mapRefreshProvider.notifier).refresh();
       });

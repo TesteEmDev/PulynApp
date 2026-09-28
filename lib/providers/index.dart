@@ -440,10 +440,11 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
       }
     });
 
-    // Escuta evento TERRITORY_CONQUERED. Enviado pelo backend para os 3
-    // jogos (Zona, Caça ao Tesouro, Caça ao Monstro) sempre que um
-    // checkpoint é conquistado — não é exclusivo do jogo Zona.
-    webSocketService.on('TERRITORY_CONQUERED', (data) {
+    // Escuta CHILD_CHECKPOINT_PASSED. Enviado pelo backend em TODOS os jogos
+    // (Zona, Zone Conquest equipe/individual, Caça ao Tesouro, Caça ao
+    // Monstro) sempre que a criança passa por um checkpoint. Não usar
+    // TERRITORY_CONQUERED aqui: ele não é enviado pelos modos Zone Conquest.
+    webSocketService.on('CHILD_CHECKPOINT_PASSED', (data) {
       // ✅ Mesmo bug do SCORE_UPDATE: os campos vêm dentro de data['payload'].
       final payload = (data['payload'] as Map?)?.cast<String, dynamic>() ?? data;
       log.i('🏆 TERRITÓRIO CONQUISTADO - Criança: ${payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpointId'] ?? 'N/A'}');

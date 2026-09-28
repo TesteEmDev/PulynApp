@@ -98,8 +98,12 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   // 📱 Estados do UI (removido filtros para interface mais limpa)
   
   // 📏 Dimensões
-  static const double mapWidth = 350;
-  static const double mapHeight = 280;
+  // ✅ Mesma "tela" (450x320) usada no admin web e no telão (AdminMap.tsx /
+  // DisplayMap.tsx) — os map_x/map_y salvos pelos checkpoints são pixels
+  // dentro desse canvas. Usar um tamanho diferente aqui deixava os
+  // checkpoints e avatares fora da posição relativa correta no mobile.
+  static const double mapWidth = 450;
+  static const double mapHeight = 320;
 
   @override
   void initState() {
@@ -888,7 +892,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     
     return activeEventAsync.when(
       loading: () => Container(
-        height: 380,
+        height: 480,
         decoration: BoxDecoration(
           color: PulynColors.darkCard,
           borderRadius: BorderRadius.circular(16),
@@ -899,7 +903,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         ),
       ),
       error: (error, _) => Container(
-        height: 380,
+        height: 480,
         decoration: BoxDecoration(
           color: PulynColors.darkCard,
           borderRadius: BorderRadius.circular(16),
@@ -934,7 +938,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         
         return checkpointsAsync.when(
           loading: () => Container(
-            height: 380,
+            height: 480,
             decoration: BoxDecoration(
               color: PulynColors.darkCard,
               borderRadius: BorderRadius.circular(16),
@@ -1225,7 +1229,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     return ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: Container(
-            height: 380, // Altura reduzida após remoção dos filtros
+            height: 480, // Mapa maior e com mais espaço pra arrastar/zoom
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: PulynColors.darkBorder),
@@ -1333,8 +1337,12 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                 Expanded(
                   child: InteractiveViewer(
                     transformationController: _transformController,
-                    minScale: 0.8,
-                    maxScale: 3.0,
+                    minScale: 0.5,
+                    maxScale: 4.0,
+                    // ✅ Sem margem, o pan travava quase imediatamente nas
+                    // bordas do mapa (350x280 cabia quase inteiro na área
+                    // visível). Dá espaço de sobra pra arrastar livremente.
+                    boundaryMargin: const EdgeInsets.all(200),
                     constrained: false,
                     child: Container(
                       width: mapWidth,

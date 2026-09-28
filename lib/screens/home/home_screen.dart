@@ -429,7 +429,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildMapLoadingState() {
     return Container(
-      height: 380, // Altura reduzida após remoção dos filtros
+      height: 480, // Mapa maior e com mais espaço pra arrastar/zoom
       decoration: BoxDecoration(
         color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
@@ -443,7 +443,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildMapErrorState() {
     return Container(
-      height: 380, // Altura reduzida após remoção dos filtros
+      height: 480, // Mapa maior e com mais espaço pra arrastar/zoom
       decoration: BoxDecoration(
         color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
@@ -467,7 +467,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildMapEmptyState() {
     return Container(
-      height: 380, // Altura reduzida após remoção dos filtros
+      height: 480, // Mapa maior e com mais espaço pra arrastar/zoom
       decoration: BoxDecoration(
         color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),

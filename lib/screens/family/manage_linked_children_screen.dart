@@ -67,9 +67,13 @@ class _ManageLinkedChildrenScreenState
     final childrenAsyncValue = ref.watch(linkedChildrenProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Gerenciar Crianças'),
+         appBar: AppBar(
+        title: const Text('Gerenciar Crianças Vinculadas'),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: childrenAsyncValue.when(
         loading: () => const Center(

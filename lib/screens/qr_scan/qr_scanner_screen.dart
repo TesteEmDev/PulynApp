@@ -308,14 +308,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               Navigator.pop(dialogContext); // Fecha o diálogo
               if (linkedChild != null) {
                 log.i('[QR] 👶 Criança vinculada: ${linkedChild!.name}');
+                // ✅ onChildLinked já fecha a tela de scanner (Navigator.pop)
+                // em todos os pontos de uso. Um segundo pop aqui bateria em
+                // uma rota já fechada e derrubava o app.
                 widget.onChildLinked(linkedChild!);
               }
-              // ✅ Aguarda um frame antes de fazer pop na tela anterior
-              Future.delayed(const Duration(milliseconds: 100), () {
-                if (mounted) {
-                  Navigator.pop(context); // Volta para tela anterior
-                }
-              });
             },
             child: const Text('Não'),
           ),

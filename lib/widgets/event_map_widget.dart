@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,9 +74,12 @@ class EventMapWidget extends ConsumerStatefulWidget {
   ConsumerState<EventMapWidget> createState() => _EventMapWidgetState();
 }
 
-class _EventMapWidgetState extends ConsumerState<EventMapWidget> 
+class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     with TickerProviderStateMixin {
   String? _floorPlanUrl;
+  // ✅ Decodificado uma única vez quando a planta carrega (evita rodar
+  // base64Decode em toda rebuild, já que a imagem pode ter vários MB).
+  ImageProvider? _floorPlanImage;
   
   // 🎮 Controllers para animações
   late AnimationController _pulseController;
@@ -174,14 +178,31 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     try {
       final apiService = ref.read(apiServiceProvider);
       final floorPlanUrl = await apiService.getFloorPlan(widget.eventoId!);
-      
+
       if (mounted && floorPlanUrl != null && floorPlanUrl.isNotEmpty) {
         setState(() {
           _floorPlanUrl = floorPlanUrl;
+          _floorPlanImage = _decodeFloorPlanImage(floorPlanUrl);
         });
       }
     } catch (e) {
       log.w('[MAP] ⚠️ Erro ao carregar floor plan: $e');
+    }
+  }
+
+  /// ✅ O backend guarda a planta como data URI base64
+  /// ("data:image/png;base64,..."), não como uma URL http real — por isso
+  /// não dá pra usar NetworkImage aqui, precisa decodificar pra bytes.
+  ImageProvider? _decodeFloorPlanImage(String value) {
+    try {
+      if (value.startsWith('data:')) {
+        final base64Part = value.split(',').last;
+        return MemoryImage(base64Decode(base64Part));
+      }
+      return NetworkImage(value);
+    } catch (e) {
+      log.e('[MAP] ❌ Erro ao decodificar imagem da planta baixa: $e');
+      return null;
     }
   }
 
@@ -1328,9 +1349,9 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             const Color(0xFF2a3a4a).withValues(alpha: 0.5),
                           ],
                         ),
-                        image: _floorPlanUrl != null
+                        image: _floorPlanImage != null
                             ? DecorationImage(
-                                image: NetworkImage(_floorPlanUrl!),
+                                image: _floorPlanImage!,
                                 fit: BoxFit.cover,
                                 opacity: 0.4,
                               )
@@ -1339,7 +1360,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                       child: Stack(
                         children: [
                           // Background decorativo (padrão de piso)
-                          if (_floorPlanUrl == null)
+                          if (_floorPlanImage == null)
                             Positioned.fill(
                               child: CustomPaint(
                                 painter: _FloorPatternPainter(),

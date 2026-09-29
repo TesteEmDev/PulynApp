@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/pulyn_logo.dart';
+import '../qr_scan/open_qr_scanner.dart';
 
 /// 🎯 FASE 2: PRÉ-FESTA SCREEN
 /// Mostra quando: Evento tem status 'scheduled' (antes de iniciar)
@@ -133,9 +134,19 @@ class _PreEventScreenState extends State<PreEventScreen> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    context.push('/qr-scan');
-                  },
+                  // Antes chamava context.push('/qr-scan'), uma rota que não existe no app
+                  onPressed: () => openQrScanner(
+                    context,
+                    onChildLinked: () {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Criança vinculada!'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                  ),
                   icon: const Icon(Icons.qr_code),
                   label: const Text('Vincular Mais Filhos'),
                 ),

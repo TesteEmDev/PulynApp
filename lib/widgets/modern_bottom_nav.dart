@@ -15,6 +15,20 @@ class ModernNavItem {
   });
 }
 
+/// Ação em destaque no meio da barra (um botão redondo que faz algo, em vez de trocar de
+/// aba). Usada para o QR Code de vincular criança enquanto ainda não há nenhuma vinculada.
+class ModernNavAction {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const ModernNavAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+}
+
 /// Barra de navegação inferior flutuante: cantos arredondados, sombra suave e
 /// uma "pílula" colorida que mostra o nome só do item selecionado.
 class ModernBottomNav extends StatelessWidget {
@@ -22,15 +36,48 @@ class ModernBottomNav extends StatelessWidget {
   final ValueChanged<int> onTap;
   final List<ModernNavItem> items;
 
+  /// Botão de ação opcional. Fica na posição [actionSlot] da barra e não conta como aba:
+  /// [currentIndex] e [onTap] continuam se referindo só aos [items].
+  final ModernNavAction? action;
+
+  /// Em qual posição da barra o botão de ação entra (0 = antes do primeiro item).
+  final int actionSlot;
+
   const ModernBottomNav({
     required this.currentIndex,
     required this.onTap,
     required this.items,
+    this.action,
+    this.actionSlot = 1,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    final actionButton = action;
+    final slots = <Widget>[];
+    for (var i = 0; i < items.length; i++) {
+      if (actionButton != null && i == actionSlot) {
+        slots.add(Expanded(child: _ActionButton(action: actionButton)));
+      }
+      slots.add(
+        Expanded(
+          child: _NavButton(
+            item: items[i],
+            selected: i == currentIndex,
+            onTap: () {
+              if (i == currentIndex) return;
+              HapticFeedback.selectionClick();
+              onTap(i);
+            },
+          ),
+        ),
+      );
+    }
+    if (actionButton != null && actionSlot >= items.length) {
+      slots.add(Expanded(child: _ActionButton(action: actionButton)));
+    }
+
     return SafeArea(
       top: false,
       child: Padding(
@@ -49,21 +96,51 @@ class ModernBottomNav extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(
-            children: [
-              for (var i = 0; i < items.length; i++)
-                Expanded(
-                  child: _NavButton(
-                    item: items[i],
-                    selected: i == currentIndex,
-                    onTap: () {
-                      if (i == currentIndex) return;
-                      HapticFeedback.selectionClick();
-                      onTap(i);
-                    },
-                  ),
+          child: Row(children: slots),
+        ),
+      ),
+    );
+  }
+}
+
+/// Botão redondo de ação (QR Code).
+class _ActionButton extends StatelessWidget {
+  final ModernNavAction action;
+
+  const _ActionButton({required this.action});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: action.label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          action.onTap();
+        },
+        child: Center(
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [PulynColors.primary, PulynColors.primaryLight],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: PulynColors.primary.withValues(alpha: 0.45),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
                 ),
-            ],
+              ],
+            ),
+            child: Icon(action.icon, color: Colors.white, size: 26),
           ),
         ),
       ),

@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import '../../providers/index.dart';
 import '../../models/family_models.dart';
 import '../../config/theme.dart';
-import '../qr_scan/qr_scanner_screen.dart';
+import '../qr_scan/open_qr_scanner.dart';
 import '../../widgets/event_map_widget.dart';
+import '../../widgets/link_child_hero.dart';
 import '../../widgets/modern_bottom_nav.dart';
 import '../../widgets/pulyn_logo.dart';
+import '../profile/profile_tab.dart';
 import '../../utils/logger.dart';
 
 // ✅ Notifier para trigger manual de refresh
@@ -77,6 +79,12 @@ final childrenRankingProvider = StreamProvider.autoDispose<List<Child>>((ref) as
   }
 });
 
+/// Já carregou a lista de crianças e ela está vazia. Enquanto carrega pela primeira vez
+/// (ou se der erro sem dados) é falso, para o QR Code não piscar na tela por engano.
+@visibleForTesting
+bool hasNoChildren(AsyncValue<List<Child>> children) =>
+    children.hasValue && (children.value?.isEmpty ?? false);
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -138,6 +146,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Sem nenhuma criança vinculada, vincular por QR Code é o próximo passo de todo
+    // responsável: ganha um botão em destaque na barra (some depois da primeira vinculada).
+    final noChildren = ref.watch(childrenProvider.select(hasNoChildren));
+
     return Scaffold(
       body: PageView(
         controller: _pageController,
@@ -155,6 +167,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: ModernBottomNav(
         currentIndex: _selectedIndex,
         onTap: _onNavTap,
+        action: noChildren
+            ? ModernNavAction(
+                icon: Icons.qr_code_scanner_rounded,
+                label: 'Vincular criança com QR Code',
+                onTap: () => openQrScanner(context, onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh()),
+              )
+            : null,
         items: const [
           ModernNavItem(
             icon: Icons.home_outlined,
@@ -178,6 +197,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // ===== HOME TAB =====
   Widget _buildHomeTab(BuildContext context, WidgetRef ref) {
+    final noChildren = ref.watch(childrenProvider.select(hasNoChildren));
+
     return Scaffold(
       appBar: AppBar(
         // Marca no lugar do texto "Dashboard" (o nome fica só para leitores de tela)
@@ -197,9 +218,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               _buildWelcomeCard(context, ref),
               const SizedBox(height: 16),
-              _buildEventMapSection(context, ref),
-              const SizedBox(height: 20),
-              _buildChildrenListFromAPI(context, ref),
+              if (noChildren)
+                // Sem crianças, o mapa e a lista seriam só caixas vazias: o destaque leva ao QR Code
+                LinkChildHero(
+                  onScan: () => openQrScanner(context, onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh()),
+                )
+              else ...[
+                _buildEventMapSection(context, ref),
+                const SizedBox(height: 20),
+                _buildChildrenListFromAPI(context, ref),
+              ],
               const SizedBox(height: 20),
             ],
           ),
@@ -328,78 +356,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // ===== PROFILE TAB =====
   Widget _buildProfileTab(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-        elevation: 0,
-        actions: const [PulynAppBarLogo()],
-      ),
-      body: Center(
-        child: authState.when(
-          data: (user) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 60,
-                  backgroundColor: PulynColors.primary.withValues(alpha: 0.2),
-                  child: Text(
-                    user?.name[0].toUpperCase() ?? 'U',
-                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  user?.name ?? 'Usuário',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  user?.email ?? '',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: PulynColors.textMuted,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-                ElevatedButton.icon(
-                  onPressed: () => context.push('/manage-children'),
-                  icon: const Icon(Icons.people_outline),
-                  label: const Text('Gerenciar Crianças'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PulynColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () => ref.read(authProvider.notifier).logout(),
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Sair'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          loading: () => const CircularProgressIndicator(),
-          error: (_, _) => const Text('Erro ao carregar perfil'),
-        ),
-      ),
+    return ProfileTab(
+      auth: ref.watch(authProvider),
+      children: ref.watch(childrenProvider),
+      onLogout: () => ref.read(authProvider.notifier).logout(),
+      onRetry: () => ref.invalidate(authProvider),
+      onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh(),
     );
   }
 
@@ -671,25 +633,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) => SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.95,
-                    child: QRScannerScreen(
-                      apiUrl: 'http://localhost:3001',
-                      onChildLinked: (child) {
-                        Navigator.pop(context);
-                        Future.microtask(() {
-                          // ✅ Triggerupdates ao adicionar filho
-                          ref.read(childrenRefreshProvider.notifier).refresh();
-                        });
-                      },
-                    ),
-                  ),
-                );
-              },
+              onPressed: () => openQrScanner(context, onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh()),
               icon: const Icon(Icons.add_circle_outline, size: 20),
               label: const Text('Vincular'),
               style: ElevatedButton.styleFrom(
@@ -726,25 +670,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) => SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.95,
-                          child: QRScannerScreen(
-                            apiUrl: 'http://localhost:3001',
-                            onChildLinked: (child) {
-                              Navigator.pop(context);
-                              Future.microtask(() {
-                                // ✅ Triggerupdates ao adicionar filho
-                                ref.read(childrenRefreshProvider.notifier).refresh();
-                              });
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => openQrScanner(context, onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh()),
                     icon: const Icon(Icons.qr_code_2),
                     label: const Text('Escanear QR Code'),
                     style: ElevatedButton.styleFrom(

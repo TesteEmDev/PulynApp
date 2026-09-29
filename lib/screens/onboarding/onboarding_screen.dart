@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 
 /// 🎯 FASE 1: ONBOARDING SCREEN
 /// Mostra quando: Primeira vez que abre o app (usuário não logado e sem evento)
-/// Objetivo: Explicar o que é Pulyn Family e levar para Login
+/// Objetivo: Explicar o que é Pulyn Family e levar para a tela do convite
+/// (colar o link recebido do buffet), de onde a família segue para o cadastro.
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -35,8 +36,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Ir para login
-      context.go('/login');
+      // Fim do onboarding: vai para a tela de colar o link/código do convite,
+      // que leva ao cadastro. Quem já tem conta usa "Já tenho conta" (login).
+      context.go('/invite');
     }
   }
 

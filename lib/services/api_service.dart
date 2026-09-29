@@ -651,7 +651,19 @@ class ApiService {
         };
       }
       
-      // Cenário 2: Resposta sem token (registro pendente de aprovação)
+      // Cenário 2: convite genérico e cadastro só do responsável (sem crianças): a
+      // conta já nasce ativa e a criança é vinculada depois, lendo o QR Code no app
+      if (data['success'] == true && data['status'] == 'active') {
+        log.i('[API] ✅ Conta criada (sem crianças): vínculo depois, pelo QR Code');
+        return {
+          'success': true,
+          'type': 'created',
+          'status': 'active',
+          'message': data['message'] ?? 'Conta criada!',
+        };
+      }
+
+      // Cenário 3: Resposta sem token (registro pendente de aprovação)
       // Usado quando é convite genérico para múltiplas crianças
       if (data['success'] == true && data['status'] == 'pending') {
         log.i('[API] ✅ Registro em pendência de aprovação');

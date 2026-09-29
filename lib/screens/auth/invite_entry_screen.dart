@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../config/theme.dart';
 import '../../utils/logger.dart';
+import '../../widgets/auth_widgets.dart';
 
+/// Tela onde a família cola o link/código do convite recebido do buffet.
+/// É o destino do onboarding: dela a pessoa segue para o cadastro pelo convite.
 class InviteEntryScreen extends ConsumerStatefulWidget {
   const InviteEntryScreen({super.key});
 
@@ -21,10 +26,14 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
 
   void _handleInviteCode() {
     final code = _codeController.text.trim();
-    
+
     if (code.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cole o código do convite')),
+        SnackBar(
+          content: const Text('Cole o link ou o código do convite'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: PulynColors.danger,
+        ),
       );
       return;
     }
@@ -37,149 +46,95 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
       log.i('[InviteEntry] Token extraído de URL: $token');
     }
 
-    // Navega para a tela de convite com o token
+    // Navega para a tela de cadastro pelo convite, com o token
     context.go('/family/invite/$token');
+  }
+
+  Future<void> _pasteFromClipboard() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text?.trim();
+    if (text == null || text.isEmpty || !mounted) return;
+    setState(() {
+      _codeController.text = text;
+      _codeController.selection = TextSelection.collapsed(offset: text.length);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 48),
-              
-              // Logo
-              Center(
-                child: Image.asset(
-                  'assets/images/logo-pulyn.png',
-                  height: 120,
-                  width: 120,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Title
-              Text(
-                'Bem-vindo!',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.displaySmall,
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Subtitle
-              Text(
-                'Acompanhe a jornada do seu filho em tempo real',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey,
-                ),
-              ),
-              
-              const SizedBox(height: 56),
-              
-              // Info Box
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.blue.withValues(alpha: 0.3),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const AuthHeader(
+                    title: 'Bem-vindo!',
+                    subtitle: 'Acompanhe a jornada do seu filho em tempo real',
                   ),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.card_giftcard,
-                      size: 48,
-                      color: Colors.blue.shade300,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Para começar, você precisa de um código de convite',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'O código foi enviado por email ou WhatsApp',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 48),
-              
-              // Input Field
-              TextField(
-                controller: _codeController,
-                decoration: InputDecoration(
-                  labelText: 'Código de Convite',
-                  hintText: 'Cole aqui...',
-                  prefixIcon: const Icon(Icons.vpn_key),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 32),
+
+                  const AuthInfoCard(
+                    icon: Icons.card_giftcard_rounded,
+                    title: 'Para começar, use o seu convite',
+                    message: 'O buffet envia o link por email ou WhatsApp.',
                   ),
-                ),
-                maxLines: 3,
-                textInputAction: TextInputAction.done,
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Submit Button
-              ElevatedButton.icon(
-                onPressed: _handleInviteCode,
-                icon: const Icon(Icons.arrow_forward),
-                label: const Text('Continuar'),
-              ),
-              
-              const SizedBox(height: 48),
-              
-              // Help Text
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    const Icon(Icons.help_outline, size: 32),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Não recebeu o convite?',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Entre em contato com o buffet/salão de festas onde seu filho fará a festa',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade400,
+                  const SizedBox(height: 20),
+
+                  AuthFormCard(
+                    children: [
+                      TextField(
+                        controller: _codeController,
+                        minLines: 1,
+                        maxLines: 3,
+                        textInputAction: TextInputAction.done,
+                        keyboardType: TextInputType.url,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        onSubmitted: (_) => _handleInviteCode(),
+                        decoration: InputDecoration(
+                          labelText: 'Link ou código do convite',
+                          hintText: 'Cole aqui...',
+                          prefixIcon: const Icon(Icons.link_rounded),
+                          suffixIcon: IconButton(
+                            tooltip: 'Colar',
+                            icon: const Icon(Icons.content_paste_rounded),
+                            onPressed: _pasteFromClipboard,
+                          ),
+                        ),
                       ),
+                      const SizedBox(height: 16),
+                      AuthPrimaryButton(
+                        label: 'Continuar',
+                        icon: Icons.arrow_forward_rounded,
+                        onPressed: _handleInviteCode,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  Center(
+                    child: TextButton(
+                      onPressed: () => context.go('/login'),
+                      child: const Text('Já tenho conta'),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  const AuthInfoCard(
+                    icon: Icons.help_outline_rounded,
+                    title: 'Não recebeu o convite?',
+                    message: 'Fale com o buffet ou salão de festas onde seu filho vai comemorar.',
+                    accent: PulynColors.textMuted,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

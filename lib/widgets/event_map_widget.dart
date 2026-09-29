@@ -1312,6 +1312,11 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     return positions;
   }
 
+  /// Online = status "online" (igual ao AdminCheckpoints e ao backend: qualquer outro
+  /// valor, ou ausência de status, conta como offline).
+  bool _isCheckpointOnline(Map<String, dynamic> checkpoint) =>
+      '${checkpoint['status'] ?? ''}'.trim().toLowerCase() == 'online';
+
   Widget _buildMapWithCheckpoints(
     List<Map<String, dynamic>> checkpoints,
     List<Map<String, dynamic>> zonesFromBackend,
@@ -1354,7 +1359,13 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       childLastCheckpoint,
     );
 
-    _world = _computeWorld(convertedZones, checkpoints, childPositions);
+    // Checkpoints offline não aparecem no mapa do app (nem ampliam a área do mapa).
+    // A regra é a mesma do admin e do backend: só o status "online" conta como online.
+    // A posição das crianças continua usando a lista completa: se o último checkpoint
+    // de uma criança ficou offline depois, o avatar continua onde ela realmente esteve.
+    final visibleCheckpoints = checkpoints.where(_isCheckpointOnline).toList();
+
+    _world = _computeWorld(convertedZones, visibleCheckpoints, childPositions);
 
     // 📍 Onde cada avatar deve ficar (centro do checkpoint) e animação até lá
     final avatarTargets = _computeAvatarTargets(childPositions);
@@ -1568,7 +1579,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                           }),
 
                           // Checkpoints com animação e interatividade
-                          ...checkpoints.map((checkpoint) {
+                          ...visibleCheckpoints.map((checkpoint) {
                             final pos = _getCheckpointPosition(checkpoint, checkpoints);
                             final color = _getCheckpointColor(checkpoint);
                             
@@ -1894,7 +1905,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                       _buildLegendItem('Meus filhos', Colors.yellow),
                       _buildLegendItem('Conquistado', PulynColors.success),
                       _buildLegendItem('Disponível', PulynColors.primary),
-                      _buildLegendItem('Fora do ar', PulynColors.danger),
                     ],
                   ),
                 ),

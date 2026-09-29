@@ -450,6 +450,57 @@ void main() {
     expect(mapScale(tester), lessThanOrEqualTo(fit * 4 + 0.001));
   });
 
+  testWidgets('checkpoints offline não aparecem no mapa nem ampliam a área', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(app(extraCheckpoints: [
+      {'id': 'off1', 'name': 'Sem Sinal', 'zone': 'Entrada', 'points': 5, 'status': 'offline', 'map_x': 200, 'map_y': 100},
+      // longe do canvas: se contasse, o mapa cresceria para abranger esse ponto
+      {'id': 'off2', 'name': 'Offline Distante', 'zone': 'Entrada', 'points': 5, 'status': 'offline', 'map_x': 700, 'map_y': 100},
+      // sem status = offline (mesma regra do admin e do backend)
+      {'id': 'off3', 'name': 'Sem Status', 'zone': 'Entrada', 'points': 5, 'map_x': 250, 'map_y': 200},
+    ]));
+    await settle(tester, 500);
+
+    expect(find.text('Sem Sinal'), findsNothing);
+    expect(find.text('Offline Distante'), findsNothing);
+    expect(find.text('Sem Status'), findsNothing);
+    // os online continuam
+    expect(find.text('Torre Encantada'), findsOneWidget);
+    expect(find.text('Caverna Misteriosa'), findsOneWidget);
+
+    // área do mapa continua a do canvas (450:320): o offline distante não a alargou
+    final viewport = tester.getRect(find.byType(InteractiveViewer));
+    expect(viewport.width / viewport.height, closeTo(450 / 320, 0.02));
+  });
+
+  testWidgets('criança que estava num checkpoint que ficou offline continua aparecendo', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(app(extraCheckpoints: [
+      {'id': 'off1', 'name': 'Sem Sinal', 'zone': 'Entrada', 'points': 5, 'status': 'offline', 'map_x': 200, 'map_y': 150},
+    ]));
+    await settle(tester, 500);
+
+    final container = ProviderScope.containerOf(tester.element(find.byType(EventMapWidget)));
+    container.read(lastCheckpoint.notifier).state = {
+      'c1': {'checkpointId': 'off1', 'checkpointName': 'Sem Sinal'},
+    };
+    await animate(tester);
+
+    expect(find.text('Lia'), findsOneWidget); // o avatar não some
+    expect(find.text('Sem Sinal'), findsNothing); // mas o marcador offline continua escondido
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a legenda não fala mais de "Fora do ar"', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(app());
+    await settle(tester, 500);
+
+    expect(find.text('Fora do ar'), findsNothing);
+    expect(find.text('Disponível'), findsOneWidget);
+    expect(find.text('Meus filhos'), findsOneWidget);
+  });
+
   test('floorPlanRect: planta sempre com a altura do canvas, centralizada, com a proporção da imagem', () {
     // Larga (2:1): 640 de largura, passando 95px de cada lado do canvas de 450
     expect(floorPlanRect(2.0), const Rect.fromLTWH(-95, 0, 640, 320));

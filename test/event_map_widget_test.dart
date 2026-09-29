@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pulyn_app/models/family_models.dart';
 import 'package:pulyn_app/providers/index.dart';
+import 'package:pulyn_app/services/api_service.dart';
 import 'package:pulyn_app/widgets/event_map_widget.dart';
 
 /// Testa o mapa com dados falsos (sem rede): encaixe na tela, avatar em cima
@@ -32,11 +33,19 @@ void main() {
         'c1': {'checkpointId': 'cp1', 'checkpointName': 'Torre Encantada'},
       });
 
-  Widget app({ValueChanged<bool>? onInteraction}) => ProviderScope(
+  Widget app({
+    ValueChanged<bool>? onInteraction,
+    List<Map<String, dynamic>>? zones,
+    List<Map<String, dynamic>>? extraCheckpoints,
+    ApiService? api,
+    String? eventoId,
+  }) =>
+      ProviderScope(
         overrides: [
+          if (api != null) apiServiceProvider.overrideWithValue(api),
           activeEventProvider.overrideWith((ref) => Stream.value({'id': 'e1', 'name': 'Festa'})),
-          checkpointsByEventProvider.overrideWith((ref, id) async => checkpoints),
-          zonesByEventProvider.overrideWith((ref, id) async => <Map<String, dynamic>>[]),
+          checkpointsByEventProvider.overrideWith((ref, id) async => [...checkpoints, ...?extraCheckpoints]),
+          zonesByEventProvider.overrideWith((ref, id) async => zones ?? <Map<String, dynamic>>[]),
           mapChildrenRealtimeProvider.overrideWith((ref) => Stream.value([child])),
           childLastCheckpointProvider.overrideWith((ref) => ref.watch(lastCheckpoint)),
         ],
@@ -45,6 +54,7 @@ void main() {
             body: Center(
               child: EventMapWidget(
                 childrenList: [child],
+                eventoId: eventoId,
                 activeGame: const {'gameName': 'Caça ao Tesouro'},
                 onInteractionChanged: onInteraction,
               ),
@@ -238,29 +248,49 @@ void main() {
     expect(mapScale(tester), closeTo(fit, 0.01));
   });
 
-  testWidgets('arrastar o mapa tem limite: ele não some da tela', (tester) async {
+  double mapTranslateY(WidgetTester tester) =>
+      tester.widget<InteractiveViewer>(find.byType(InteractiveViewer)).transformationController!.value.entry(1, 3);
+
+  testWidgets('o mapa cobre toda a área visível, sem faixas cinza em volta', (tester) async {
     phone(tester);
     await tester.pumpWidget(app());
     await settle(tester, 500);
 
-    final fit = mapScale(tester);
-    // Aproxima para poder arrastar
+    final viewport = tester.getSize(find.byType(InteractiveViewer));
+    final scale = mapScale(tester);
+
+    // A área do mapa tem a proporção exata do canvas 450x320…
+    expect(viewport.width / viewport.height, closeTo(450 / 320, 0.01));
+    // …e o mapa encaixado ocupa a área inteira: sem sobra em nenhum lado
+    expect(450 * scale, closeTo(viewport.width, 1.0));
+    expect(320 * scale, closeTo(viewport.height, 1.0));
+    expect(mapTranslateX(tester), closeTo(0, 1.0));
+    expect(mapTranslateY(tester), closeTo(0, 1.0));
+  });
+
+  testWidgets('arrastar o mapa nunca mostra o que está fora dele (borda do mapa nas bordas da área)', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(app());
+    await settle(tester, 500);
+    final viewport = tester.getSize(find.byType(InteractiveViewer));
+
     await tester.tap(find.byTooltip('Aproximar'));
     await animate(tester);
     final s = mapScale(tester);
-    expect(s, greaterThan(fit));
+    final txBefore = mapTranslateX(tester);
 
-    await tester.drag(find.byType(InteractiveViewer), const Offset(3000, 0));
+    // Puxa o mapa para a direita e para baixo: a borda esquerda/de cima do mapa para nas bordas da área
+    await tester.drag(find.byType(InteractiveViewer), const Offset(3000, 3000));
     await tester.pump(const Duration(milliseconds: 100));
-    final tx = mapTranslateX(tester);
-    expect(tx, greaterThan(0)); // arrastou de fato
-    expect(tx, lessThanOrEqualTo(24 * s + 1)); // mas parou na borda + folga, sem fugir da tela
+    expect(mapTranslateX(tester), greaterThan(txBefore)); // arrastou de fato
+    expect(mapTranslateX(tester), lessThanOrEqualTo(1.0));
+    expect(mapTranslateY(tester), lessThanOrEqualTo(1.0));
 
-    await tester.drag(find.byType(InteractiveViewer), const Offset(-6000, 0));
+    // Puxa para a esquerda e para cima: a borda direita/de baixo do mapa para nas bordas da área
+    await tester.drag(find.byType(InteractiveViewer), const Offset(-6000, -6000));
     await tester.pump(const Duration(milliseconds: 100));
-    final viewportWidth = tester.getSize(find.byType(InteractiveViewer)).width;
-    // Borda direita do mapa nunca passa da folga dentro da tela
-    expect(mapTranslateX(tester) + 450 * s, greaterThanOrEqualTo(viewportWidth - 24 * s - 1));
+    expect(mapTranslateX(tester) + 450 * s, greaterThanOrEqualTo(viewport.width - 1.0));
+    expect(mapTranslateY(tester) + 320 * s, greaterThanOrEqualTo(viewport.height - 1.0));
   });
 
   testWidgets('avisa a tela quando o dedo entra e sai do mapa (para travar a rolagem)', (tester) async {
@@ -282,4 +312,167 @@ void main() {
     await g2.up();
     expect(events, [true, false]);
   });
+
+  testWidgets('zona que passa da borda do canvas aparece inteira (o mapa cresce para abranger)', (tester) async {
+    phone(tester);
+    // Zona salva pelo admin web com parte fora do canvas 450x320
+    await tester.pumpWidget(app(zones: [
+      {'id': 'z1', 'name': 'Zona Extra', 'color': '#22C55E', 'x': 330, 'y': 200, 'width': 300, 'height': 200},
+    ]));
+    await settle(tester, 500);
+
+    final viewport = tester.getRect(find.byType(InteractiveViewer));
+    final zone = tester.getRect(find.byWidgetPredicate(
+      (w) => w is Container && w.constraints == const BoxConstraints.tightFor(width: 300, height: 200),
+    ));
+
+    // Antes ela era cortada na borda do canvas; agora cabe inteira na área visível
+    expect(zone.left, greaterThanOrEqualTo(viewport.left - 1));
+    expect(zone.top, greaterThanOrEqualTo(viewport.top - 1));
+    expect(zone.right, lessThanOrEqualTo(viewport.right + 1));
+    expect(zone.bottom, lessThanOrEqualTo(viewport.bottom + 1));
+    expect(viewport.contains(tester.getCenter(find.text('Zona Extra'))), isTrue);
+
+    // O mapa cresceu (proporção maior que a do canvas) mas continua preenchendo a área toda
+    expect(viewport.width / viewport.height, closeTo(632 / 402, 0.02));
+    expect(mapTranslateX(tester), closeTo(0, 1.0));
+    expect(mapTranslateY(tester), closeTo(0, 1.0));
+  });
+
+  testWidgets('checkpoint fora do canvas aparece e continua tocável', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(app(extraCheckpoints: [
+      {'id': 'cp3', 'name': 'Ponto Distante', 'zone': 'Entrada', 'points': 5, 'status': 'online', 'map_x': 520, 'map_y': 120},
+    ]));
+    await settle(tester, 500);
+
+    final viewport = tester.getRect(find.byType(InteractiveViewer));
+    expect(viewport.contains(tester.getCenter(find.text('Ponto Distante'))), isTrue);
+
+    await tester.tap(find.text('Ponto Distante'));
+    await animate(tester);
+    expect(find.byType(BottomSheet), findsOneWidget);
+  });
+
+  testWidgets('planta larga ocupa a altura toda, passa das laterais do canvas e o mapa a abrange inteira', (tester) async {
+    phone(tester);
+    // Planta 4x2 pixels (proporção 2:1), como a de um espaço largo
+    await tester.pumpWidget(app(api: _FakeApi(_wideFloorPlan), eventoId: 'e1'));
+    await settle(tester, 500);
+    // Decodificar a imagem é assíncrono de verdade (fora do relógio simulado do teste)
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 500)));
+    await settle(tester, 500);
+
+    final viewport = tester.getRect(find.byType(InteractiveViewer));
+    final plan = tester.getRect(find.byType(Image));
+
+    // Proporção 2:1 => 640x320 canvas-px, de x=-95 a x=545: o mapa cresceu para abranger tudo
+    expect(viewport.width / viewport.height, closeTo(640 / 320, 0.03));
+    // A planta aparece inteira, ocupando a área visível toda (nada dela fica de fora)
+    expect(plan.left, closeTo(viewport.left, 1.5));
+    expect(plan.right, closeTo(viewport.right, 1.5));
+    expect(plan.top, closeTo(viewport.top, 1.5));
+    expect(plan.bottom, closeTo(viewport.bottom, 1.5));
+    expect(tester.takeException(), isNull);
+  });
+
+  /// Pinça com dois dedos: [from1]/[from2] vão até [to1]/[to2] em vários quadros,
+  /// como num celular.
+  Future<void> pinch(WidgetTester tester, Offset from1, Offset from2, Offset to1, Offset to2) async {
+    final g1 = await tester.startGesture(from1, pointer: 11);
+    final g2 = await tester.startGesture(from2, pointer: 12);
+    await tester.pump(const Duration(milliseconds: 16));
+    const steps = 12;
+    for (var i = 1; i <= steps; i++) {
+      final t = i / steps;
+      await g1.moveTo(Offset.lerp(from1, to1, t)!);
+      await g2.moveTo(Offset.lerp(from2, to2, t)!);
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    await g1.up();
+    await g2.up();
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+
+  testWidgets('afastar com os dedos (pinça) nunca passa do mapa inteiro nem mostra fundo cinza', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(app());
+    await settle(tester, 500);
+    final viewport = tester.getRect(find.byType(InteractiveViewer));
+    final fit = mapScale(tester);
+    final c = viewport.center;
+
+    // Aproxima um pouco (botão) e então pinça para afastar muito, várias vezes
+    await tester.tap(find.byTooltip('Aproximar'));
+    await animate(tester);
+    expect(mapScale(tester), greaterThan(fit * 1.5));
+
+    for (var i = 0; i < 3; i++) {
+      await pinch(tester, c + const Offset(-90, 0), c + const Offset(90, 0), c + const Offset(-15, 0), c + const Offset(15, 0));
+      expect(mapScale(tester), greaterThanOrEqualTo(fit - 0.001), reason: 'passou do zoom mínimo (pinça $i)');
+    }
+
+    // No zoom mínimo o mapa ocupa a área toda: sem sobra em nenhum lado
+    final s = mapScale(tester);
+    expect(450 * s, closeTo(viewport.width, 1.5));
+    expect(mapTranslateX(tester), closeTo(0, 1.5));
+    expect(mapTranslateY(tester), closeTo(0, 1.5));
+  });
+
+  testWidgets('pinça de afastar já no zoom mínimo não encolhe o mapa', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(app());
+    await settle(tester, 500);
+    final viewport = tester.getRect(find.byType(InteractiveViewer));
+    final fit = mapScale(tester);
+    final c = viewport.center;
+
+    await pinch(tester, c + const Offset(-90, 0), c + const Offset(90, 0), c + const Offset(-10, 0), c + const Offset(10, 0));
+
+    expect(mapScale(tester), greaterThanOrEqualTo(fit - 0.001));
+    expect(mapTranslateX(tester), closeTo(0, 1.5));
+    expect(mapTranslateY(tester), closeTo(0, 1.5));
+  });
+
+  testWidgets('pinça de aproximar funciona e respeita o zoom máximo', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(app());
+    await settle(tester, 500);
+    final viewport = tester.getRect(find.byType(InteractiveViewer));
+    final fit = mapScale(tester);
+    final c = viewport.center;
+
+    for (var i = 0; i < 3; i++) {
+      await pinch(tester, c + const Offset(-10, 0), c + const Offset(10, 0), c + const Offset(-110, 0), c + const Offset(110, 0));
+    }
+
+    expect(mapScale(tester), greaterThan(fit * 2));
+    expect(mapScale(tester), lessThanOrEqualTo(fit * 4 + 0.001));
+  });
+
+  test('floorPlanRect: planta sempre com a altura do canvas, centralizada, com a proporção da imagem', () {
+    // Larga (2:1): 640 de largura, passando 95px de cada lado do canvas de 450
+    expect(floorPlanRect(2.0), const Rect.fromLTWH(-95, 0, 640, 320));
+    // Mesma proporção do canvas: cobre exatamente o canvas
+    final same = floorPlanRect(450 / 320);
+    expect(same.left, closeTo(0, 0.001));
+    expect(same.width, closeTo(450, 0.001));
+    // Alta (1:2): mais estreita que o canvas, centralizada
+    expect(floorPlanRect(0.5), const Rect.fromLTWH(145, 0, 160, 320));
+    // Valores inválidos caem no canvas
+    expect(floorPlanRect(0), const Rect.fromLTWH(0, 0, 450, 320));
+    expect(floorPlanRect(double.nan), const Rect.fromLTWH(0, 0, 450, 320));
+  });
+}
+
+/// Planta falsa: PNG 4x2 (proporção 2:1) em base64.
+const _wideFloorPlan =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAEklEQVR4nGM4ceLEf2TMgC4AAMPVGrkYQwV4AAAAAElFTkSuQmCC';
+
+class _FakeApi extends ApiService {
+  final String floorPlan;
+  _FakeApi(this.floorPlan);
+
+  @override
+  Future<String?> getFloorPlan(String eventoId) async => floorPlan;
 }

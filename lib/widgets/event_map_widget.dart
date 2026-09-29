@@ -59,6 +59,24 @@ class AvatarPosition {
   }
 }
 
+/// 📐 Onde a planta baixa é desenhada, em coordenadas do canvas 450x320.
+///
+/// No admin web e no telão a planta usa object-contain dentro de uma área BEM mais
+/// larga que o canvas, enquanto as zonas e checkpoints usam as coordenadas do canvas
+/// (SVG viewBox 450x320). Nessa situação a planta ocupa a altura toda (320) e a largura
+/// que a proporção dela pedir, centralizada — passando das laterais do canvas.
+/// É por isso que zonas desenhadas sobre a planta têm x < 0 ou x > 450.
+/// Encaixar a planta só dentro dos 450px de largura a deixava menor que as zonas.
+Rect floorPlanRect(double aspect) {
+  const canvasWidth = 450.0;
+  const canvasHeight = 320.0;
+  if (!aspect.isFinite || aspect <= 0) {
+    return const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight);
+  }
+  final width = canvasHeight * aspect;
+  return Rect.fromLTWH(canvasWidth / 2 - width / 2, 0, width, canvasHeight);
+}
+
 /// 🗺️ Widget de Mapa do Evento com Zonas, Checkpoints e Filhos - VERSÃO MELHORADA
 class EventMapWidget extends ConsumerStatefulWidget {
   final List<Child>? childrenList; // Lista de filhos vinculados no app (todos são "meus filhos")
@@ -135,6 +153,15 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   // checkpoints e avatares fora da posição relativa correta no mobile.
   static const double mapWidth = 450;
   static const double mapHeight = 320;
+
+  // 🌍 Área que o mapa realmente ocupa: o canvas 450x320 MAIS tudo que passa dele
+  // (zonas, checkpoints com rótulo, avatares com nome). O admin web aceita e salva
+  // coordenadas fora do canvas (o SVG dele tem sobra em volta); sem isto o app
+  // cortava essas zonas na borda.
+  Rect _world = const Rect.fromLTWH(0, 0, mapWidth, mapHeight);
+  Rect? _fittedWorld; // mundo usado no último encaixe
+  bool _userMovedView = false; // a pessoa já mexeu no zoom/posição
+  double? _floorPlanAspect; // largura/altura da planta (só depois de decodificada)
 
   @override
   void initState() {
@@ -237,14 +264,33 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       final floorPlanUrl = await apiService.getFloorPlan(widget.eventoId!);
 
       if (mounted && floorPlanUrl != null && floorPlanUrl.isNotEmpty) {
+        final image = _decodeFloorPlanImage(floorPlanUrl);
         setState(() {
           _floorPlanUrl = floorPlanUrl;
-          _floorPlanImage = _decodeFloorPlanImage(floorPlanUrl);
+          _floorPlanImage = image;
+          _floorPlanAspect = null;
         });
+        if (image != null) _resolveFloorPlanAspect(image);
       }
     } catch (e) {
       log.w('[MAP] ⚠️ Erro ao carregar floor plan: $e');
     }
+  }
+
+  /// Descobre largura/altura da planta para posicioná-la como no admin/telão.
+  void _resolveFloorPlanAspect(ImageProvider image) {
+    final stream = image.resolve(ImageConfiguration.empty);
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (info, _) {
+        stream.removeListener(listener);
+        if (!mounted) return;
+        final height = info.image.height;
+        if (height > 0) setState(() => _floorPlanAspect = info.image.width / height);
+      },
+      onError: (_, _) => stream.removeListener(listener),
+    );
+    stream.addListener(listener);
   }
 
   /// ✅ O backend guarda a planta como data URI base64
@@ -364,31 +410,89 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     });
   }
 
+  /// Retângulo (em coordenadas do canvas) que contém o canvas 450x320 e todo o
+  /// conteúdo, com folga para rótulos e nomes. Limitado a 2x o canvas para cada
+  /// lado, para um dado absurdo não encolher o mapa inteiro.
+  Rect _computeWorld(
+    List<ZoneConfig> zones,
+    List<Map<String, dynamic>> checkpoints,
+    List<Map<String, dynamic>> childPositions,
+  ) {
+    var left = 0.0, top = 0.0, right = mapWidth, bottom = mapHeight;
+    void include(double l, double t, double r, double b) {
+      if (!(l.isFinite && t.isFinite && r.isFinite && b.isFinite)) return;
+      left = math.min(left, l);
+      top = math.min(top, t);
+      right = math.max(right, r);
+      bottom = math.max(bottom, b);
+    }
+
+    final planAspect = _floorPlanAspect;
+    if (_floorPlanImage != null && planAspect != null) {
+      final plan = floorPlanRect(planAspect);
+      include(plan.left, plan.top, plan.right, plan.bottom);
+    }
+    for (final z in zones) {
+      include(z.x - 2, z.y - 2, z.x + z.w + 2, z.y + z.h + 2);
+    }
+    for (final cp in checkpoints) {
+      try {
+        final pos = _getCheckpointPosition(cp, checkpoints);
+        final x = pos['x']!, y = pos['y']!;
+        include(x - 60, y - 20, x + 60, y + 66); // círculo de 40px + rótulo com o nome
+      } catch (_) {
+        // checkpoint sem posição utilizável: não altera o tamanho do mapa
+      }
+    }
+    for (final p in childPositions) {
+      final x = (p['x'] as num).toDouble(), y = (p['y'] as num).toDouble();
+      include(x - 45, y - 46, x + 45, y + 20); // avatar + nome acima
+    }
+
+    return Rect.fromLTRB(
+      math.max(left, -mapWidth),
+      math.max(top, -mapHeight),
+      math.min(right, mapWidth * 3),
+      math.min(bottom, mapHeight * 3),
+    );
+  }
+
   /// Menor zoom = mapa inteiro na tela ("encaixe"). O maior é 4x isso.
   static const double _maxZoomFactor = 4.0;
 
-  /// Folga (em px de cena) que dá para arrastar além da borda do mapa.
-  static const double _panMargin = 24;
+  /// Folga (em px de cena) que dá para arrastar além da borda do mapa. Zero: o
+  /// que fica fora do mapa é só fundo vazio (cinza), então nunca deve aparecer.
+  static const double _panMargin = 0;
+
+  /// Matriz da câmera: escala [scale] e deslocamento ([tx], [ty]).
+  ///
+  /// A escala tem que ser IGUAL nos três eixos (inclusive Z). O InteractiveViewer
+  /// lê a escala atual com getMaxScaleOnAxis(), que considera o Z: com Z fixo em 1 e o
+  /// mapa reduzido (escala < 1) ele achava que a escala atual era 1, errava a conta do
+  /// limite mínimo e deixava a pinça de afastar encolher o mapa além do encaixe,
+  /// mostrando o fundo cinza.
+  Matrix4 _cameraMatrix(double scale, double tx, double ty) =>
+      Matrix4(scale, 0, 0, 0, 0, scale, 0, 0, 0, 0, scale, 0, tx, ty, 0, 1);
 
   double _fitScale(Size viewport) =>
-      math.min(viewport.width / mapWidth, viewport.height / mapHeight).clamp(0.3, 1.5).toDouble();
+      math.min(viewport.width / _world.width, viewport.height / _world.height).clamp(0.3, 1.5).toDouble();
 
   /// 📐 Matriz que encaixa o canvas 450x320 inteiro (e centralizado) na área
   /// visível. Sem isso o mapa abria cortado em telas de ~360-400dp de largura.
   Matrix4 _fitMatrix(Size viewport) {
     final scale = _fitScale(viewport);
-    final dx = (viewport.width - mapWidth * scale) / 2;
-    final dy = (viewport.height - mapHeight * scale) / 2;
-    return Matrix4(scale, 0, 0, 0, 0, scale, 0, 0, 0, 0, 1, 0, dx, dy, 0, 1);
+    final dx = (viewport.width - _world.width * scale) / 2;
+    final dy = (viewport.height - _world.height * scale) / 2;
+    return _cameraMatrix(scale, dx, dy);
   }
 
-  /// Limite do arrasto. Com o zoom mínimo (mapa encaixado) a área permitida é
-  /// exatamente a visível + uma folga, então o mapa nunca "foge" da tela — antes
-  /// a margem fixa de 200 deixava arrastar o mapa para fora e se perder.
+  /// Limite do arrasto: a borda do mapa nunca entra na área visível, então não
+  /// aparece fundo cinza em volta (antes a margem fixa de 200 deixava arrastar o
+  /// mapa para fora e se perder).
   EdgeInsets _mapBoundary(Size viewport) {
     final fit = _fitScale(viewport);
-    final extraX = math.max(0.0, (viewport.width / fit - mapWidth) / 2);
-    final extraY = math.max(0.0, (viewport.height / fit - mapHeight) / 2);
+    final extraX = math.max(0.0, (viewport.width / fit - _world.width) / 2);
+    final extraY = math.max(0.0, (viewport.height / fit - _world.height) / 2);
     return EdgeInsets.symmetric(horizontal: extraX + _panMargin, vertical: extraY + _panMargin);
   }
 
@@ -404,9 +508,9 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       return lo > hi ? (view - content) / 2 : t.clamp(lo, hi).toDouble();
     }
 
-    final tx = axis(m.entry(0, 3), viewport.width, mapWidth * s, boundary.left);
-    final ty = axis(m.entry(1, 3), viewport.height, mapHeight * s, boundary.top);
-    return Matrix4(s, 0, 0, 0, 0, s, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
+    final tx = axis(m.entry(0, 3), viewport.width, _world.width * s, boundary.left);
+    final ty = axis(m.entry(1, 3), viewport.height, _world.height * s, boundary.top);
+    return _cameraMatrix(s, tx, ty);
   }
 
   /// Anima a câmera do mapa até [target] (280ms).
@@ -421,6 +525,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   void _resetView() {
     final viewport = _viewportSize;
     if (viewport == null) return;
+    _userMovedView = false;
     _animateViewTo(_fitMatrix(viewport));
   }
 
@@ -430,6 +535,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     final viewport = _viewportSize;
     if (viewport == null) return;
 
+    _userMovedView = true;
     final current = _transformController.value;
     final s = current.entry(0, 0);
     final fit = _fitScale(viewport);
@@ -439,7 +545,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     final k = target / s;
     final f = focal ?? Offset(viewport.width / 2, viewport.height / 2);
     // Escala em volta de f: p' = k·p + f·(1 − k)
-    final zoom = Matrix4(k, 0, 0, 0, 0, k, 0, 0, 0, 0, 1, 0, f.dx * (1 - k), f.dy * (1 - k), 0, 1);
+    final zoom = _cameraMatrix(k, f.dx * (1 - k), f.dy * (1 - k));
     _animateViewTo(_clampView(zoom.multiplied(current), viewport));
   }
 
@@ -500,34 +606,35 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     if (_activePointers == 0) widget.onInteractionChanged?.call(false);
   }
 
-  Widget _buildZoomButton(IconData icon, String tooltip, VoidCallback onPressed) {
-    return Material(
-      color: PulynColors.darkCard.withValues(alpha: 0.92),
-      elevation: 2,
-      shape: const CircleBorder(side: BorderSide(color: PulynColors.darkBorder)),
-      child: IconButton(
-        onPressed: () {
-          HapticFeedback.selectionClick();
-          onPressed();
-        },
-        icon: Icon(icon),
-        iconSize: 20,
-        color: Colors.white,
-        tooltip: tooltip,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints.tightFor(width: 40, height: 40),
-      ),
+  Widget _buildHeaderButton(IconData icon, String tooltip, VoidCallback onPressed) {
+    return IconButton(
+      onPressed: () {
+        HapticFeedback.selectionClick();
+        onPressed();
+      },
+      icon: Icon(icon),
+      iconSize: 20,
+      color: PulynColors.textMuted,
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 36, height: 36),
     );
   }
 
   /// Encaixa o mapa na primeira vez que a área visível é conhecida.
   void _scheduleInitialFit(Size viewport) {
     _viewportSize = viewport;
-    if (_initialFitDone) return;
+    // Também refaz o encaixe quando o conteúdo muda de tamanho (zonas/checkpoints
+    // acabaram de carregar) e a pessoa ainda não mexeu na vista.
+    final worldChanged = _fittedWorld != _world;
+    if (_initialFitDone && !(worldChanged && !_userMovedView)) return;
+
+    final world = _world;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _initialFitDone) return;
-      _transformController.value = _fitMatrix(viewport);
-      setState(() => _initialFitDone = true);
+      if (!mounted) return;
+      _transformController.value = _fitMatrix(_viewportSize ?? viewport);
+      _fittedWorld = world;
+      if (!_initialFitDone) setState(() => _initialFitDone = true);
     });
   }
 
@@ -1247,6 +1354,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       childLastCheckpoint,
     );
 
+    _world = _computeWorld(convertedZones, checkpoints, childPositions);
+
     // 📍 Onde cada avatar deve ficar (centro do checkpoint) e animação até lá
     final avatarTargets = _computeAvatarTargets(childPositions);
     _syncAvatarTargets(childPositions, avatarTargets);
@@ -1254,12 +1363,14 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     return ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: Container(
-            height: 480, // Mapa maior e com mais espaço pra arrastar/zoom
+            // Sem altura fixa: a área do mapa abaixo tem a proporção exata do canvas
+            // (450x320), então o mapa preenche tudo, sem faixas vazias em volta.
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: PulynColors.darkBorder),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Cabeçalho
                 Container(
@@ -1335,28 +1446,28 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             ),
                           ),
                         ),
-                      // Volta ao encaixe inicial (mapa inteiro na tela)
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          _resetView();
-                        },
-                        icon: const Icon(Icons.center_focus_strong),
-                        tooltip: 'Centralizar',
-                        iconSize: 20,
-                        color: PulynColors.textMuted,
-                      ),
+                      // Zoom e "mapa inteiro" no cabeçalho: sobre o mapa eles cobriam
+                      // e bloqueavam o toque em checkpoints do canto.
+                      _buildHeaderButton(Icons.remove, 'Afastar', () => _zoomBy(1 / 1.6)),
+                      _buildHeaderButton(Icons.add, 'Aproximar', () => _zoomBy(1.6)),
+                      _buildHeaderButton(Icons.center_focus_strong, 'Centralizar', _resetView),
                     ],
                   ),
                 ),
 
                 // Mapa interativo
-                Expanded(
+                AspectRatio(
+                  aspectRatio: _world.width / _world.height,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final viewport = Size(constraints.maxWidth, constraints.maxHeight);
                       _scheduleInitialFit(viewport);
                       final fitScale = _fitScale(viewport);
+                      // Desloca o conteúdo: (0,0) do canvas pode não ser o canto do mundo
+                      final ox = -_world.left;
+                      final oy = -_world.top;
+                      final planAspect = _floorPlanAspect;
+                      final planRect = planAspect != null ? floorPlanRect(planAspect) : null;
                       return Stack(
                         children: [
                           Positioned.fill(
@@ -1376,11 +1487,14 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                     maxScale: fitScale * _maxZoomFactor,
                     boundaryMargin: _mapBoundary(viewport),
                     // Tocar no mapa durante uma animação de zoom assume o controle
-                    onInteractionStart: (_) => _viewAnimController.stop(),
+                    onInteractionStart: (_) {
+                      _userMovedView = true;
+                      _viewAnimController.stop();
+                    },
                     constrained: false,
                     child: Container(
-                      width: mapWidth,
-                      height: mapHeight,
+                      width: _world.width,
+                      height: _world.height,
                       decoration: BoxDecoration(
                         color: PulynColors.darkCard.withValues(alpha: 0.3),
                         gradient: LinearGradient(
@@ -1391,13 +1505,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             const Color(0xFF2a3a4a).withValues(alpha: 0.5),
                           ],
                         ),
-                        image: _floorPlanImage != null
-                            ? DecorationImage(
-                                image: _floorPlanImage!,
-                                fit: BoxFit.cover,
-                                opacity: 0.4,
-                              )
-                            : null,
                       ),
                       child: Stack(
                         children: [
@@ -1409,14 +1516,30 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                               ),
                             ),
 
+                          // Planta baixa INTEIRA (nunca cortada), na mesma posição/tamanho do
+                          // admin e do telão — veja floorPlanRect. A caixa já tem a proporção
+                          // da imagem, então fill não distorce.
+                          if (_floorPlanImage != null && planRect != null)
+                            Positioned(
+                              left: planRect.left + ox,
+                              top: planRect.top + oy,
+                              width: planRect.width,
+                              height: planRect.height,
+                              child: Image(
+                                image: _floorPlanImage!,
+                                fit: BoxFit.fill,
+                                opacity: const AlwaysStoppedAnimation(0.4),
+                              ),
+                            ),
+
                           // Zonas background com animação
                           ...convertedZones.map((zone) {
                             log.i('🎨 [ZONES] Renderizando zona: ${zone.name} @ (${zone.x}, ${zone.y})');
                             return AnimatedBuilder(
                               animation: _zoomAnimation,
                               builder: (context, child) => Positioned(
-                                left: zone.x,
-                                top: zone.y,
+                                left: zone.x + ox,
+                                top: zone.y + oy,
                                 child: Container(
                                   width: zone.w,
                                   height: zone.h,
@@ -1460,8 +1583,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                               // (40px) fica sempre exatamente em (map_x, map_y). Antes a caixa
                               // crescia com o nome do checkpoint e o círculo saía deslocado pra
                               // direita, e o avatar não cobria o checkpoint. x/y são pixels.
-                              left: pos['x']! - 60,
-                              top: pos['y']! - 20,
+                              left: pos['x']! - 60 + ox,
+                              top: pos['y']! - 20 + oy,
                               width: 120,
                               child: GestureDetector(
                                 onTap: () => _showCheckpointDetails(checkpoint),
@@ -1568,8 +1691,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                               // anel do checkpoint aparecendo em volta, e o nome fica ACIMA:
                               // assim o rótulo do checkpoint, logo abaixo, continua tocável.
                               return Positioned(
-                                left: centerX - 20,
-                                top: centerY - 20,
+                                left: centerX - 20 + ox,
+                                top: centerY - 20 + oy,
                                 width: 40,
                                 height: 40,
                                 child: Stack(
@@ -1746,19 +1869,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                         ),
                                       ),
                               ),
-                            ),
-                          ),
-                          // Botões de zoom
-                          Positioned(
-                            right: 10,
-                            bottom: 10,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                _buildZoomButton(Icons.add, 'Aproximar', () => _zoomBy(1.6)),
-                                const SizedBox(height: 8),
-                                _buildZoomButton(Icons.remove, 'Afastar', () => _zoomBy(1 / 1.6)),
-                              ],
                             ),
                           ),
                         ],

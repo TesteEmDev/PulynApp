@@ -88,6 +88,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
   late PageController _pageController;
 
+  // Verdadeiro enquanto o dedo está no mapa: trava a rolagem da tela e a troca de
+  // abas por deslize, para arrastar/dar zoom no mapa não rolar a página nem mudar de aba.
+  bool _mapInteracting = false;
+
+  void _setMapInteracting(bool value) {
+    if (!mounted || _mapInteracting == value) return;
+    setState(() => _mapInteracting = value);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -132,6 +141,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
+        physics: _mapInteracting ? const NeverScrollableScrollPhysics() : null,
         onPageChanged: _onPageChanged,
         children: [
           // Página 0: Home
@@ -179,6 +189,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       body: SingleChildScrollView(
+        physics: _mapInteracting ? const NeverScrollableScrollPhysics() : null,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -435,6 +446,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               childrenList: children,
               eventoId: activeEvent?['id'],
               activeGame: activeGame,
+              onInteractionChanged: _setMapInteracting,
             );
           },
         ),

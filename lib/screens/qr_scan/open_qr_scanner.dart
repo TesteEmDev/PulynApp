@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
-import '../../config/api_config.dart';
-import 'qr_scanner_screen.dart';
+import '../../widgets/qr_link_panel.dart';
 
-/// Abre o leitor de QR Code para vincular uma criança, como uma janela que sobe por
-/// cima da tela atual. É o ÚNICO caminho usado pelo app para isso (home, perfil, barra
-/// de baixo e pré-festa), então o comportamento é o mesmo em todos os lugares.
+/// Abre o leitor de QR Code numa janela que sobe por cima da tela atual (usado onde não
+/// há espaço para o leitor dentro da própria tela: Perfil, pré-festa, lista de crianças).
+/// Na home o leitor funciona dentro do próprio cartão (veja `LinkChildHero`). Os dois
+/// usam o mesmo `QrLinkPanel`, então pedem a câmera e confirmam do mesmo jeito.
 ///
-/// [onChildLinked] é chamado depois de a criança ser vinculada e a janela ter fechado.
+/// [onChildLinked] é chamado assim que a criança é vinculada.
 Future<void> openQrScanner(BuildContext context, {VoidCallback? onChildLinked}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    builder: (sheetContext) => SizedBox(
-      height: MediaQuery.of(sheetContext).size.height * 0.95,
-      child: QRScannerScreen(
-        apiUrl: ApiConfig.getApiBaseUrl(),
-        onChildLinked: (child) {
-          Navigator.pop(sheetContext);
-          onChildLinked?.call();
-        },
+    useSafeArea: true,
+    showDragHandle: true,
+    builder: (sheetContext) => Padding(
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.of(sheetContext).viewInsets.bottom),
+      child: SingleChildScrollView(
+        child: QrLinkPanel(
+          framed: false,
+          onLinked: (_) => onChildLinked?.call(),
+          onClose: () => Navigator.pop(sheetContext),
+        ),
       ),
     ),
   );

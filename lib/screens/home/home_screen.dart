@@ -4,11 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../providers/index.dart';
 import '../../models/family_models.dart';
 import '../../config/theme.dart';
-import '../qr_scan/open_qr_scanner.dart';
 import '../../widgets/event_map_widget.dart';
 import '../../widgets/link_child_hero.dart';
 import '../../widgets/modern_bottom_nav.dart';
 import '../../widgets/pulyn_logo.dart';
+import '../../widgets/qr_link_panel.dart';
 import '../profile/profile_tab.dart';
 import '../../utils/logger.dart';
 
@@ -100,6 +100,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // abas por deslize, para arrastar/dar zoom no mapa não rolar a página nem mudar de aba.
   bool _mapInteracting = false;
 
+  // Leitor de QR Code aberto dentro da lista de crianças (quando já há crianças vinculadas).
+  bool _linkPanelOpen = false;
+
+  /// Uma criança acabou de ser vinculada: atualiza a lista. [announce] mostra um aviso, para
+  /// quando o cartão do leitor some (o primeiro vínculo troca o cartão pelo mapa e pela lista).
+  void _handleChildLinked(Child child, {bool announce = false}) {
+    ref.read(childrenRefreshProvider.notifier).refresh();
+    if (!announce || !mounted) return;
+    final name = child.nickname.isNotEmpty ? child.nickname : child.name;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$name vinculado! Agora você acompanha a festa em tempo real.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   void _setMapInteracting(bool value) {
     if (!mounted || _mapInteracting == value) return;
     setState(() => _mapInteracting = value);
@@ -146,10 +163,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Sem nenhuma criança vinculada, vincular por QR Code é o próximo passo de todo
-    // responsável: ganha um botão em destaque na barra (some depois da primeira vinculada).
-    final noChildren = ref.watch(childrenProvider.select(hasNoChildren));
-
     return Scaffold(
       body: PageView(
         controller: _pageController,
@@ -167,13 +180,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: ModernBottomNav(
         currentIndex: _selectedIndex,
         onTap: _onNavTap,
-        action: noChildren
-            ? ModernNavAction(
-                icon: Icons.qr_code_scanner_rounded,
-                label: 'Vincular criança com QR Code',
-                onTap: () => openQrScanner(context, onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh()),
-              )
-            : null,
         items: const [
           ModernNavItem(
             icon: Icons.home_outlined,
@@ -221,7 +227,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               if (noChildren)
                 // Sem crianças, o mapa e a lista seriam só caixas vazias: o destaque leva ao QR Code
                 LinkChildHero(
-                  onScan: () => openQrScanner(context, onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh()),
+                  onLinked: (child) => _handleChildLinked(child, announce: true),
                 )
               else ...[
                 _buildEventMapSection(context, ref),
@@ -633,8 +639,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: () => openQrScanner(context, onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh()),
-              icon: const Icon(Icons.add_circle_outline, size: 20),
+              onPressed: () => setState(() => _linkPanelOpen = !_linkPanelOpen),
+              icon: Icon(_linkPanelOpen ? Icons.close_rounded : Icons.add_circle_outline, size: 20),
               label: const Text('Vincular'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: PulynColors.primary,
@@ -648,6 +654,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
         const SizedBox(height: 16),
+        if (_linkPanelOpen) ...[
+          QrLinkPanel(
+            onLinked: _handleChildLinked,
+            onClose: () => setState(() => _linkPanelOpen = false),
+          ),
+          const SizedBox(height: 16),
+        ],
         if (children.isEmpty)
           Container(
             decoration: BoxDecoration(
@@ -670,7 +683,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
-                    onPressed: () => openQrScanner(context, onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh()),
+                    onPressed: () => setState(() => _linkPanelOpen = true),
                     icon: const Icon(Icons.qr_code_2),
                     label: const Text('Escanear QR Code'),
                     style: ElevatedButton.styleFrom(

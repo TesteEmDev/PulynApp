@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../utils/logger.dart';
 import '../../services/api_service.dart';
 import '../../models/family_models.dart';
-import '../qr_scan/qr_scanner_screen.dart';
+import '../qr_scan/open_qr_scanner.dart';
 import '../../screens/child/child_detail_screen.dart';
 import '../../widgets/pulyn_logo.dart';
 
@@ -60,20 +60,12 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
   }
 
   void _openQRScanner() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.95,
-        child: QRScannerScreen(
-          apiUrl: widget.apiUrl,
-          onChildLinked: (child) {
-            log.i('✅ Criança vinculada: ${child.nickname}');
-            Navigator.pop(context);
-            _loadChildren(); // Recarregar lista
-          },
-        ),
-      ),
+    openQrScanner(
+      context,
+      onChildLinked: () {
+        log.i('✅ Criança vinculada');
+        _loadChildren(); // Recarregar lista
+      },
     );
   }
 

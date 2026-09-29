@@ -52,9 +52,6 @@ dependencies:
   logger: ^2.1.0
   intl: ^0.19.0
   
-  # Location
-  geolocator: ^10.1.0
-  
   # QR Code Scanner
   mobile_scanner: ^7.4.2
 
@@ -68,6 +65,20 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+
+  # Gera os ícones do app (Android/iOS) a partir de assets/icons/*.png.
+  # Rodar: dart run flutter_launcher_icons
+  flutter_launcher_icons: ^0.14.4
+
+# Configuração do ícone do app. Imagens geradas a partir de logo-pulyn.png
+# (só o nome "Pulyn", sem o slogan, centralizado num quadrado 1024x1024).
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

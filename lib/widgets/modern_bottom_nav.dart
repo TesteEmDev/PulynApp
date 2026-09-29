@@ -90,6 +90,8 @@ class _NavButton extends StatelessWidget {
       button: true,
       selected: selected,
       label: item.label,
+      // O Text do item selecionado repetiria o rótulo: o leitor de tela lia duas vezes.
+      excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,

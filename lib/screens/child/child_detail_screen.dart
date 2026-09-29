@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/theme.dart';
+import '../../widgets/pulyn_logo.dart';
 import '../../models/family_models.dart';
 import '../../providers/index.dart';
 
@@ -41,6 +42,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
             }
           },
         ),
+        actions: const [PulynAppBarLogo()],
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,

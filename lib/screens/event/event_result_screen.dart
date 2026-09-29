@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../widgets/pulyn_logo.dart';
 
 /// 🎯 FASE 4: EVENT RESULT SCREEN
 /// Mostra quando: Evento tem status 'completed' (após encerramento)
@@ -70,6 +71,7 @@ class _EventResultScreenState extends State<EventResultScreen> with TickerProvid
         title: const Text('Resultado Final'),
         elevation: 0,
         automaticallyImplyLeading: false,
+        actions: const [PulynAppBarLogo()],
       ),
       body: Stack(
         children: [

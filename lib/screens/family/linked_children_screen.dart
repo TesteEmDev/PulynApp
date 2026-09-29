@@ -4,6 +4,7 @@ import '../../services/api_service.dart';
 import '../../models/family_models.dart';
 import '../qr_scan/qr_scanner_screen.dart';
 import '../../screens/child/child_detail_screen.dart';
+import '../../widgets/pulyn_logo.dart';
 
 class LinkedChildrenScreen extends StatefulWidget {
   final String apiUrl;
@@ -128,6 +129,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
       appBar: AppBar(
         title: const Text('Minhas Crianças'),
         centerTitle: true,
+        actions: const [PulynAppBarLogo()],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())

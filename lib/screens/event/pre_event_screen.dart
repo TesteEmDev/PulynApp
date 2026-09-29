@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../widgets/pulyn_logo.dart';
 
 /// 🎯 FASE 2: PRÉ-FESTA SCREEN
 /// Mostra quando: Evento tem status 'scheduled' (antes de iniciar)
@@ -84,6 +85,7 @@ class _PreEventScreenState extends State<PreEventScreen> {
       appBar: AppBar(
         title: const Text('Festa'),
         elevation: 0,
+        actions: const [PulynAppBarLogo()],
       ),
       body: SingleChildScrollView(
         child: Padding(

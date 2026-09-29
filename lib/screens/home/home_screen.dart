@@ -7,6 +7,7 @@ import '../../config/theme.dart';
 import '../qr_scan/qr_scanner_screen.dart';
 import '../../widgets/event_map_widget.dart';
 import '../../widgets/modern_bottom_nav.dart';
+import '../../widgets/pulyn_logo.dart';
 import '../../utils/logger.dart';
 
 // ✅ Notifier para trigger manual de refresh
@@ -169,7 +170,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildHomeTab(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        // Marca no lugar do texto "Dashboard" (o nome fica só para leitores de tela)
+        title: const PulynLogo(height: 34),
         leading: null,
         elevation: 0,
         actions: [
@@ -201,6 +203,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: const Text('Ranking'),
         elevation: 0,
+        actions: const [PulynAppBarLogo()],
       ),
       body: _buildRankingContent(),
     );
@@ -320,6 +323,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: const Text('Perfil'),
         elevation: 0,
+        actions: const [PulynAppBarLogo()],
       ),
       body: Center(
         child: authState.when(

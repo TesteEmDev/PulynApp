@@ -474,12 +474,12 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /eventos/:id/floor-plan - Planta baixa do evento (imagem base64 do buffet)
-  Future<String?> getFloorPlan(String eventoId) async {
+  /// ✅ GET /company-map/floor-plan - Planta baixa do buffet (imagem base64, vale para todos os eventos)
+  Future<String?> getFloorPlan() async {
     try {
-      final response = await _dio.get('/eventos/$eventoId/floor-plan');
+      final response = await _dio.get('/company-map/floor-plan');
       final data = _validateResponseData(response.data);
-      
+
       // Backend retorna { floorPlan: { dataUrl, name, type } }
       final floorPlan = data['floorPlan'] as Map<String, dynamic>?;
       if (floorPlan != null) {
@@ -506,11 +506,11 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /eventos/{eventoId}/zones - Zonas do evento
-  Future<List<Map<String, dynamic>>> getZonesByEvent(String eventoId) async {
+  /// ✅ GET /company-map/zones - Zonas do buffet (vale para todos os eventos)
+  Future<List<Map<String, dynamic>>> getZones() async {
     try {
-      final response = await _dio.get('/eventos/$eventoId/zones');
-      
+      final response = await _dio.get('/company-map/zones');
+
       final data = _validateResponseList(response.data);
       return data.map((item) => item as Map<String, dynamic>).toList();
     } catch (e) {

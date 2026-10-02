@@ -42,10 +42,13 @@ void main() {
   }) =>
       ProviderScope(
         overrides: [
-          if (api != null) apiServiceProvider.overrideWithValue(api),
+          // Sem fake, usaríamos o ApiService real (Dio) e o widget dispara
+          // um GET de floor-plan ao construir — isso deixa um timer pendente
+          // no teste. _FakeApi('') resolve na hora, sem rede.
+          apiServiceProvider.overrideWithValue(api ?? _FakeApi('')),
           activeEventProvider.overrideWith((ref) => Stream.value({'id': 'e1', 'name': 'Festa'})),
           checkpointsByEventProvider.overrideWith((ref, id) async => [...checkpoints, ...?extraCheckpoints]),
-          zonesByEventProvider.overrideWith((ref, id) async => zones ?? <Map<String, dynamic>>[]),
+          zonesProvider.overrideWith((ref) async => zones ?? <Map<String, dynamic>>[]),
           mapChildrenRealtimeProvider.overrideWith((ref) => Stream.value([child])),
           childLastCheckpointProvider.overrideWith((ref) => ref.watch(lastCheckpoint)),
         ],
@@ -525,5 +528,5 @@ class _FakeApi extends ApiService {
   _FakeApi(this.floorPlan);
 
   @override
-  Future<String?> getFloorPlan(String eventoId) async => floorPlan;
+  Future<String?> getFloorPlan() async => floorPlan;
 }

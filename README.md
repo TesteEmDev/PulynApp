@@ -45,17 +45,20 @@ Todo o padrão de funcionamento (endpoints, lógica de dados, visualizações) j
 ### 📝 Exemplos de Replicação
 
 #### ✅ Zonas (Zones)
+Zonas e planta baixa são do buffet (empresa), não do evento — o espaço físico
+não muda de uma festa para outra. Só os checkpoints são por evento.
+
 **Web:** `front-pulyn/src/pages/display/DisplayMap.tsx`
 ```typescript
-const zonesData = await api.getZones(eventoAtual);
+const zonesData = await api.getZones();
 setZones(zonesData);
-localStorage.setItem(`zones_${eventoAtual}`, JSON.stringify(zonesData));
+localStorage.setItem('zones_company', JSON.stringify(zonesData));
 ```
 
 **Mobile:** `pulyn_app/lib/providers/index.dart`
 ```dart
-final zones = await apiService.getZonesByEvent(eventoId);
-await _cacheZonesToStorage(apiService, eventoId, zones);
+final zones = await apiService.getZones();
+await _cacheZonesToStorage(apiService, zones);
 return zones;
 ```
 **Resultado:** ✅ Idêntico
@@ -75,13 +78,13 @@ final checkpoints = await apiService.getCheckpointsByEvent(eventoId);
 #### ✅ Floor Plan
 **Web:** `front-pulyn/src/pages/display/DisplayMap.tsx`
 ```typescript
-const floorPlan = await api.getFloorPlan(eventoAtual);
+const floorPlan = await api.getFloorPlan();
 ```
 
 **Mobile:** `pulyn_app/lib/services/api_service.dart`
 ```dart
-Future<String?> getFloorPlan(String eventoId) async {
-  final response = await _dio.get('/eventos/$eventoId/floor-plan');
+Future<String?> getFloorPlan() async {
+  final response = await _dio.get('/company-map/floor-plan');
 }
 ```
 **Resultado:** ✅ Idêntico
@@ -129,10 +132,10 @@ pulyn_app/
 - `POST /api/auth/login` - Login
 - `POST /api/auth/register` - Registro
 
-### Eventos & Mapa
-- `GET /api/eventos/:id/floor-plan` - Carregar planta baixa (imagem do buffet)
-- `GET /api/eventos/:id/zones` - Carregar zonas/áreas do evento
-- `GET /api/checkpoints/evento/:evento_id` - Carregar checkpoints do evento
+### Mapa do Buffet & Checkpoints
+- `GET /api/company-map/floor-plan` - Carregar planta baixa (imagem do buffet, vale para todos os eventos)
+- `GET /api/company-map/zones` - Carregar zonas/áreas do buffet (idem)
+- `GET /api/checkpoints/evento/:evento_id` - Carregar checkpoints do evento (esses sim variam por evento)
 
 ### Pontuação & Ranking
 - `GET /api/ranking/criancas/:evento_id` - Ranking de crianças
@@ -151,39 +154,32 @@ pulyn_app/
 // front-pulyn/src/pages/display/DisplayMap.tsx
 useEffect(() => {
   const loadData = async () => {
-    const zonesData = await api.getZones(eventoAtual);
+    const zonesData = await api.getZones();
     if (zonesData && Array.isArray(zonesData) && zonesData.length > 0) {
       setZones(zonesData);
-      localStorage.setItem(`zones_${eventoAtual}`, JSON.stringify(zonesData));
+      localStorage.setItem('zones_company', JSON.stringify(zonesData));
     }
   };
   loadData();
-}, [eventoAtual]);
+}, []);
 ```
 
 **O que faz:**
-1. Busca zonas via `GET /api/eventos/:id/zones`
+1. Busca zonas via `GET /api/company-map/zones` (uma vez, não por evento)
 2. Salva no localStorage como cache
 3. Se falhar, usa DEFAULT_ZONES como fallback
 
 ### Mobile (Flutter)
 ```dart
 // pulyn_app/lib/providers/index.dart
-final zonesByEventProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, eventoId) async {
-  final cache = ref.read(zonesCacheProvider); // SharedPreferences cache
-  final cachedZones = cache[eventoId];
-  
-  if (cachedZones != null) {
-    return cachedZones; // Retorna do cache
-  }
-
+final zonesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   await apiService.init();
-  
-  final zones = await apiService.getZonesByEvent(eventoId); // GET /api/eventos/:id/zones
-  
-  ref.read(zonesCacheProvider.notifier).setZones(eventoId, zones); // Salva no cache
-  
+
+  final zones = await apiService.getZones(); // GET /api/company-map/zones
+
+  await _cacheZonesToStorage(apiService, zones); // Salva no cache
+
   return zones;
 });
 ```

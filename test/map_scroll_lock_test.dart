@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pulyn_app/models/family_models.dart';
 import 'package:pulyn_app/providers/index.dart';
+import 'package:pulyn_app/services/api_service.dart';
 import 'package:pulyn_app/widgets/event_map_widget.dart';
 
 /// Reproduz a estrutura da home (PageView de abas > rolagem vertical > mapa) e
@@ -32,11 +33,14 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
+        // Sem fake, o widget dispara um GET real de floor-plan ao construir,
+        // deixando um timer pendente no teste.
+        apiServiceProvider.overrideWithValue(_FakeApi()),
         activeEventProvider.overrideWith((ref) => Stream.value({'id': 'e1'})),
         checkpointsByEventProvider.overrideWith((ref, id) async => [
               {'id': 'cp1', 'name': 'Torre', 'zone': 'Entrada', 'points': 10, 'status': 'online', 'map_x': 200, 'map_y': 150},
             ]),
-        zonesByEventProvider.overrideWith((ref, id) async => <Map<String, dynamic>>[]),
+        zonesProvider.overrideWith((ref) async => <Map<String, dynamic>>[]),
         mapChildrenRealtimeProvider.overrideWith((ref) => Stream.value([child])),
         childLastCheckpointProvider.overrideWith((ref) => {}),
       ],
@@ -192,4 +196,9 @@ class _PageState extends State<_Page> {
       ),
     );
   }
+}
+
+class _FakeApi extends ApiService {
+  @override
+  Future<String?> getFloorPlan() async => null;
 }

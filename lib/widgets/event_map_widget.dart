@@ -255,13 +255,9 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   }
 
   Future<void> _loadFloorPlanFromRef() async {
-    if (widget.eventoId == null) {
-      return;
-    }
-
     try {
       final apiService = ref.read(apiServiceProvider);
-      final floorPlanUrl = await apiService.getFloorPlan(widget.eventoId!);
+      final floorPlanUrl = await apiService.getFloorPlan();
 
       if (mounted && floorPlanUrl != null && floorPlanUrl.isNotEmpty) {
         final image = _decodeFloorPlanImage(floorPlanUrl);
@@ -1081,10 +1077,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         
         // ✅ Busca checkpoints usando provider com cache
         final checkpointsAsync = ref.watch(checkpointsByEventProvider(eventoId));
-        
-        // ✅ NOVO: Busca zonas do backend
-        final zonesAsync = ref.watch(zonesByEventProvider(eventoId));
-        
+
+        // ✅ Zonas são do buffet (empresa), não mudam por evento
+        final zonesAsync = ref.watch(zonesProvider);
+
         return checkpointsAsync.when(
           loading: () => Container(
             height: 480,
@@ -1218,7 +1214,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   Widget build(BuildContext context) {
     // ✅ Carregar floor plan na primeira vez que o widget for construído
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_floorPlanUrl == null && widget.eventoId != null) {
+      if (_floorPlanUrl == null) {
         _loadFloorPlanFromRef();
       }
     });

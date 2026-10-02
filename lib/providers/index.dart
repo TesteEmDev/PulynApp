@@ -328,6 +328,9 @@ final checkpointsByEventProvider = FutureProvider.family<List<Map<String, dynami
 /// variam por eventoId (diferente de checkpointsByEventProvider).
 final zonesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   try {
+    // ✅ Mesmo gatilho de "puxar pra atualizar"/WebSocket do resto do mapa.
+    ref.watch(mapRefreshProvider);
+
     final apiService = ref.read(apiServiceProvider);
     await apiService.init();
 

@@ -215,31 +215,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // Removed notifications button - feature not implemented
         ],
       ),
-      body: SingleChildScrollView(
-        physics: _mapInteracting ? const NeverScrollableScrollPhysics() : null,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildWelcomeCard(context, ref),
-              const SizedBox(height: 16),
-              if (noChildren)
-                // Sem crianças, o mapa e a lista seriam só caixas vazias: o destaque leva ao QR Code
-                LinkChildHero(
-                  onLinked: (child) => _handleChildLinked(child, announce: true),
-                )
-              else ...[
-                _buildEventMapSection(context, ref),
+      body: RefreshIndicator(
+        onRefresh: () => _handleRefresh(ref),
+        child: SingleChildScrollView(
+          physics: _mapInteracting
+              ? const NeverScrollableScrollPhysics()
+              : const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildWelcomeCard(context, ref),
+                const SizedBox(height: 16),
+                if (noChildren)
+                  // Sem crianças, o mapa e a lista seriam só caixas vazias: o destaque leva ao QR Code
+                  LinkChildHero(
+                    onLinked: (child) => _handleChildLinked(child, announce: true),
+                  )
+                else ...[
+                  _buildEventMapSection(context, ref),
+                  const SizedBox(height: 20),
+                  _buildChildrenListFromAPI(context, ref),
+                ],
                 const SizedBox(height: 20),
-                _buildChildrenListFromAPI(context, ref),
               ],
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  /// Puxar pra atualizar: força recarregar crianças, evento/jogo ativo,
+  /// zonas, planta e checkpoints (zonas e planta reagem a mapRefreshProvider;
+  /// checkpoints têm cache próprio, por isso são limpos/invalidados na mão).
+  Future<void> _handleRefresh(WidgetRef ref) async {
+    final eventoId = ref.read(activeEventProvider).value?['id'] as String?;
+
+    ref.read(childrenRefreshProvider.notifier).refresh();
+    ref.read(checkpointsCacheProvider.notifier).clearCache();
+    ref.invalidate(checkpointsByEventProvider);
+    ref.read(mapRefreshProvider.notifier).refresh();
+    ref.invalidate(activeEventProvider);
+    ref.invalidate(activeGameProvider);
+
+    await Future.wait([
+      ref.read(childrenProvider.future),
+      ref.read(zonesProvider.future),
+      if (eventoId != null) ref.read(checkpointsByEventProvider(eventoId).future),
+    ]);
   }
 
   // ===== RANKING TAB =====
@@ -292,26 +317,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return _buildEmptyState('Sem dados');
         }
         final sorted = [...children]..sort((a, b) => b.currentScore.compareTo(a.currentScore));
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: sorted.length,
-          itemBuilder: (context, index) {
-            final child = sorted[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildRankingCard(
-                position: index + 1,
-                name: child.nickname.isNotEmpty ? child.nickname : child.name,
-                score: child.currentScore,
-                teamColor: child.teamColor,
-                medal: _getMedalForPosition(index),
-                isTop: index < 3,
-              ),
-            );
-          },
+        return RefreshIndicator(
+          onRefresh: () => _handleRankingRefresh(ref),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: sorted.length,
+            itemBuilder: (context, index) {
+              final child = sorted[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildRankingCard(
+                  position: index + 1,
+                  name: child.nickname.isNotEmpty ? child.nickname : child.name,
+                  score: child.currentScore,
+                  teamColor: child.teamColor,
+                  medal: _getMedalForPosition(index),
+                  isTop: index < 3,
+                ),
+              );
+            },
+          ),
         );
       },
     );
+  }
+
+  /// Puxar pra atualizar no Ranking: mesmos gatilhos usados pelo WebSocket.
+  Future<void> _handleRankingRefresh(WidgetRef ref) async {
+    ref.read(childrenRefreshProvider.notifier).refresh();
+    await ref.read(childrenRankingProvider.future);
   }
 
   Widget _buildTeamsRankingTab() {
@@ -338,23 +372,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         final sorted = teamsMap.entries.toList()..sort((a, b) => b.value.$2.compareTo(a.value.$2));
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: sorted.length,
-          itemBuilder: (context, index) {
-            final (teamName, totalScore, teamColor) = sorted[index].value;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildTeamRankingCard(
-                position: index + 1,
-                name: teamName,
-                score: totalScore,
-                teamColor: teamColor,
-                medal: _getMedalForPosition(index),
-                isTop: index < 3,
-              ),
-            );
-          },
+        return RefreshIndicator(
+          onRefresh: () => _handleRankingRefresh(ref),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: sorted.length,
+            itemBuilder: (context, index) {
+              final (teamName, totalScore, teamColor) = sorted[index].value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildTeamRankingCard(
+                  position: index + 1,
+                  name: teamName,
+                  score: totalScore,
+                  teamColor: teamColor,
+                  medal: _getMedalForPosition(index),
+                  isTop: index < 3,
+                ),
+              );
+            },
+          ),
         );
       },
     );

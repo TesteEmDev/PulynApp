@@ -163,6 +163,11 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   bool _userMovedView = false; // a pessoa já mexeu no zoom/posição
   double? _floorPlanAspect; // largura/altura da planta (só depois de decodificada)
 
+  // A planta não tem provider próprio (fica em estado local, decodificada uma
+  // única vez) — por isso observa esse contador na mão pra saber quando
+  // "puxar pra atualizar"/WebSocket pede uma releitura.
+  int? _lastMapRefreshTick;
+
   @override
   void initState() {
     super.initState();
@@ -1212,13 +1217,21 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Recarregar a planta quando o "puxar pra atualizar"/WebSocket disparar
+    // mapRefreshProvider (zonas e checkpoints já reagem via provider próprio).
+    final refreshTick = ref.watch(mapRefreshProvider);
+    if (_lastMapRefreshTick != null && _lastMapRefreshTick != refreshTick) {
+      _floorPlanUrl = null;
+    }
+    _lastMapRefreshTick = refreshTick;
+
     // ✅ Carregar floor plan na primeira vez que o widget for construído
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_floorPlanUrl == null) {
         _loadFloorPlanFromRef();
       }
     });
-    
+
     // ✅ Usar provider com cache para evitar loading infinito
     return _buildCheckpointsFromProvider();
   }

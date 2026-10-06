@@ -60,6 +60,10 @@ dev_dependencies:
   # Rodar: dart run flutter_launcher_icons
   flutter_launcher_icons: ^0.14.4
 
+  # JSON Serialization
+  build_runner: ^2.4.0
+  json_serializable: ^6.7.1
+
 # Configuração do ícone do app. Imagens geradas a partir de logo-pulyn.png
 # (só o nome "Pulyn", sem o slogan, centralizado num quadrado 1024x1024).
 flutter_launcher_icons:

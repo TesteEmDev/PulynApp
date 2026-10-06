@@ -84,7 +84,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Desvinc ular', style: TextStyle(color: Colors.red)),
+            child: const Text('Desvinc ular', style: TextStyle(cor: Colors.red)),
           ),
         ],
       ),
@@ -130,7 +130,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                      const Icon(Icons.error_outline, size: 64, cor: Colors.red),
                       const SizedBox(height: 16),
                       Text(error!),
                       const SizedBox(height: 16),
@@ -149,7 +149,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                           const Icon(
                             Icons.child_friendly,
                             size: 64,
-                            color: Colors.grey,
+                            cor: Colors.grey,
                           ),
                           const SizedBox(height: 16),
                           const Text('Nenhuma criança vinculada'),
@@ -208,7 +208,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _parseColor(child.teamColor),
+              cor: _parseColor(child.teamColor),
               width: 2,
             ),
           ),
@@ -223,16 +223,16 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: _parseColor(child.teamColor),
+                        cor: _parseColor(child.teamColor),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: Center(
                         child: Text(
-                          (child.nickname.isNotEmpty ? child.nickname : child.name)
+                          (child.apelido.isNotEmpty ? child.apelido : child.nome)
                               .substring(0, 1)
                               .toUpperCase(),
                           style: const TextStyle(
-                            color: Colors.white,
+                            cor: Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -245,7 +245,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            child.nickname.isNotEmpty ? child.nickname : child.name,
+                            child.apelido.isNotEmpty ? child.apelido : child.nome,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -253,10 +253,10 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${child.age} anos • ${child.teamName}',
+                            '${child.idade} anos • ${child.teamName}',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[600],
+                              cor: Colors.grey[600],
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -264,7 +264,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                             'Pontos: ${child.currentScore}',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[500],
+                              cor: Colors.grey[500],
                             ),
                           ),
                         ],
@@ -276,7 +276,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                           onTap: () => _unlinkChild(child.id),
                           child: const Row(
                             children: [
-                              Icon(Icons.delete, color: Colors.red),
+                              Icon(Icons.delete, cor: Colors.red),
                               SizedBox(width: 8),
                               Text('Desvinc ular'),
                             ],
@@ -298,7 +298,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
     if (colorValue == null) return Colors.blue;
     if (colorValue is Color) return colorValue;
     if (colorValue is String) {
-      // Parse hex color: "#FF0000"
+      // Parse hex cor: "#FF0000"
       try {
         return Color(int.parse(colorValue.replaceFirst('#', '0xff')));
       } catch (e) {

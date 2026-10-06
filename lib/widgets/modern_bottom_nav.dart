@@ -38,12 +38,12 @@ class ModernBottomNav extends StatelessWidget {
         child: Container(
           height: 64,
           decoration: BoxDecoration(
-            color: PulynColors.darkCard,
+            cor: PulynColors.darkCard,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: PulynColors.darkBorder),
+            border: Border.all(cor: PulynColors.darkBorder),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.35),
+                cor: Colors.black.withValues(alpha: 0.35),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -101,7 +101,7 @@ class _NavButton extends StatelessWidget {
             curve: Curves.easeOutCubic,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: selected
+              cor: selected
                   ? PulynColors.primary.withValues(alpha: 0.18)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(18),
@@ -118,7 +118,7 @@ class _NavButton extends StatelessWidget {
                       selected ? item.activeIcon : item.icon,
                       key: ValueKey(selected),
                       size: 24,
-                      color: selected
+                      cor: selected
                           ? PulynColors.primary
                           : PulynColors.textMuted,
                     ),
@@ -137,7 +137,7 @@ class _NavButton extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
-                                color: PulynColors.primary,
+                                cor: PulynColors.primary,
                               ),
                             ),
                           )

@@ -33,10 +33,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  void _showError(String message) {
+  void _showError(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(mensagem),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
@@ -51,15 +51,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     FocusScope.of(context).unfocus();
 
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
+    final email = _emailController.texto.trim();
+    final senha = _passwordController.texto;
 
     setState(() => _isLoading = true);
 
     try {
       log.i('[LOGIN] 🔐 Tentando fazer login com email: $email');
 
-      await ref.read(authProvider.notifier).login(email, password);
+      await ref.read(authProvider.notifier).login(email, senha);
 
       if (!mounted) return;
 
@@ -76,8 +76,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           errorStr.contains('not registered') ||
           errorStr.contains('404')) {
         errorMessage = '❌ Email não registrado. Crie uma conta';
-      } else if (errorStr.contains('invalid password') ||
-                 errorStr.contains('wrong password') ||
+      } else if (errorStr.contains('invalid senha') ||
+                 errorStr.contains('wrong senha') ||
                  errorStr.contains('401') ||
                  errorStr.contains('unauthorized')) {
         errorMessage = '❌ Senha incorreta. Tente novamente';
@@ -103,7 +103,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return 'Email é obrigatório';
     }
     final result = _validationService.validateEmail(value);
-    return result.valid ? null : result.message;
+    return result.valid ? null : result.mensagem;
   }
 
   String? _validatePassword(String? value) {
@@ -222,15 +222,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Divider
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.3))),
+                    Expanded(child: Divider(cor: Colors.grey.withValues(alpha: 0.3))),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
                         'ou',
-                        style: TextStyle(color: Colors.grey.withValues(alpha: 0.6)),
+                        style: TextStyle(cor: Colors.grey.withValues(alpha: 0.6)),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.3))),
+                    Expanded(child: Divider(cor: Colors.grey.withValues(alpha: 0.3))),
                   ],
                 ),
 

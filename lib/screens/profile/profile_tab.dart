@@ -55,7 +55,7 @@ class ProfileTab extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline_rounded, size: 48, color: PulynColors.danger),
+                const Icon(Icons.error_outline_rounded, size: 48, cor: PulynColors.danger),
                 const SizedBox(height: 12),
                 const Text('Não foi possível carregar seu perfil'),
                 const SizedBox(height: 12),
@@ -158,7 +158,7 @@ class ProfileTab extends StatelessWidget {
                 label: const Text('Sair da conta'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: PulynColors.danger,
-                  side: BorderSide(color: PulynColors.danger.withValues(alpha: 0.6)),
+                  side: BorderSide(cor: PulynColors.danger.withValues(alpha: 0.6)),
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -197,8 +197,8 @@ class ProfileTab extends StatelessWidget {
   }
 }
 
-String _roleLabel(String role) {
-  switch (role.toLowerCase()) {
+String _roleLabel(String perfil) {
+  switch (perfil.toLowerCase()) {
     case 'family':
       return 'Responsável';
     case 'admin':
@@ -208,7 +208,7 @@ String _roleLabel(String role) {
     case 'master':
       return 'Master';
     default:
-      return role;
+      return perfil;
   }
 }
 
@@ -227,7 +227,7 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initial = user.name.trim().isNotEmpty ? user.name.trim()[0].toUpperCase() : '?';
+    final initial = user.nome.trim().isNotEmpty ? user.nome.trim()[0].toUpperCase() : '?';
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -241,7 +241,7 @@ class _ProfileHeader extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: PulynColors.primary.withValues(alpha: 0.35)),
+        border: Border.all(cor: PulynColors.primary.withValues(alpha: 0.35)),
       ),
       child: Row(
         children: [
@@ -256,12 +256,12 @@ class _ProfileHeader extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: [PulynColors.primary, PulynColors.primaryLight],
               ),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 3),
+              border: Border.all(cor: Colors.white.withValues(alpha: 0.25), width: 3),
             ),
             child: Text(
               initial,
               style: const TextStyle(
-                color: Colors.white,
+                cor: Colors.white,
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
               ),
@@ -273,11 +273,11 @@ class _ProfileHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user.name.isEmpty ? 'Usuário' : user.name,
+                  user.nome.isEmpty ? 'Usuário' : user.nome,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: Colors.white,
+                    cor: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                   ),
@@ -287,19 +287,19 @@ class _ProfileHeader extends StatelessWidget {
                   user.email,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: PulynColors.textSecondary, fontSize: 13),
+                  style: const TextStyle(cor: PulynColors.textSecondary, fontSize: 13),
                 ),
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: PulynColors.primary.withValues(alpha: 0.2),
+                    cor: PulynColors.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    _roleLabel(user.role),
+                    _roleLabel(user.perfil),
                     style: const TextStyle(
-                      color: PulynColors.primaryLight,
+                      cor: PulynColors.primaryLight,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
@@ -332,9 +332,9 @@ class _StatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: PulynColors.darkCard,
+        cor: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: PulynColors.darkBorder),
+        border: Border.all(cor: PulynColors.darkBorder),
       ),
       child: Row(
         children: [
@@ -342,10 +342,10 @@ class _StatTile extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.16),
+              cor: accent.withValues(alpha: 0.16),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: accent, size: 20),
+            child: Icon(icon, cor: accent, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -355,7 +355,7 @@ class _StatTile extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                    color: Colors.white,
+                    cor: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1.1,
@@ -365,7 +365,7 @@ class _StatTile extends StatelessWidget {
                   label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                  style: const TextStyle(cor: PulynColors.textMuted, fontSize: 12),
                 ),
               ],
             ),
@@ -391,7 +391,7 @@ class _SectionHeader extends StatelessWidget {
           child: Text(
             title,
             style: const TextStyle(
-              color: Colors.white,
+              cor: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -419,13 +419,13 @@ class _ChildTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _parseHex(child.teamColor);
-    final name = child.nickname.isNotEmpty ? child.nickname : child.name.split(' ').first;
-    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    final cor = _parseHex(child.teamColor);
+    final nome = child.apelido.isNotEmpty ? child.apelido : child.nome.split(' ').first;
+    final initial = nome.isNotEmpty ? nome[0].toUpperCase() : '?';
     final team = child.teamName.isNotEmpty ? child.teamName : 'Sem time ainda';
 
     return Material(
-      color: PulynColors.darkCard,
+      cor: PulynColors.darkCard,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -434,7 +434,7 @@ class _ChildTile extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: PulynColors.darkBorder),
+            border: Border.all(cor: PulynColors.darkBorder),
           ),
           child: Row(
             children: [
@@ -447,13 +447,13 @@ class _ChildTile extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [color, color.withValues(alpha: 0.7)],
+                    colors: [cor, cor.withValues(alpha: 0.7)],
                   ),
                 ),
                 child: Text(
                   initial,
                   style: const TextStyle(
-                    color: Colors.white,
+                    cor: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
@@ -465,11 +465,11 @@ class _ChildTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      nome,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: Colors.white,
+                        cor: Colors.white,
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
                       ),
@@ -479,12 +479,12 @@ class _ChildTile extends StatelessWidget {
                       '$team · ${child.currentScore} pts',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                      style: const TextStyle(cor: PulynColors.textMuted, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+              const Icon(Icons.chevron_right_rounded, cor: PulynColors.textMuted),
             ],
           ),
         ),
@@ -503,24 +503,24 @@ class _EmptyChildren extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: PulynColors.darkCard,
+        cor: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: PulynColors.darkBorder),
+        border: Border.all(cor: PulynColors.darkBorder),
       ),
       child: Column(
         children: [
-          const Icon(Icons.qr_code_2_rounded, size: 40, color: PulynColors.primary),
+          const Icon(Icons.qr_code_2_rounded, size: 40, cor: PulynColors.primary),
           const SizedBox(height: 10),
           const Text(
             'Nenhuma criança vinculada ainda',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: TextStyle(cor: Colors.white, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           const Text(
             'Escaneie o QR Code que a recepção entregar para acompanhar seu filho.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: PulynColors.textMuted, fontSize: 13, height: 1.35),
+            style: TextStyle(cor: PulynColors.textMuted, fontSize: 13, height: 1.35),
           ),
           const SizedBox(height: 14),
           ElevatedButton.icon(
@@ -554,7 +554,7 @@ class _MenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: PulynColors.darkCard,
+      cor: PulynColors.darkCard,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -563,11 +563,11 @@ class _MenuTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: PulynColors.darkBorder),
+            border: Border.all(cor: PulynColors.darkBorder),
           ),
           child: Row(
             children: [
-              Icon(icon, color: PulynColors.primary, size: 22),
+              Icon(icon, cor: PulynColors.primary, size: 22),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -576,7 +576,7 @@ class _MenuTile extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                        color: Colors.white,
+                        cor: Colors.white,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -584,12 +584,12 @@ class _MenuTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                      style: const TextStyle(cor: PulynColors.textMuted, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+              const Icon(Icons.chevron_right_rounded, cor: PulynColors.textMuted),
             ],
           ),
         ),

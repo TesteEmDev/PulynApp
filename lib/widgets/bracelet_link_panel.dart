@@ -95,7 +95,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
       uid = await _reader.readBraceletUid();
       log.i('[BRACELET] ✅ UID lido: $uid');
     } on NfcReadException catch (e) {
-      log.w('[BRACELET] ⚠️ NFC Exception: ${e.message} (cancelled: ${e.cancelled})');
+      log.w('[BRACELET] ⚠️ NFC Exception: ${e.mensagem} (cancelled: ${e.cancelled})');
       if (!mounted) return;
       // A pessoa fechou a janela de leitura: volta ao botão, sem mostrar erro.
       setState(() {
@@ -103,8 +103,8 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
           log.i('[BRACELET] 📴 Leitura cancelada pelo usuário');
           _step = _Step.ready;
         } else {
-          log.e('[BRACELET] ❌ Erro NFC: ${e.message}');
-          _errorMessage = e.message;
+          log.e('[BRACELET] ❌ Erro NFC: ${e.mensagem}');
+          _errorMessage = e.mensagem;
           _step = _Step.error;
         }
       });
@@ -128,11 +128,11 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
       log.i('[BRACELET] 📦 Resposta da API: $result');
       final data = result['linkedChild'];
       if (result['success'] != true || data is! Map) {
-        throw Exception('${result['message'] ?? result['error'] ?? 'Dados da criança não encontrados'}');
+        throw Exception('${result['mensagem'] ?? result['error'] ?? 'Dados da criança não encontrados'}');
       }
       final child = childFromLinkedChild(Map<String, dynamic>.from(data));
       if (!mounted) return;
-      log.i('[BRACELET] ✅ Criança vinculada: ${child.name}');
+      log.i('[BRACELET] ✅ Criança vinculada: ${child.nome}');
       setState(() {
         _linkedChild = child;
         _step = _Step.linked;
@@ -171,9 +171,9 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: PulynColors.darkCard,
+        cor: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: PulynColors.primary.withValues(alpha: 0.4)),
+        border: Border.all(cor: PulynColors.primary.withValues(alpha: 0.4)),
       ),
       child: content,
     );
@@ -182,19 +182,19 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
   Widget _buildHeader() {
     return Row(
       children: [
-        const Icon(Icons.nfc_rounded, color: PulynColors.primary),
+        const Icon(Icons.nfc_rounded, cor: PulynColors.primary),
         const SizedBox(width: 10),
         const Expanded(
           child: Text(
             'Vincular com a pulseira',
-            style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700),
+            style: TextStyle(cor: Colors.white, fontSize: 17, fontWeight: FontWeight.w700),
           ),
         ),
         if (widget.onClose != null)
           IconButton(
             tooltip: 'Fechar',
             icon: const Icon(Icons.close_rounded),
-            color: PulynColors.textMuted,
+            cor: PulynColors.textMuted,
             visualDensity: VisualDensity.compact,
             onPressed: widget.onClose,
           ),
@@ -209,17 +209,17 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
       case _Step.unsupported:
         return _buildMessage(
           icon: Icons.phonelink_erase_rounded,
-          color: PulynColors.warning,
+          cor: PulynColors.warning,
           title: 'Este celular não lê pulseiras',
-          text: 'Seu aparelho não tem NFC. Use o QR Code que a recepção entregou.',
+          texto: 'Seu aparelho não tem NFC. Use o QR Code que a recepção entregou.',
           showQrButton: true,
         );
       case _Step.disabled:
         return _buildMessage(
           icon: Icons.nfc_rounded,
-          color: PulynColors.warning,
+          cor: PulynColors.warning,
           title: 'O NFC está desligado',
-          text: 'Ative o NFC nas configurações do celular e toque em "Tentar de novo".',
+          texto: 'Ative o NFC nas configurações do celular e toque em "Tentar de novo".',
           retryLabel: 'Tentar de novo',
           onRetry: _prepare,
           showQrButton: true,
@@ -227,16 +227,16 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
       case _Step.ready:
         return _buildMessage(
           icon: Icons.nfc_rounded,
-          color: PulynColors.primary,
+          cor: PulynColors.primary,
           title: 'Encoste a pulseira',
-          text: 'Toque em "Ler pulseira" e encoste a pulseira do seu filho atrás do celular.',
+          texto: 'Toque em "Ler pulseira" e encoste a pulseira do seu filho atrás do celular.',
           retryLabel: 'Ler pulseira',
           onRetry: _startReading,
           showQrButton: true,
         );
       case _Step.reading:
         return _statusBox(
-          const Icon(Icons.nfc_rounded, size: 56, color: PulynColors.primary),
+          const Icon(Icons.nfc_rounded, size: 56, cor: PulynColors.primary),
           'Encoste a pulseira atrás do celular...',
         );
       case _Step.processing:
@@ -246,7 +246,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
       case _Step.error:
         return _buildMessage(
           icon: Icons.error_outline_rounded,
-          color: PulynColors.danger,
+          cor: PulynColors.danger,
           title: _errorMessage.isEmpty ? 'Não foi possível vincular a criança.' : _errorMessage,
           retryLabel: 'Tentar de novo',
           onRetry: _startReading,
@@ -255,7 +255,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
     }
   }
 
-  Widget _statusBox(Widget indicator, String text) {
+  Widget _statusBox(Widget indicator, String texto) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 28),
       child: Column(
@@ -263,7 +263,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
         children: [
           indicator,
           const SizedBox(height: 16),
-          Text(text, textAlign: TextAlign.center, style: const TextStyle(color: PulynColors.textSecondary)),
+          Text(texto, textAlign: TextAlign.center, style: const TextStyle(cor: PulynColors.textSecondary)),
         ],
       ),
     );
@@ -271,9 +271,9 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
 
   Widget _buildMessage({
     required IconData icon,
-    required Color color,
+    required Color cor,
     required String title,
-    String? text,
+    String? texto,
     String? retryLabel,
     VoidCallback? onRetry,
     bool showQrButton = false,
@@ -282,19 +282,19 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Icon(icon, size: 44, color: color),
+        Icon(icon, size: 44, cor: cor),
         const SizedBox(height: 12),
         Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16, height: 1.3),
+          style: const TextStyle(cor: Colors.white, fontWeight: FontWeight.w700, fontSize: 16, height: 1.3),
         ),
-        if (text != null) ...[
+        if (texto != null) ...[
           const SizedBox(height: 6),
           Text(
-            text,
+            texto,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: PulynColors.textSecondary, height: 1.4),
+            style: const TextStyle(cor: PulynColors.textSecondary, height: 1.4),
           ),
         ],
         const SizedBox(height: 16),
@@ -318,7 +318,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
 
   Widget _buildLinked() {
     final child = _linkedChild!;
-    final name = child.nickname.isNotEmpty ? child.nickname : child.name;
+    final nome = child.apelido.isNotEmpty ? child.apelido : child.nome;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -328,26 +328,26 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
           height: 64,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: PulynColors.success.withValues(alpha: 0.15),
+            cor: PulynColors.success.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.check_rounded, size: 36, color: PulynColors.success),
+          child: const Icon(Icons.check_rounded, size: 36, cor: PulynColors.success),
         ),
         const SizedBox(height: 12),
         const Text(
           'Criança vinculada!',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18),
+          style: TextStyle(cor: Colors.white, fontWeight: FontWeight.w800, fontSize: 18),
         ),
         const SizedBox(height: 4),
         Text(
           [
-            name,
-            if (child.age > 0) '${child.age} anos',
+            nome,
+            if (child.idade > 0) '${child.idade} anos',
             if (child.teamName.isNotEmpty) child.teamName,
           ].join(' · '),
           textAlign: TextAlign.center,
-          style: const TextStyle(color: PulynColors.textSecondary),
+          style: const TextStyle(cor: PulynColors.textSecondary),
         ),
         const SizedBox(height: 16),
         OutlinedButton.icon(

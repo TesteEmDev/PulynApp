@@ -6,9 +6,9 @@ part 'family_models.g.dart';
 @JsonSerializable()
 class LoginRequest {
   final String email;
-  final String password;
+  final String senha;
 
-  LoginRequest({required this.email, required this.password});
+  LoginRequest({required this.email, required this.senha});
 
   factory LoginRequest.fromJson(Map<String, dynamic> json) =>
       _$LoginRequestFromJson(json);
@@ -32,17 +32,17 @@ class LoginResponse {
 class User {
   final String id;
   final String email;
-  final String name;
+  final String nome;
   final String? profileImage;
-  final String role;
+  final String perfil;
   final String empresaId;
 
   User({
     required this.id,
     required this.email,
-    required this.name,
+    required this.nome,
     this.profileImage,
-    required this.role,
+    required this.perfil,
     required this.empresaId,
   });
 
@@ -54,11 +54,11 @@ class User {
 @JsonSerializable()
 class Child {
   final String id;
-  @JsonKey(name: 'eventoId')
+  @JsonKey(nome: 'eventoId')
   final String? eventoId;  // ID do evento para rastrear criança no mapa
-  final String name;
-  final String nickname;
-  final int age;
+  final String nome;
+  final String apelido;
+  final int idade;
   final String? profileImage;
   final int currentScore;
   final int totalScore;
@@ -71,9 +71,9 @@ class Child {
   Child({
     required this.id,
     this.eventoId,
-    required this.name,
-    required this.nickname,
-    required this.age,
+    required this.nome,
+    required this.apelido,
+    required this.idade,
     this.profileImage,
     required this.currentScore,
     required this.totalScore,
@@ -102,18 +102,18 @@ class Child {
 class Achievement {
   final String id;
   final String title;
-  final String description;
+  final String descricao;
   final String icon;
   final DateTime unlockedAt;
-  final int points;
+  final int pontos;
 
   Achievement({
     required this.id,
     required this.title,
-    required this.description,
+    required this.descricao,
     required this.icon,
     required this.unlockedAt,
-    required this.points,
+    required this.pontos,
   });
 
   factory Achievement.fromJson(Map<String, dynamic> json) =>
@@ -125,7 +125,7 @@ class Achievement {
 @JsonSerializable()
 class Event {
   final String id;
-  final String name;
+  final String nome;
   final DateTime date;
   final String status;
   final List<Child> children;
@@ -133,7 +133,7 @@ class Event {
 
   Event({
     required this.id,
-    required this.name,
+    required this.nome,
     required this.date,
     required this.status,
     required this.children,
@@ -148,16 +148,16 @@ class Event {
 @JsonSerializable()
 class Team {
   final String id;
-  final String name;
-  final String color;
+  final String nome;
+  final String cor;
   final int totalPoints;
   final int ranking;
   final List<String> childrenIds;
 
   Team({
     required this.id,
-    required this.name,
-    required this.color,
+    required this.nome,
+    required this.cor,
     required this.totalPoints,
     required this.ranking,
     required this.childrenIds,
@@ -172,8 +172,8 @@ class Team {
 class Notification {
   final String id;
   final String title;
-  final String message;
-  final String type;
+  final String mensagem;
+  final String tipo;
   final String? childId;
   final DateTime createdAt;
   final bool read;
@@ -181,8 +181,8 @@ class Notification {
   Notification({
     required this.id,
     required this.title,
-    required this.message,
-    required this.type,
+    required this.mensagem,
+    required this.tipo,
     this.childId,
     required this.createdAt,
     required this.read,
@@ -198,7 +198,7 @@ class Notification {
 class ScoreUpdate {
   final String childId;
   final String childName;
-  final int points;
+  final int pontos;
   final String checkpointName;
   final DateTime timestamp;
   final String teamColor;
@@ -206,7 +206,7 @@ class ScoreUpdate {
   ScoreUpdate({
     required this.childId,
     required this.childName,
-    required this.points,
+    required this.pontos,
     required this.checkpointName,
     required this.timestamp,
     required this.teamColor,

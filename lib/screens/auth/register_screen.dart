@@ -37,10 +37,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
-  void _showError(String message) {
+  void _showError(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(mensagem),
         backgroundColor: PulynColors.danger,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
@@ -48,10 +48,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  void _showSuccess(String message) {
+  void _showSuccess(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(mensagem),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
@@ -67,21 +67,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     FocusScope.of(context).unfocus();
 
-    final name = _nameController.text.trim();
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-    final confirmPassword = _confirmPasswordController.text;
+    final nome = _nameController.texto.trim();
+    final email = _emailController.texto.trim();
+    final senha = _passwordController.texto;
+    final confirmPassword = _confirmPasswordController.texto;
 
     // Validação de senhas correspondentes
-    if (password != confirmPassword) {
+    if (senha != confirmPassword) {
       _showError('❌ As senhas não conferem');
       return;
     }
 
     // Validação de força de senha
-    final passwordValidation = _validationService.validatePassword(password);
+    final passwordValidation = _validationService.validatePassword(senha);
     if (!passwordValidation.valid) {
-      _showError('❌ ${passwordValidation.message}');
+      _showError('❌ ${passwordValidation.mensagem}');
       return;
     }
 
@@ -102,7 +102,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (!mounted) return;
 
       // Dispara register
-      await ref.read(authProvider.notifier).register(email, password, name);
+      await ref.read(authProvider.notifier).register(email, senha, nome);
 
       if (!mounted) return;
     } catch (e) {
@@ -118,11 +118,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         errorMessage = '❌ Este email já foi registrado';
       } else if (errorStr.contains('invalid email') || errorStr.contains('email inválido')) {
         errorMessage = '❌ Email inválido';
-      } else if (errorStr.contains('password')) {
+      } else if (errorStr.contains('senha')) {
         errorMessage = '❌ Senha não atende aos requisitos';
       } else if (errorStr.contains('network') || errorStr.contains('connection')) {
         errorMessage = '❌ Erro de conexão. Verifique sua internet';
-      } else if (errorStr.contains('name')) {
+      } else if (errorStr.contains('nome')) {
         errorMessage = '❌ Nome inválido. Use seu nome completo';
       }
 
@@ -136,7 +136,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Email é obrigatório';
     }
     final result = _validationService.validateEmail(value);
-    return result.valid ? null : result.message;
+    return result.valid ? null : result.mensagem;
   }
 
   String? _validatePassword(String? value) {
@@ -144,7 +144,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Senha é obrigatória';
     }
     final result = _validationService.validatePassword(value);
-    return result.valid ? null : result.message;
+    return result.valid ? null : result.mensagem;
   }
 
   String? _validateConfirmPassword(String? value) {
@@ -152,10 +152,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Confirme a senha';
     }
     final result = _validationService.validatePasswordMatch(
-      _passwordController.text,
+      _passwordController.texto,
       value,
     );
-    return result.valid ? null : result.message;
+    return result.valid ? null : result.mensagem;
   }
 
   String? _validateName(String? value) {
@@ -163,7 +163,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Nome é obrigatório';
     }
     final result = _validationService.validateName(value);
-    return result.valid ? null : result.message;
+    return result.valid ? null : result.mensagem;
   }
 
   @override
@@ -202,7 +202,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           enabled: !_isLoading,
                           textCapitalization: TextCapitalization.words,
                           textInputAction: TextInputAction.next,
-                          autofillHints: const [AutofillHints.name],
+                          autofillHints: const [AutofillHints.nome],
                           decoration: const InputDecoration(
                             labelText: 'Nome completo',
                             hintText: 'João Silva',

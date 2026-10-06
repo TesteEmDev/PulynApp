@@ -111,9 +111,9 @@ class _EnvironmentSelectorScreenState
               // Info Card
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  cor: Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.shade200),
+                  border: Border.all(cor: Colors.blue.shade200),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -136,7 +136,7 @@ class _EnvironmentSelectorScreenState
                       'Selecionado: ${_selectedEnvironment.toString().split('.').last.toUpperCase()}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: Colors.blue,
+                        cor: Colors.blue,
                       ),
                     ),
                   ],
@@ -155,7 +155,7 @@ class _EnvironmentSelectorScreenState
               _buildEnvironmentCard(
                 environment: ApiEnvironment.local,
                 title: '💻 Local',
-                description: 'Conectar com API em sua máquina',
+                descricao: 'Conectar com API em sua máquina',
                 url: ApiConfig.apiBaseUrlLocal,
                 isSelected: _selectedEnvironment == ApiEnvironment.local,
                 onTap: () => _selectEnvironment(ApiEnvironment.local),
@@ -166,7 +166,7 @@ class _EnvironmentSelectorScreenState
               _buildEnvironmentCard(
                 environment: ApiEnvironment.render,
                 title: '☁️ Render (Hospedado)',
-                description: 'Conectar com API hospedada no Render',
+                descricao: 'Conectar com API hospedada no Render',
                 url: ApiConfig.apiBaseUrlRender,
                 isSelected: _selectedEnvironment == ApiEnvironment.render,
                 onTap: () => _selectEnvironment(ApiEnvironment.render),
@@ -177,7 +177,7 @@ class _EnvironmentSelectorScreenState
               _buildEnvironmentCard(
                 environment: ApiEnvironment.production,
                 title: '🚀 Produção',
-                description: 'Conectar com API em produção',
+                descricao: 'Conectar com API em produção',
                 url: ApiConfig.apiBaseUrlProd,
                 isSelected: _selectedEnvironment == ApiEnvironment.production,
                 onTap: () => _selectEnvironment(ApiEnvironment.production),
@@ -216,16 +216,16 @@ class _EnvironmentSelectorScreenState
               // Connection Status
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.green.shade50,
+                  cor: Colors.green.shade50,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green.shade200),
+                  border: Border.all(cor: Colors.green.shade200),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
                     Icon(
                       Icons.check_circle,
-                      color: Colors.green.shade600,
+                      cor: Colors.green.shade600,
                       size: 24,
                     ),
                     const SizedBox(width: 12),
@@ -254,9 +254,9 @@ class _EnvironmentSelectorScreenState
               // Instructions
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  cor: Colors.orange.shade50,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.orange.shade200),
+                  border: Border.all(cor: Colors.orange.shade200),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -332,7 +332,7 @@ class _EnvironmentSelectorScreenState
   Widget _buildEnvironmentCard({
     required ApiEnvironment environment,
     required String title,
-    required String description,
+    required String descricao,
     required String url,
     required bool isSelected,
     required VoidCallback onTap,
@@ -341,10 +341,10 @@ class _EnvironmentSelectorScreenState
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade50 : Colors.white,
+          cor: isSelected ? Colors.blue.shade50 : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
+            cor: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -364,7 +364,7 @@ class _EnvironmentSelectorScreenState
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    description,
+                    descricao,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 8),
@@ -372,7 +372,7 @@ class _EnvironmentSelectorScreenState
                     url,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      cor: Colors.grey.shade600,
                       fontFamily: 'monospace',
                     ),
                     maxLines: 1,
@@ -385,7 +385,7 @@ class _EnvironmentSelectorScreenState
               isSelected
                   ? Icons.radio_button_checked
                   : Icons.radio_button_unchecked,
-              color: isSelected ? Colors.blue : Colors.grey,
+              cor: isSelected ? Colors.blue : Colors.grey,
               size: 24,
             ),
           ],
@@ -401,9 +401,9 @@ class _EnvironmentSelectorScreenState
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        cor: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(cor: Colors.grey.shade200),
       ),
       padding: const EdgeInsets.all(12),
       child: Row(
@@ -423,7 +423,7 @@ class _EnvironmentSelectorScreenState
                   url,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    cor: Colors.grey.shade600,
                     fontFamily: 'monospace',
                   ),
                   maxLines: 1,

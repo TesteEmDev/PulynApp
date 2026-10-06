@@ -40,7 +40,7 @@ class _LinkChildHeroState extends State<LinkChildHero> {
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: PulynColors.primary.withValues(alpha: 0.4)),
+        border: Border.all(cor: PulynColors.primary.withValues(alpha: 0.4)),
       ),
       child: AnimatedSize(
         duration: const Duration(milliseconds: 250),
@@ -74,26 +74,26 @@ class _LinkChildHeroState extends State<LinkChildHero> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: PulynColors.primary.withValues(alpha: 0.45),
+                  cor: PulynColors.primary.withValues(alpha: 0.45),
                   blurRadius: 18,
                   offset: const Offset(0, 6),
                 ),
               ],
             ),
-            child: const Icon(Icons.qr_code_scanner_rounded, size: 36, color: Colors.white),
+            child: const Icon(Icons.qr_code_scanner_rounded, size: 36, cor: Colors.white),
           ),
         ),
         const SizedBox(height: 16),
         const Text(
           'Vincule seu filho',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800),
+          style: TextStyle(cor: Colors.white, fontSize: 20, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 6),
         const Text(
           'Peça o QR Code na recepção do buffet e escaneie para acompanhar a festa em tempo real.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: PulynColors.textSecondary, fontSize: 14, height: 1.4),
+          style: TextStyle(cor: PulynColors.textSecondary, fontSize: 14, height: 1.4),
         ),
         const SizedBox(height: 18),
         SizedBox(

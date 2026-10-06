@@ -29,8 +29,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final authState = ref.watch(authProvider);
     authState.whenData((user) {
       if (user != null) {
-        _nameController.text = user.name;
-        _emailController.text = user.email;
+        _nameController.texto = user.nome;
+        _emailController.texto = user.email;
       }
     });
   }
@@ -73,7 +73,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             },
             child: const Text(
               'Logout',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(cor: Colors.red),
             ),
           ),
         ],
@@ -189,14 +189,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           width: 100,
           height: 100,
           decoration: BoxDecoration(
-            color: PulynColors.primary,
+            cor: PulynColors.primary,
             borderRadius: BorderRadius.circular(50),
           ),
           child: Center(
             child: Text(
-              user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
+              user.nome.isNotEmpty ? user.nome[0].toUpperCase() : '?',
               style: const TextStyle(
-                color: Colors.white,
+                cor: Colors.white,
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
               ),
@@ -206,9 +206,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         const SizedBox(height: 16),
         // Name
         Text(
-          user.name,
+          user.nome,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            color: PulynColors.textPrimary,
+            cor: PulynColors.textPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -216,7 +216,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Text(
           user.email,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: PulynColors.textMuted,
+            cor: PulynColors.textMuted,
           ),
         ),
         // Role badge
@@ -224,15 +224,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: PulynColors.primary.withValues(alpha: 0.2),
+            cor: PulynColors.primary.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            user.role.toUpperCase(),
+            user.perfil.toUpperCase(),
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: PulynColors.primary,
+              cor: PulynColors.primary,
             ),
           ),
         ),
@@ -253,7 +253,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _buildInfoCard(
           icon: Icons.person_outline,
           label: 'Nome Completo',
-          value: user.name,
+          value: user.nome,
         ),
         const SizedBox(height: 12),
         // Email Info
@@ -267,7 +267,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _buildInfoCard(
           icon: Icons.security_outlined,
           label: 'Tipo de Conta',
-          value: user.role.toUpperCase(),
+          value: user.perfil.toUpperCase(),
         ),
       ],
     );
@@ -280,14 +280,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: PulynColors.darkCard,
+        cor: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: PulynColors.darkBorder),
+        border: Border.all(cor: PulynColors.darkBorder),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(icon, color: PulynColors.primary, size: 24),
+          Icon(icon, cor: PulynColors.primary, size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -297,7 +297,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   label,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: PulynColors.textMuted,
+                    cor: PulynColors.textMuted,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -306,7 +306,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   value,
                   style: const TextStyle(
                     fontSize: 14,
-                    color: PulynColors.textPrimary,
+                    cor: PulynColors.textPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -338,16 +338,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             fillColor: PulynColors.darkCard,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: PulynColors.darkBorder),
+              borderSide: const BorderSide(cor: PulynColors.darkBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: PulynColors.darkBorder),
+              borderSide: const BorderSide(cor: PulynColors.darkBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: PulynColors.primary,
+                cor: PulynColors.primary,
                 width: 2,
               ),
             ),
@@ -366,15 +366,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             fillColor: PulynColors.darkSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: PulynColors.darkBorder),
+              borderSide: const BorderSide(cor: PulynColors.darkBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: PulynColors.darkBorder),
+              borderSide: const BorderSide(cor: PulynColors.darkBorder),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: PulynColors.darkBorder),
+              borderSide: const BorderSide(cor: PulynColors.darkBorder),
             ),
           ),
         ),
@@ -383,7 +383,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           'Email não pode ser alterado',
           style: TextStyle(
             fontSize: 12,
-            color: PulynColors.textMuted,
+            cor: PulynColors.textMuted,
           ),
         ),
       ],
@@ -446,14 +446,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: PulynColors.darkCard,
+        cor: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: PulynColors.darkBorder),
+        border: Border.all(cor: PulynColors.darkBorder),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(icon, color: PulynColors.primary),
+          Icon(icon, cor: PulynColors.primary),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -464,14 +464,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: PulynColors.textPrimary,
+                    cor: PulynColors.textPrimary,
                   ),
                 ),
                 Text(
                   subtitle,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: PulynColors.textMuted,
+                    cor: PulynColors.textMuted,
                   ),
                 ),
               ],
@@ -497,14 +497,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: PulynColors.darkCard,
+          cor: PulynColors.darkCard,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: PulynColors.darkBorder),
+          border: Border.all(cor: PulynColors.darkBorder),
         ),
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(icon, color: PulynColors.primary),
+            Icon(icon, cor: PulynColors.primary),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -515,14 +515,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: PulynColors.textPrimary,
+                      cor: PulynColors.textPrimary,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: const TextStyle(
                       fontSize: 12,
-                      color: PulynColors.textMuted,
+                      cor: PulynColors.textMuted,
                     ),
                   ),
                 ],
@@ -531,7 +531,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: PulynColors.textMuted,
+              cor: PulynColors.textMuted,
             ),
           ],
         ),
@@ -547,7 +547,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const Icon(
             Icons.error_outline,
             size: 64,
-            color: PulynColors.danger,
+            cor: PulynColors.danger,
           ),
           const SizedBox(height: 16),
           const Text('Erro ao carregar perfil'),

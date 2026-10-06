@@ -43,7 +43,7 @@ class WebSocketNotifier extends StateNotifier<AsyncValue<bool>> {
 
   Future<void> _initializeConnection() async {
     try {
-      state = const AsyncValue.loading();
+      estado = const AsyncValue.loading();
 
       // ✅ Precisa do evento ativo para conectar (igual frontend web).
       // NOTA: usar `.future` aqui — e não `.when(loading: ...)` — porque o
@@ -56,7 +56,7 @@ class WebSocketNotifier extends StateNotifier<AsyncValue<bool>> {
 
       if (activeEvent == null) {
         log.w('[WebSocket] ⚠️ Nenhum evento ativo encontrado');
-        state = const AsyncValue.data(false);
+        estado = const AsyncValue.data(false);
         return;
       }
 
@@ -75,15 +75,15 @@ class WebSocketNotifier extends StateNotifier<AsyncValue<bool>> {
 
       if (success) {
         _isInitialized = true;
-        state = const AsyncValue.data(true);
+        estado = const AsyncValue.data(true);
         log.i('[WebSocket] ✅ Conectado e sincronizando com evento $eventoId');
         _setupEventHandlers();
       } else {
-        state = const AsyncValue.data(false);
+        estado = const AsyncValue.data(false);
       }
     } catch (e, st) {
       log.e('[WebSocket] ❌ Erro ao conectar: $e');
-      state = AsyncValue.error(e, st);
+      estado = AsyncValue.error(e, st);
     }
   }
 
@@ -130,13 +130,13 @@ class WebSocketNotifier extends StateNotifier<AsyncValue<bool>> {
   Future<void> disconnect() async {
     _isInitialized = false;
     await _webSocketService.disconnect();
-    state = const AsyncValue.data(false);
+    estado = const AsyncValue.data(false);
     log.i('[WebSocket] Desconectado');
   }
 
-  void sendMessage(String type, Map<String, dynamic> payload) {
+  void sendMessage(String tipo, Map<String, dynamic> payload) {
     _webSocketService.send({
-      'type': type,
+      'tipo': tipo,
       ...payload,
     });
   }

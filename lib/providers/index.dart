@@ -24,7 +24,7 @@ final activeEventProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((r
   // Carrega INICIALMENTE
   try {
     final event = await apiService.getActiveEvent();
-    log.i('[EVENT] 📅 Evento ativo: ${event?['name'] ?? 'NENHUM'}');
+    log.i('[EVENT] 📅 Evento ativo: ${event?['nome'] ?? 'NENHUM'}');
     yield event;
   } catch (e) {
     log.w('[EVENT] ⚠️ Erro ao carregar evento: $e');
@@ -57,16 +57,16 @@ final activeGameProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((re
       log.i('[GAME] 🎮 Jogo ativo: NENHUM');
       yield null;
     } else {
-      // 🎯 Usar gameName (nome da brincadeira ativa), não name (nome do evento)
+      // 🎯 Usar gameName (nome da brincadeira ativa), não nome (nome do evento)
       final gameName = activeGame['gameName'] ?? 'Nenhum jogo em andamento';
       log.i('[GAME] 🎮 Jogo ativo: $gameName');
       yield {
         'id': activeGame['id'],
-        'name': activeGame['name'], // Nome do evento
+        'nome': activeGame['nome'], // Nome do evento
         'gameName': gameName, // Nome da brincadeira ativa
         'gameId': activeGame['gameId'],
-        'description': activeGame['gameDescription'] ?? 'Jogo em andamento',
-        'type': activeGame['gameType'] ?? 'standard',
+        'descricao': activeGame['gameDescription'] ?? 'Jogo em andamento',
+        'tipo': activeGame['gameType'] ?? 'standard',
         'duration': activeGame['duration'],
         'pontosPadrao': activeGame['pontosPadrao'],
         'hasActiveGame': activeGame['hasActiveGame'] ?? false,
@@ -86,11 +86,11 @@ final activeGameProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((re
         final gameName = activeGame['gameName'] ?? 'Nenhum jogo em andamento';
         yield {
           'id': activeGame['id'],
-          'name': activeGame['name'],
+          'nome': activeGame['nome'],
           'gameName': gameName,
           'gameId': activeGame['gameId'],
-          'description': activeGame['gameDescription'] ?? 'Jogo em andamento',
-          'type': activeGame['gameType'] ?? 'standard',
+          'descricao': activeGame['gameDescription'] ?? 'Jogo em andamento',
+          'tipo': activeGame['gameType'] ?? 'standard',
           'duration': activeGame['duration'],
           'pontosPadrao': activeGame['pontosPadrao'],
           'hasActiveGame': activeGame['hasActiveGame'] ?? false,
@@ -142,8 +142,8 @@ class MapRefreshNotifier extends StateNotifier<int> {
   MapRefreshNotifier() : super(0);
   
   void refresh() {
-    state++;
-    log.i('[MAP] 🔄 Trigger refresh: $state');
+    estado++;
+    log.i('[MAP] 🔄 Trigger refresh: $estado');
   }
 }
 
@@ -254,7 +254,7 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
             'checkpointId': checkpointId,
             'checkpointName': checkpointName,
             'timestamp': entry['criadoEm'] ?? DateTime.now().toIso8601String(),
-            'points': entry['points'] ?? 0,
+            'pontos': entry['pontos'] ?? 0,
           };
         }
       } catch (e) {
@@ -271,7 +271,7 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
       'checkpointId': reading.checkpointId,
       'checkpointName': reading.checkpointName,
       'timestamp': reading.timestamp.toIso8601String(),
-      'points': reading.points,
+      'pontos': reading.pontos,
     };
   });
 
@@ -287,15 +287,15 @@ class CheckpointsCacheNotifier extends StateNotifier<Map<String, List<Map<String
   CheckpointsCacheNotifier() : super({});
 
   void setCheckpoints(String eventoId, List<Map<String, dynamic>> checkpoints) {
-    state = {...state, eventoId: checkpoints};
+    estado = {...estado, eventoId: checkpoints};
   }
 
   List<Map<String, dynamic>>? getCheckpoints(String eventoId) {
-    return state[eventoId];
+    return estado[eventoId];
   }
 
   void clearCache() {
-    state = {};
+    estado = {};
   }
 }
 
@@ -416,23 +416,23 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
     
     // Escuta evento SCORE_UPDATE quando criança lê uma pulseira
     webSocketService.on('SCORE_UPDATE', (data) {
-      // ✅ O WebSocketService entrega a mensagem inteira ({type, payload}),
+      // ✅ O WebSocketService entrega a mensagem inteira ({tipo, payload}),
       // não só o payload — os campos ficam dentro de data['payload'].
       final payload = (data['payload'] as Map?)?.cast<String, dynamic>() ?? data;
-      log.i('⚡ PULSEIRA LIDA - Criança: ${payload['child_name'] ?? payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpoint_name'] ?? payload['checkpointName'] ?? 'N/A'} | Pontos: ${payload['points'] ?? 0}');
+      log.i('⚡ PULSEIRA LIDA - Criança: ${payload['child_name'] ?? payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpoint_name'] ?? payload['checkpointName'] ?? 'N/A'} | Pontos: ${payload['pontos'] ?? 0}');
 
       try {
         final childId = payload['criancaId'] ?? payload['criancaId'] ?? payload['child_id'] ?? payload['childId'];
         final checkpointId = payload['checkpointId'] ?? payload['checkpointId'] ?? payload['checkpoint'];
         final checkpointName = payload['checkpointName'] ?? payload['checkpoint_name'] ?? '';
-        final points = payload['points'] ?? 0;
+        final pontos = payload['pontos'] ?? 0;
 
         if (childId != null && checkpointId != null) {
           notifier.updateChildCheckpoint(
             childId.toString(),
             checkpointId.toString(),
             checkpointName.toString(),
-            points,
+            pontos,
           );
         }
       } catch (e) {
@@ -454,14 +454,14 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
         final checkpointId = payload['checkpointId'] ?? payload['checkpointId'];
         final checkpointName = payload['checkpointName'] ?? payload['checkpoint_name'] ?? '';
         final teamColor = payload['teamColor'] ?? '#FFFFFF';
-        final points = payload['points'] ?? 10;
+        final pontos = payload['pontos'] ?? 10;
 
         if (childId != null && checkpointId != null) {
           notifier.updateChildCheckpoint(
             childId.toString(),
             checkpointId.toString(),
             checkpointName.toString(),
-            points is num ? points.toInt() : 10,
+            pontos is num ? pontos.toInt() : 10,
             teamColor: teamColor.toString(),
           );
         }
@@ -478,14 +478,14 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
 class CheckpointReading {
   final String checkpointId;
   final String checkpointName;
-  final int points;
+  final int pontos;
   final DateTime timestamp;
   final String? teamColor;
   
   CheckpointReading({
     required this.checkpointId,
     required this.checkpointName,
-    required this.points,
+    required this.pontos,
     DateTime? timestamp,
     this.teamColor,
   }) : timestamp = timestamp ?? DateTime.now();
@@ -500,36 +500,36 @@ class RealtimeTrackingNotifier extends StateNotifier<Map<String, CheckpointReadi
     String childId,
     String checkpointId,
     String checkpointName,
-    int points, {
+    int pontos, {
     String? teamColor,
   }) {
     log.i('[TRACKING_NOTIFIER] 📍 Atualizando criança $childId → checkpoint $checkpointName');
     
-    state = {
-      ...state,
+    estado = {
+      ...estado,
       childId: CheckpointReading(
         checkpointId: checkpointId,
         checkpointName: checkpointName,
-        points: points,
+        pontos: pontos,
         teamColor: teamColor,
       ),
     };
     
-    log.i('[TRACKING_NOTIFIER] ✅ Estado atualizado. Total: ${state.length} crianças rastreadas');
+    log.i('[TRACKING_NOTIFIER] ✅ Estado atualizado. Total: ${estado.length} crianças rastreadas');
   }
   
   /// Obtém o último checkpoint de uma criança
   CheckpointReading? getChildLastCheckpoint(String childId) {
-    return state[childId];
+    return estado[childId];
   }
   
   /// Limpa o rastreamento de uma criança (ou de todas)
   void clearTracking({String? childId}) {
     if (childId != null) {
-      state = {...state}..remove(childId);
+      estado = {...estado}..remove(childId);
       log.i('[TRACKING_NOTIFIER] 🗑️ Rastreamento de $childId removido');
     } else {
-      state = {};
+      estado = {};
       log.i('[TRACKING_NOTIFIER] 🗑️ Todos os rastreamentos removidos');
     }
   }

@@ -20,9 +20,9 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
   }
 
   void _handleInviteCode() {
-    final code = _codeController.text.trim();
+    final codigo = _codeController.texto.trim();
     
-    if (code.isEmpty) {
+    if (codigo.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cole o link ou o código do convite')),
       );
@@ -30,10 +30,10 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
     }
 
     // ✅ Se o usuário cola a URL completa, extrair apenas o token
-    String token = code;
-    if (code.contains('/family/invite/')) {
+    String token = codigo;
+    if (codigo.contains('/family/invite/')) {
       // Extrai a última parte após /family/invite/
-      token = code.split('/family/invite/').last;
+      token = codigo.split('/family/invite/').last;
       log.i('[InviteEntry] Token extraído de URL: $token');
     }
 
@@ -78,7 +78,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                 'Acompanhe a jornada do seu filho em tempo real',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey,
+                  cor: Colors.grey,
                 ),
               ),
               
@@ -88,10 +88,10 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.1),
+                  cor: Colors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.blue.withValues(alpha: 0.3),
+                    cor: Colors.blue.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
@@ -99,7 +99,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                     Icon(
                       Icons.card_giftcard,
                       size: 48,
-                      color: Colors.blue.shade300,
+                      cor: Colors.blue.shade300,
                     ),
                     const SizedBox(height: 16),
                     const Text(
@@ -116,7 +116,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey.shade400,
+                        cor: Colors.grey.shade400,
                       ),
                     ),
                   ],
@@ -163,7 +163,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.1),
+                  cor: Colors.grey.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -181,7 +181,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey.shade400,
+                        cor: Colors.grey.shade400,
                       ),
                     ),
                   ],

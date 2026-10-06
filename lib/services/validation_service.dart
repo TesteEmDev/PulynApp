@@ -39,103 +39,103 @@ class ValidationService {
   }
 
   /// Valida força da senha
-  ValidationResult validatePassword(String password) {
+  ValidationResult validatePassword(String senha) {
     log.i('[VALIDATION] 🔐 Validando força da senha');
 
-    if (password.isEmpty) {
+    if (senha.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'Senha é obrigatória',
+        mensagem: 'Senha é obrigatória',
         strength: PasswordStrength.empty,
       );
     }
 
-    if (password.length < 6) {
+    if (senha.length < 6) {
       return ValidationResult(
         valid: false,
-        message: 'Senha deve ter no mínimo 6 caracteres',
+        mensagem: 'Senha deve ter no mínimo 6 caracteres',
         strength: PasswordStrength.weak,
       );
     }
 
-    bool hasUppercase = password.contains(RegExp(r'[A-Z]'));
-    bool hasNumbers = password.contains(RegExp(r'\d'));
-    bool hasSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    bool hasUppercase = senha.contains(RegExp(r'[A-Z]'));
+    bool hasNumbers = senha.contains(RegExp(r'\d'));
+    bool hasSpecialChar = senha.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
 
     int strength = 0;
-    if (password.length >= 8) strength++;
+    if (senha.length >= 8) strength++;
     if (hasUppercase) strength++;
     if (hasNumbers) strength++;
     if (hasSpecialChar) strength++;
 
     late PasswordStrength passwordStrength;
-    late String message;
+    late String mensagem;
 
     if (strength >= 3) {
       passwordStrength = PasswordStrength.strong;
-      message = '✅ Senha forte!';
+      mensagem = '✅ Senha forte!';
     } else if (strength >= 1) {
       passwordStrength = PasswordStrength.medium;
-      message = '⚠️ Senha moderada - considere adicionar maiúsculas e números';
+      mensagem = '⚠️ Senha moderada - considere adicionar maiúsculas e números';
     } else {
       passwordStrength = PasswordStrength.weak;
-      message = '❌ Senha fraca - adicione maiúsculas, números ou caracteres especiais';
+      mensagem = '❌ Senha fraca - adicione maiúsculas, números ou caracteres especiais';
     }
 
     log.i('[VALIDATION] 🔐 Força da senha: $passwordStrength');
 
     return ValidationResult(
       valid: true,
-      message: message,
+      mensagem: mensagem,
       strength: passwordStrength,
     );
   }
 
   /// Valida nome completo
-  ValidationResult validateName(String name) {
-    log.i('[VALIDATION] 👤 Validando nome: $name');
+  ValidationResult validateName(String nome) {
+    log.i('[VALIDATION] 👤 Validando nome: $nome');
 
-    if (name.isEmpty) {
+    if (nome.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'Nome é obrigatório',
+        mensagem: 'Nome é obrigatório',
       );
     }
 
-    if (name.length < 2) {
+    if (nome.length < 2) {
       return ValidationResult(
         valid: false,
-        message: 'Nome deve ter no mínimo 2 caracteres',
+        mensagem: 'Nome deve ter no mínimo 2 caracteres',
       );
     }
 
-    if (name.length > 100) {
+    if (nome.length > 100) {
       return ValidationResult(
         valid: false,
-        message: 'Nome não pode ter mais de 100 caracteres',
+        mensagem: 'Nome não pode ter mais de 100 caracteres',
       );
     }
 
     // Valida se contém números
-    if (RegExp(r'\d').hasMatch(name)) {
+    if (RegExp(r'\d').hasMatch(nome)) {
       return ValidationResult(
         valid: false,
-        message: 'Nome não pode conter números',
+        mensagem: 'Nome não pode conter números',
       );
     }
 
     // Valida se tem pelo menos 2 palavras (nome e sobrenome)
-    final parts = name.trim().split(RegExp(r'\s+'));
+    final parts = nome.trim().split(RegExp(r'\s+'));
     if (parts.length < 2) {
       return ValidationResult(
         valid: false,
-        message: 'Por favor, insira seu nome completo (nome e sobrenome)',
+        mensagem: 'Por favor, insira seu nome completo (nome e sobrenome)',
       );
     }
 
     log.i('[VALIDATION] ✅ Nome válido');
 
-    return ValidationResult(valid: true, message: 'Nome válido');
+    return ValidationResult(valid: true, mensagem: 'Nome válido');
   }
 
   /// Valida email
@@ -145,7 +145,7 @@ class ValidationService {
     if (email.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'Email é obrigatório',
+        mensagem: 'Email é obrigatório',
       );
     }
 
@@ -154,36 +154,36 @@ class ValidationService {
     if (!emailRegex.hasMatch(email)) {
       return ValidationResult(
         valid: false,
-        message: 'Email inválido',
+        mensagem: 'Email inválido',
       );
     }
 
     log.i('[VALIDATION] ✅ Email válido');
 
-    return ValidationResult(valid: true, message: 'Email válido');
+    return ValidationResult(valid: true, mensagem: 'Email válido');
   }
 
   /// Valida confirmação de senha
-  ValidationResult validatePasswordMatch(String password, String confirmPassword) {
+  ValidationResult validatePasswordMatch(String senha, String confirmPassword) {
     log.i('[VALIDATION] 🔄 Validando correspondência de senhas');
 
     if (confirmPassword.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'Confirmação de senha é obrigatória',
+        mensagem: 'Confirmação de senha é obrigatória',
       );
     }
 
-    if (password != confirmPassword) {
+    if (senha != confirmPassword) {
       return ValidationResult(
         valid: false,
-        message: 'As senhas não correspondem',
+        mensagem: 'As senhas não correspondem',
       );
     }
 
     log.i('[VALIDATION] ✅ Senhas correspondem');
 
-    return ValidationResult(valid: true, message: 'Senhas correspondem');
+    return ValidationResult(valid: true, mensagem: 'Senhas correspondem');
   }
 
   /// Valida CPF (opcional, se necessário)
@@ -195,14 +195,14 @@ class ValidationService {
     if (cleanCPF.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'CPF é obrigatório',
+        mensagem: 'CPF é obrigatório',
       );
     }
 
     if (cleanCPF.length != 11) {
       return ValidationResult(
         valid: false,
-        message: 'CPF deve ter 11 dígitos',
+        mensagem: 'CPF deve ter 11 dígitos',
       );
     }
 
@@ -210,7 +210,7 @@ class ValidationService {
     if (RegExp(r'^(\d)\1{10}$').hasMatch(cleanCPF)) {
       return ValidationResult(
         valid: false,
-        message: 'CPF inválido',
+        mensagem: 'CPF inválido',
       );
     }
 
@@ -232,54 +232,54 @@ class ValidationService {
         int.parse(cleanCPF[10]) != secondDigit) {
       return ValidationResult(
         valid: false,
-        message: 'CPF inválido',
+        mensagem: 'CPF inválido',
       );
     }
 
     log.i('[VALIDATION] ✅ CPF válido');
 
-    return ValidationResult(valid: true, message: 'CPF válido');
+    return ValidationResult(valid: true, mensagem: 'CPF válido');
   }
 
   /// Valida telefone
-  ValidationResult validatePhone(String phone) {
-    log.i('[VALIDATION] 📱 Validando telefone: $phone');
+  ValidationResult validatePhone(String telefone) {
+    log.i('[VALIDATION] 📱 Validando telefone: $telefone');
 
-    String cleanPhone = phone.replaceAll(RegExp(r'\D'), '');
+    String cleanPhone = telefone.replaceAll(RegExp(r'\D'), '');
 
     if (cleanPhone.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'Telefone é obrigatório',
+        mensagem: 'Telefone é obrigatório',
       );
     }
 
     if (cleanPhone.length < 10 || cleanPhone.length > 11) {
       return ValidationResult(
         valid: false,
-        message: 'Telefone deve ter 10 ou 11 dígitos',
+        mensagem: 'Telefone deve ter 10 ou 11 dígitos',
       );
     }
 
     log.i('[VALIDATION] ✅ Telefone válido');
 
-    return ValidationResult(valid: true, message: 'Telefone válido');
+    return ValidationResult(valid: true, mensagem: 'Telefone válido');
   }
 }
 
 class ValidationResult {
   final bool valid;
-  final String message;
+  final String mensagem;
   final PasswordStrength? strength;
 
   ValidationResult({
     required this.valid,
-    required this.message,
+    required this.mensagem,
     this.strength,
   });
 
   @override
-  String toString() => 'ValidationResult(valid: $valid, message: $message)';
+  String toString() => 'ValidationResult(valid: $valid, mensagem: $mensagem)';
 }
 
 enum PasswordStrength {

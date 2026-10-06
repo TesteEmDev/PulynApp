@@ -12,16 +12,16 @@ import '../utils/text_sanitizer.dart';
 
 /// Zone configuration para o mapa do buffet
 class ZoneConfig {
-  final String name;
-  final Color color;
+  final String nome;
+  final Color cor;
   final double x; // percentual
   final double y;
   final double w;
   final double h;
 
   ZoneConfig({
-    required this.name,
-    required this.color,
+    required this.nome,
+    required this.cor,
     required this.x,
     required this.y,
     required this.w,
@@ -80,7 +80,7 @@ Rect floorPlanRect(double aspect) {
 /// 🗺️ Widget de Mapa do Evento com Zonas, Checkpoints e Filhos - VERSÃO MELHORADA
 class EventMapWidget extends ConsumerStatefulWidget {
   final List<Child>? childrenList; // Lista de filhos vinculados no app (todos são "meus filhos")
-  final String? eventoId; // ID do evento para carregar floor plan
+  final String? eventoId; // ID do evento para carregar floor plano
   final Map<String, dynamic>? activeGame; // Jogo ativo para exibição
 
   /// Avisa quando o dedo entra/sai do mapa. A tela que hospeda o mapa usa isso
@@ -148,7 +148,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   
   // 📏 Dimensões
   // ✅ Mesma "tela" (450x320) usada no admin web e no telão (AdminMap.tsx /
-  // DisplayMap.tsx) — os map_x/map_y salvos pelos checkpoints são pixels
+  // DisplayMap.tsx) — os mapaX/mapaY salvos pelos checkpoints são pixels
   // dentro desse canvas. Usar um tamanho diferente aqui deixava os
   // checkpoints e avatares fora da posição relativa correta no mobile.
   static const double mapWidth = 450;
@@ -274,7 +274,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         if (image != null) _resolveFloorPlanAspect(image);
       }
     } catch (e) {
-      log.w('[MAP] ⚠️ Erro ao carregar floor plan: $e');
+      log.w('[MAP] ⚠️ Erro ao carregar floor plano: $e');
     }
   }
 
@@ -338,7 +338,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     return targets;
   }
 
-  /// Leva cada avatar até o alvo calculado. Chamado a cada build, mas só age
+  /// Leva cada avatar até o alvo calculado. Chamado a cada build, mas só idade
   /// quando o alvo de uma criança mudou (nova leitura de checkpoint).
   void _syncAvatarTargets(List<Map<String, dynamic>> childPositions, Map<String, Offset> targets) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -358,7 +358,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
           setState(() {
             _avatarPositions[child.id] = AvatarPosition(
               childId: child.id,
-              childName: child.nickname.isNotEmpty ? child.nickname : child.name,
+              childName: child.apelido.isNotEmpty ? child.apelido : child.nome,
               teamColor: child.teamColor,
               x: target.dx,
               y: target.dy,
@@ -430,8 +430,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
 
     final planAspect = _floorPlanAspect;
     if (_floorPlanImage != null && planAspect != null) {
-      final plan = floorPlanRect(planAspect);
-      include(plan.left, plan.top, plan.right, plan.bottom);
+      final plano = floorPlanRect(planAspect);
+      include(plano.left, plano.top, plano.right, plano.bottom);
     }
     for (final z in zones) {
       include(z.x - 2, z.y - 2, z.x + z.w + 2, z.y + z.h + 2);
@@ -615,7 +615,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       },
       icon: Icon(icon),
       iconSize: 20,
-      color: PulynColors.textMuted,
+      cor: PulynColors.textMuted,
       tooltip: tooltip,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(width: 36, height: 36),
@@ -645,10 +645,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     if (!mounted) return;
     HapticFeedback.lightImpact();
 
-    final name = child.nickname.isNotEmpty ? child.nickname : child.name.split(' ').first;
+    final nome = child.apelido.isNotEmpty ? child.apelido : child.nome.split(' ').first;
     setState(() {
       _arrivalRings[child.id] = DateTime.now().millisecondsSinceEpoch;
-      _arrivalMessage = '$name chegou em $checkpointName';
+      _arrivalMessage = '$nome chegou em $checkpointName';
     });
 
     _ringTimers[child.id]?.cancel();
@@ -670,7 +670,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: const BoxDecoration(
-          color: PulynColors.darkCard,
+          cor: PulynColors.darkCard,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -685,7 +685,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: PulynColors.textMuted,
+                cor: PulynColors.textMuted,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -699,10 +699,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   height: 50,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: _getCheckpointColor(checkpoint),
+                    cor: _getCheckpointColor(checkpoint),
                     boxShadow: [
                       BoxShadow(
-                        color: _getCheckpointColor(checkpoint).withValues(alpha: 0.3),
+                        cor: _getCheckpointColor(checkpoint).withValues(alpha: 0.3),
                         blurRadius: 12,
                         spreadRadius: 2,
                       ),
@@ -710,7 +710,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   ),
                   child: const Icon(
                     Icons.location_on,
-                    color: Colors.white,
+                    cor: Colors.white,
                     size: 28,
                   ),
                 ),
@@ -720,19 +720,19 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        checkpoint['name'],
+                        checkpoint['nome'],
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          cor: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        checkpoint['zone'] ?? checkpoint['location'] ?? 'Zona não definida',
+                        checkpoint['zona'] ?? checkpoint['localizacao'] ?? 'Zona não definida',
                         style: const TextStyle(
                           fontSize: 14,
-                          color: PulynColors.textMuted,
+                          cor: PulynColors.textMuted,
                         ),
                       ),
                     ],
@@ -749,7 +749,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: PulynColors.darkSurface,
+                      cor: PulynColors.darkSurface,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -758,7 +758,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                           checkpoint['status'] == 'online' 
                             ? Icons.wifi 
                             : Icons.wifi_off,
-                          color: checkpoint['status'] == 'online'
+                          cor: checkpoint['status'] == 'online'
                             ? PulynColors.success
                             : PulynColors.danger,
                           size: 24,
@@ -767,7 +767,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                         Text(
                           checkpoint['status'] == 'online' ? 'Online' : 'Offline',
                           style: TextStyle(
-                            color: checkpoint['status'] == 'online'
+                            cor: checkpoint['status'] == 'online'
                               ? PulynColors.success
                               : PulynColors.danger,
                             fontWeight: FontWeight.bold,
@@ -797,7 +797,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: const BoxDecoration(
-          color: PulynColors.darkCard,
+          cor: PulynColors.darkCard,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -812,7 +812,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: PulynColors.textMuted,
+                cor: PulynColors.textMuted,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -833,7 +833,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: teamColor.withValues(alpha: 0.3),
+                        cor: teamColor.withValues(alpha: 0.3),
                         blurRadius: 12,
                         spreadRadius: 2,
                       ),
@@ -841,11 +841,11 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   ),
                   child: Center(
                     child: Text(
-                      child.nickname.isNotEmpty 
-                        ? child.nickname[0].toUpperCase()
-                        : child.name[0].toUpperCase(),
+                      child.apelido.isNotEmpty 
+                        ? child.apelido[0].toUpperCase()
+                        : child.nome[0].toUpperCase(),
                       style: const TextStyle(
-                        color: Colors.white,
+                        cor: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -858,19 +858,19 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        child.nickname.isNotEmpty ? child.nickname : child.name,
+                        child.apelido.isNotEmpty ? child.apelido : child.nome,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          cor: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${child.age} anos • ${child.teamName}',
+                        '${child.idade} anos • ${child.teamName}',
                         style: const TextStyle(
                           fontSize: 14,
-                          color: PulynColors.textMuted,
+                          cor: PulynColors.textMuted,
                         ),
                       ),
                     ],
@@ -887,21 +887,21 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: PulynColors.darkSurface,
+                      cor: PulynColors.darkSurface,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
                       children: [
                         const Icon(
                           Icons.emoji_events,
-                          color: PulynColors.accent,
+                          cor: PulynColors.accent,
                           size: 24,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           '${child.currentScore}',
                           style: const TextStyle(
-                            color: Colors.white,
+                            cor: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -909,7 +909,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                         const Text(
                           'Pontos',
                           style: TextStyle(
-                            color: PulynColors.textMuted,
+                            cor: PulynColors.textMuted,
                             fontSize: 12,
                           ),
                         ),
@@ -922,21 +922,21 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: PulynColors.darkSurface,
+                      cor: PulynColors.darkSurface,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
                       children: [
                         const Icon(
                           Icons.flag,
-                          color: PulynColors.success,
+                          cor: PulynColors.success,
                           size: 24,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           '${child.achievements.length}',
                           style: const TextStyle(
-                            color: Colors.white,
+                            cor: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -944,7 +944,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                         const Text(
                           'Conquistas',
                           style: TextStyle(
-                            color: PulynColors.textMuted,
+                            cor: PulynColors.textMuted,
                             fontSize: 12,
                           ),
                         ),
@@ -966,7 +966,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     // Verifica se algum dos meus filhos conquistou este checkpoint
     final childrenToCheck = widget.childrenList ?? [];
     final isConquered = childrenToCheck.any((child) => 
-      child.achievements.any((achievement) => achievement.title == checkpoint['name'])
+      child.achievements.any((achievement) => achievement.title == checkpoint['nome'])
     );
     
     final isOnline = checkpoint['status'] == 'online';
@@ -984,32 +984,32 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   List<ZoneConfig> _getDefaultZones() {
     return [
       ZoneConfig(
-        name: 'Entrada',
-        color: const Color(0xFF1E9BD7),
+        nome: 'Entrada',
+        cor: const Color(0xFF1E9BD7),
         x: 30,
         y: 5,
         w: 40,
         h: 18,
       ),
       ZoneConfig(
-        name: 'Área Verde',
-        color: const Color(0xFF10B981),
+        nome: 'Área Verde',
+        cor: const Color(0xFF10B981),
         x: 5,
         y: 28,
         w: 42,
         h: 38,
       ),
       ZoneConfig(
-        name: 'Área Azul',
-        color: const Color(0xFF1E9BD7),
+        nome: 'Área Azul',
+        cor: const Color(0xFF1E9BD7),
         x: 53,
         y: 28,
         w: 42,
         h: 38,
       ),
       ZoneConfig(
-        name: 'Área Central',
-        color: const Color(0xFFF59E0B),
+        nome: 'Área Central',
+        cor: const Color(0xFFF59E0B),
         x: 20,
         y: 70,
         w: 60,
@@ -1044,9 +1044,9 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       loading: () => Container(
         height: 480,
         decoration: BoxDecoration(
-          color: PulynColors.darkCard,
+          cor: PulynColors.darkCard,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: PulynColors.darkBorder),
+          border: Border.all(cor: PulynColors.darkBorder),
         ),
         child: const Center(
           child: CircularProgressIndicator(),
@@ -1055,19 +1055,19 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       error: (error, _) => Container(
         height: 480,
         decoration: BoxDecoration(
-          color: PulynColors.darkCard,
+          cor: PulynColors.darkCard,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: PulynColors.danger),
+          border: Border.all(cor: PulynColors.danger),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: PulynColors.danger, size: 48),
+              const Icon(Icons.error_outline, cor: PulynColors.danger, size: 48),
               const SizedBox(height: 16),
               const Text(
                 'Erro ao carregar mapa',
-                style: TextStyle(color: PulynColors.danger, fontWeight: FontWeight.bold),
+                style: TextStyle(cor: PulynColors.danger, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -1090,9 +1090,9 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
           loading: () => Container(
             height: 480,
             decoration: BoxDecoration(
-              color: PulynColors.darkCard,
+              cor: PulynColors.darkCard,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: PulynColors.darkBorder),
+              border: Border.all(cor: PulynColors.darkBorder),
             ),
             child: const Center(
               child: CircularProgressIndicator(),
@@ -1123,45 +1123,45 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     return [
       {
         'id': '1',
-        'name': 'Torre Encantada',
-        'zone': 'Entrada',
-        'points': 10,
+        'nome': 'Torre Encantada',
+        'zona': 'Entrada',
+        'pontos': 10,
         'status': 'online',
       },
       {
         'id': '2',
-        'name': 'Caverna Misteriosa',
-        'zone': 'Área Verde',
-        'points': 15,
+        'nome': 'Caverna Misteriosa',
+        'zona': 'Área Verde',
+        'pontos': 15,
         'status': 'online',
       },
       {
         'id': '3',
-        'name': 'Jardim Secreto',
-        'zone': 'Área Azul',
-        'points': 10,
+        'nome': 'Jardim Secreto',
+        'zona': 'Área Azul',
+        'pontos': 10,
         'status': 'online',
       },
       {
         'id': '4',
-        'name': 'Castelo da Diversão',
-        'zone': 'Área Central',
-        'points': 20,
+        'nome': 'Castelo da Diversão',
+        'zona': 'Área Central',
+        'pontos': 20,
         'status': 'online',
       },
       {
         'id': '5',
-        'name': 'Floresta Mágica',
-        'zone': 'Área Central',
-        'points': 12,
+        'nome': 'Floresta Mágica',
+        'zona': 'Área Central',
+        'pontos': 12,
         'status': 'offline',
       },
     ];
   }
 
   /// Normaliza nome da zona para comparação
-  String _normalizeZoneName(String? name) {
-    return (name ?? '')
+  String _normalizeZoneName(String? nome) {
+    return (nome ?? '')
         .trim()
         .toLowerCase()
         .replaceAll('á', 'a')
@@ -1172,13 +1172,13 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   }
 
   /// Obtém posição do checkpoint no mapa
-  /// Primeiro tenta usar map_x e map_y da tabela, senão calcula pela zona
+  /// Primeiro tenta usar mapaX e mapaY da tabela, senão calcula pela zona
   Map<String, double> _getCheckpointPosition(
       Map<String, dynamic> checkpoint,
       List<Map<String, dynamic>> allCheckpoints) {
-    // ✅ Primeiro: tentar puxar posição salva na tabela (map_x, map_y)
-    final storedX = checkpoint['map_x'] ?? checkpoint['mapX'];
-    final storedY = checkpoint['map_y'] ?? checkpoint['mapY'];
+    // ✅ Primeiro: tentar puxar posição salva na tabela (mapaX, mapaY)
+    final storedX = checkpoint['mapaX'] ?? checkpoint['mapX'];
+    final storedY = checkpoint['mapaY'] ?? checkpoint['mapY'];
     
     if (storedX != null && storedY != null) {
       try {
@@ -1197,15 +1197,15 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     if (zones.isEmpty) {
       return {'x': 0.5, 'y': 0.5};
     }
-    final zoneName = checkpoint['zone'] ?? checkpoint['location'] ?? 'Entrada';
-    final zone = zones.firstWhere(
-      (z) => _normalizeZoneName(z.name) == _normalizeZoneName(zoneName),
+    final zoneName = checkpoint['zona'] ?? checkpoint['localizacao'] ?? 'Entrada';
+    final zona = zones.firstWhere(
+      (z) => _normalizeZoneName(z.nome) == _normalizeZoneName(zoneName),
       orElse: () => zones[0],
     );
 
     final sameZone = allCheckpoints
         .where((c) =>
-            _normalizeZoneName(c['zone'] ?? c['location'] ?? 'Entrada') == _normalizeZoneName(zoneName))
+            _normalizeZoneName(c['zona'] ?? c['localizacao'] ?? 'Entrada') == _normalizeZoneName(zoneName))
         .toList();
     final index = sameZone.indexOf(checkpoint);
     final count = sameZone.length;
@@ -1213,8 +1213,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     final xOffset = count > 1 ? (index / (count - 1)) * 0.6 + 0.2 : 0.5;
 
     return {
-      'x': zone.x + zone.w * xOffset,
-      'y': zone.y + zone.h * 0.75,
+      'x': zona.x + zona.w * xOffset,
+      'y': zona.y + zona.h * 0.75,
     };
   }
 
@@ -1228,7 +1228,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     }
     _lastMapRefreshTick = refreshTick;
 
-    // ✅ Carregar floor plan na primeira vez que o widget for construído
+    // ✅ Carregar floor plano na primeira vez que o widget for construído
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_floorPlanUrl == null) {
         _loadFloorPlanFromRef();
@@ -1271,8 +1271,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
             'child': child,
             'x': cpPos['x'] ?? 50,
             'y': cpPos['y'] ?? 50,
-            'zone': checkpoint['zone'] ?? checkpoint['location'] ?? 'Checkpoint',
-            'checkpointName': checkpoint['name'],
+            'zona': checkpoint['zona'] ?? checkpoint['localizacao'] ?? 'Checkpoint',
+            'checkpointName': checkpoint['nome'],
             'hasCheckpoint': true,
           });
           
@@ -1287,7 +1287,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
           'child': child,
           'x': mapWidth / 2,
           'y': mapHeight / 2,
-          'zone': 'Centro',
+          'zona': 'Centro',
           'hasCheckpoint': false,
         });
       } else {
@@ -1297,25 +1297,25 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
             'child': child,
             'x': mapWidth / 2,
             'y': mapHeight / 2,
-            'zone': 'Centro (fallback)',
+            'zona': 'Centro (fallback)',
             'hasCheckpoint': false,
           });
           continue;
         }
         
         final zoneIdx = childrenToDisplay.indexOf(child) % zones.length;
-        final zone = zones[zoneIdx];
+        final zona = zones[zoneIdx];
         const cols = 2;
         final col = (childrenToDisplay.indexOf(child) % cols);
 
-        final x = zone.x + zone.w * (col == 0 ? 0.3 : 0.7);
-        final y = zone.y + zone.h * (0.3 + (childrenToDisplay.indexOf(child) ~/ cols) * 0.25);
+        final x = zona.x + zona.w * (col == 0 ? 0.3 : 0.7);
+        final y = zona.y + zona.h * (0.3 + (childrenToDisplay.indexOf(child) ~/ cols) * 0.25);
 
         positions.add({
           'child': child,
           'x': x,
           'y': y,
-          'zone': zone.name,
+          'zona': zona.nome,
           'hasCheckpoint': false,
         });
       }
@@ -1334,20 +1334,20 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     List<Map<String, dynamic>> zonesFromBackend,
   ) {
     // ✅ Converte zonas do backend para ZoneConfig
-    // Backend envia: {id, name, color, x, y, width, height}
+    // Backend envia: {id, nome, cor, x, y, width, height}
     List<ZoneConfig> convertedZones = zonesFromBackend.isEmpty
         ? _getDefaultZones() // Fallback se vazio
-        : zonesFromBackend.map((zone) {
-            final x = double.tryParse(zone['x']?.toString() ?? '0') ?? 0;
-            final y = double.tryParse(zone['y']?.toString() ?? '0') ?? 0;
-            final w = double.tryParse((zone['width'] ?? zone['w'])?.toString() ?? '20') ?? 20;
-            final h = double.tryParse((zone['height'] ?? zone['h'])?.toString() ?? '20') ?? 20;
+        : zonesFromBackend.map((zona) {
+            final x = double.tryParse(zona['x']?.toString() ?? '0') ?? 0;
+            final y = double.tryParse(zona['y']?.toString() ?? '0') ?? 0;
+            final w = double.tryParse((zona['width'] ?? zona['w'])?.toString() ?? '20') ?? 20;
+            final h = double.tryParse((zona['height'] ?? zona['h'])?.toString() ?? '20') ?? 20;
             
-            log.i('🎨 [MAP] Convertendo zona: ${zone['name']} (x:$x, y:$y, w:$w, h:$h)');
+            log.i('🎨 [MAP] Convertendo zona: ${zona['nome']} (x:$x, y:$y, w:$w, h:$h)');
             
             return ZoneConfig(
-              name: sanitizeUtf16((zone['name'] ?? 'Zona Desconhecida').toString()),
-              color: _getZoneColor(zone['color']),
+              nome: sanitizeUtf16((zona['nome'] ?? 'Zona Desconhecida').toString()),
+              cor: _getZoneColor(zona['cor']),
               x: x,
               y: y,
               w: w,
@@ -1390,7 +1390,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
             // (450x320), então o mapa preenche tudo, sem faixas vazias em volta.
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: PulynColors.darkBorder),
+              border: Border.all(cor: PulynColors.darkBorder),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1400,7 +1400,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
                   decoration: const BoxDecoration(
                     border: Border(
-                      bottom: BorderSide(color: PulynColors.darkBorder),
+                      bottom: BorderSide(cor: PulynColors.darkBorder),
                     ),
                   ),
                   child: Row(
@@ -1413,7 +1413,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             Text(
                               'Mapa do Evento',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: Colors.white,
+                                cor: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -1421,7 +1421,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             Text(
                               'Arraste, pince ou toque 2x para dar zoom',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: PulynColors.textMuted,
+                                cor: PulynColors.textMuted,
                                 fontSize: 10,
                               ),
                             ),
@@ -1435,10 +1435,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: PulynColors.success.withValues(alpha: 0.16),
+                              cor: PulynColors.success.withValues(alpha: 0.16),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: PulynColors.success.withValues(alpha: 0.5),
+                                cor: PulynColors.success.withValues(alpha: 0.5),
                               ),
                             ),
                             child: Row(
@@ -1449,19 +1449,19 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                   height: 8,
                                   decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: PulynColors.success,
+                                    cor: PulynColors.success,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                                 Flexible(
                                   child: Text(
-                                    '${widget.activeGame!['gameName'] ?? widget.activeGame!['name'] ?? 'Jogo ativo'}',
+                                    '${widget.activeGame!['gameName'] ?? widget.activeGame!['nome'] ?? 'Jogo ativo'}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: PulynColors.success,
+                                      cor: PulynColors.success,
                                     ),
                                   ),
                                 ),
@@ -1519,7 +1519,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                       width: _world.width,
                       height: _world.height,
                       decoration: BoxDecoration(
-                        color: PulynColors.darkCard.withValues(alpha: 0.3),
+                        cor: PulynColors.darkCard.withValues(alpha: 0.3),
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -1556,32 +1556,32 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             ),
 
                           // Zonas background com animação
-                          ...convertedZones.map((zone) {
-                            log.i('🎨 [ZONES] Renderizando zona: ${zone.name} @ (${zone.x}, ${zone.y})');
+                          ...convertedZones.map((zona) {
+                            log.i('🎨 [ZONES] Renderizando zona: ${zona.nome} @ (${zona.x}, ${zona.y})');
                             return AnimatedBuilder(
                               animation: _zoomAnimation,
                               builder: (context, child) => Positioned(
-                                left: zone.x + ox,
-                                top: zone.y + oy,
+                                left: zona.x + ox,
+                                top: zona.y + oy,
                                 child: Container(
-                                  width: zone.w,
-                                  height: zone.h,
+                                  width: zona.w,
+                                  height: zona.h,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: zone.color.withValues(alpha: 0.8),  // ✅ Aumentei alpha para 0.8
+                                      cor: zona.cor.withValues(alpha: 0.8),  // ✅ Aumentei alpha para 0.8
                                       width: 2,
                                     ),
-                                    color: zone.color.withValues(alpha: 0.2),  // ✅ Aumentei alpha para 0.2
+                                    cor: zona.cor.withValues(alpha: 0.2),  // ✅ Aumentei alpha para 0.2
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(8),
                                     child: Text(
-                                      zone.name,
+                                      zona.nome,
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: zone.color,
+                                        cor: zona.cor,
                                       ),
                                     ),
                                   ),
@@ -1593,17 +1593,17 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                           // Checkpoints com animação e interatividade
                           ...visibleCheckpoints.map((checkpoint) {
                             final pos = _getCheckpointPosition(checkpoint, checkpoints);
-                            final color = _getCheckpointColor(checkpoint);
+                            final cor = _getCheckpointColor(checkpoint);
                             
                             // Verifica se algum dos meus filhos conquistou este checkpoint
                             final childrenToCheck = widget.childrenList ?? [];
                             final isConquered = childrenToCheck.any((child) => 
-                              child.achievements.any((achievement) => achievement.title == checkpoint['name'])
+                              child.achievements.any((achievement) => achievement.title == checkpoint['nome'])
                             );
 
                             return Positioned(
-                              // Caixa de largura FIXA (120px) centrada em map_x: o círculo
-                              // (40px) fica sempre exatamente em (map_x, map_y). Antes a caixa
+                              // Caixa de largura FIXA (120px) centrada em mapaX: o círculo
+                              // (40px) fica sempre exatamente em (mapaX, mapaY). Antes a caixa
                               // crescia com o nome do checkpoint e o círculo saía deslocado pra
                               // direita, e o avatar não cobria o checkpoint. x/y são pixels.
                               left: pos['x']! - 60 + ox,
@@ -1624,11 +1624,11 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                           height: 40,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            border: Border.all(color: color, width: 3),
-                                            color: PulynColors.darkCard.withValues(alpha: 0.95),
+                                            border: Border.all(cor: cor, width: 3),
+                                            cor: PulynColors.darkCard.withValues(alpha: 0.95),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: color.withValues(alpha: 0.4),
+                                                cor: cor.withValues(alpha: 0.4),
                                                 blurRadius: 12,
                                                 spreadRadius: 3,
                                               ),
@@ -1641,7 +1641,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                                 : checkpoint['status'] == 'online'
                                                   ? Icons.radio_button_unchecked
                                                   : Icons.cancel,
-                                              color: color,
+                                              cor: cor,
                                               size: 20,
                                             ),
                                           ),
@@ -1651,19 +1651,19 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: PulynColors.darkCard.withValues(alpha: 0.9),
+                                            cor: PulynColors.darkCard.withValues(alpha: 0.9),
                                             borderRadius: BorderRadius.circular(8),
                                             border: Border.all(
-                                              color: color.withValues(alpha: 0.3),
+                                              cor: cor.withValues(alpha: 0.3),
                                             ),
                                           ),
                                           child: Column(
                                             children: [
                                               Text(
-                                                checkpoint['name'],
+                                                checkpoint['nome'],
                                                 style: const TextStyle(
                                                   fontSize: 10,
-                                                  color: Colors.white,
+                                                  cor: Colors.white,
                                                   fontWeight: FontWeight.w600,
                                                 ),
                                                 textAlign: TextAlign.center,
@@ -1702,12 +1702,12 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
 
                             try {
                               final teamColor = Color(int.parse('0xFF${childData.teamColor.replaceFirst('#', '')}'));
-                              final displayName = childData.nickname.isNotEmpty
-                                  ? childData.nickname
-                                  : childData.name.split(' ').first;
-                              final initial = childData.nickname.isNotEmpty
-                                  ? childData.nickname[0].toUpperCase()
-                                  : childData.name[0].toUpperCase();
+                              final displayName = childData.apelido.isNotEmpty
+                                  ? childData.apelido
+                                  : childData.nome.split(' ').first;
+                              final initial = childData.apelido.isNotEmpty
+                                  ? childData.apelido[0].toUpperCase()
+                                  : childData.nome[0].toUpperCase();
                               final ringId = _arrivalRings[childData.id];
 
                               // Caixa 40x40 centrada no checkpoint. O avatar (34px) deixa o
@@ -1737,7 +1737,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                               height: 40 + 56 * t,
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
-                                                border: Border.all(color: teamColor, width: 3),
+                                                border: Border.all(cor: teamColor, width: 3),
                                               ),
                                             ),
                                           ),
@@ -1755,10 +1755,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
                                           ),
-                                          border: Border.all(color: Colors.yellow, width: 3),
+                                          border: Border.all(cor: Colors.yellow, width: 3),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: teamColor.withValues(alpha: 0.5),
+                                              cor: teamColor.withValues(alpha: 0.5),
                                               blurRadius: 10,
                                               spreadRadius: 1,
                                             ),
@@ -1773,7 +1773,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                                     child: Text(
                                                       initial,
                                                       style: const TextStyle(
-                                                        color: Colors.white,
+                                                        cor: Colors.white,
                                                         fontWeight: FontWeight.bold,
                                                         fontSize: 14,
                                                       ),
@@ -1785,7 +1785,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                                 child: Text(
                                                   initial,
                                                   style: const TextStyle(
-                                                    color: Colors.white,
+                                                    cor: Colors.white,
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 14,
                                                   ),
@@ -1803,17 +1803,17 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                             decoration: BoxDecoration(
-                                              color: PulynColors.darkCard.withValues(alpha: 0.92),
+                                              cor: PulynColors.darkCard.withValues(alpha: 0.92),
                                               borderRadius: BorderRadius.circular(6),
                                               border: Border.all(
-                                                color: Colors.yellow.withValues(alpha: 0.5),
+                                                cor: Colors.yellow.withValues(alpha: 0.5),
                                               ),
                                             ),
                                             child: Text(
                                               displayName,
                                               style: const TextStyle(
                                                 fontSize: 9,
-                                                color: Colors.yellow,
+                                                cor: Colors.yellow,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                               maxLines: 1,
@@ -1861,10 +1861,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                         key: ValueKey(_arrivalMessage),
                                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                         decoration: BoxDecoration(
-                                          color: PulynColors.darkCard.withValues(alpha: 0.96),
+                                          cor: PulynColors.darkCard.withValues(alpha: 0.96),
                                           borderRadius: BorderRadius.circular(12),
                                           border: Border.all(
-                                            color: PulynColors.success.withValues(alpha: 0.6),
+                                            cor: PulynColors.success.withValues(alpha: 0.6),
                                           ),
                                         ),
                                         child: Row(
@@ -1872,7 +1872,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                           children: [
                                             const Icon(
                                               Icons.location_on,
-                                              color: PulynColors.success,
+                                              cor: PulynColors.success,
                                               size: 18,
                                             ),
                                             const SizedBox(width: 8),
@@ -1882,7 +1882,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
-                                                  color: Colors.white,
+                                                  cor: Colors.white,
                                                   fontSize: 13,
                                                   fontWeight: FontWeight.w600,
                                                 ),
@@ -1906,7 +1906,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                   decoration: const BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: PulynColors.darkBorder),
+                      top: BorderSide(cor: PulynColors.darkBorder),
                     ),
                   ),
                   child: Wrap(
@@ -1926,7 +1926,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         );
   }
 
-  Widget _buildLegendItem(String label, Color color) {
+  Widget _buildLegendItem(String label, Color cor) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1935,10 +1935,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
           height: 10,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: color,
+            cor: cor,
             boxShadow: [
               BoxShadow(
-                color: color.withValues(alpha: 0.3),
+                cor: cor.withValues(alpha: 0.3),
                 blurRadius: 4,
                 spreadRadius: 1,
               ),
@@ -1950,7 +1950,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
           label,
           style: const TextStyle(
             fontSize: 11,
-            color: PulynColors.textMuted,
+            cor: PulynColors.textMuted,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -1965,7 +1965,7 @@ class _FloorPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF3a4a5a).withValues(alpha: 0.15)
+      ..cor = const Color(0xFF3a4a5a).withValues(alpha: 0.15)
       ..strokeWidth = 1;
 
     // Desenhar grade de piso

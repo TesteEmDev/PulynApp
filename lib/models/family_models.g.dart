@@ -8,11 +8,11 @@ part of 'family_models.dart';
 
 LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) => LoginRequest(
   email: json['email'] as String,
-  password: json['password'] as String,
+  senha: json['senha'] as String,
 );
 
 Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) =>
-    <String, dynamic>{'email': instance.email, 'password': instance.password};
+    <String, dynamic>{'email': instance.email, 'senha': instance.senha};
 
 LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) =>
     LoginResponse(
@@ -26,27 +26,27 @@ Map<String, dynamic> _$LoginResponseToJson(LoginResponse instance) =>
 User _$UserFromJson(Map<String, dynamic> json) => User(
   id: json['id'] as String,
   email: json['email'] as String,
-  name: json['name'] as String,
+  nome: json['nome'] as String,
   profileImage: json['profileImage'] as String?,
-  role: json['role'] as String,
+  perfil: json['perfil'] as String,
   empresaId: json['empresaId'] as String,
 );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'id': instance.id,
   'email': instance.email,
-  'name': instance.name,
+  'nome': instance.nome,
   'profileImage': instance.profileImage,
-  'role': instance.role,
+  'perfil': instance.perfil,
   'empresaId': instance.empresaId,
 };
 
 Child _$ChildFromJson(Map<String, dynamic> json) => Child(
   id: json['id'] as String,
   eventoId: json['eventoId'] as String?,
-  name: json['name'] as String,
-  nickname: json['nickname'] as String,
-  age: (json['age'] as num).toInt(),
+  nome: json['nome'] as String,
+  apelido: json['apelido'] as String,
+  idade: (json['idade'] as num).toInt(),
   profileImage: json['profileImage'] as String?,
   currentScore: (json['currentScore'] as num).toInt(),
   totalScore: (json['totalScore'] as num).toInt(),
@@ -62,9 +62,9 @@ Child _$ChildFromJson(Map<String, dynamic> json) => Child(
 Map<String, dynamic> _$ChildToJson(Child instance) => <String, dynamic>{
   'id': instance.id,
   'eventoId': instance.eventoId,
-  'name': instance.name,
-  'nickname': instance.nickname,
-  'age': instance.age,
+  'nome': instance.nome,
+  'apelido': instance.apelido,
+  'idade': instance.idade,
   'profileImage': instance.profileImage,
   'currentScore': instance.currentScore,
   'totalScore': instance.totalScore,
@@ -78,25 +78,25 @@ Map<String, dynamic> _$ChildToJson(Child instance) => <String, dynamic>{
 Achievement _$AchievementFromJson(Map<String, dynamic> json) => Achievement(
   id: json['id'] as String,
   title: json['title'] as String,
-  description: json['description'] as String,
+  descricao: json['descricao'] as String,
   icon: json['icon'] as String,
   unlockedAt: DateTime.parse(json['unlockedAt'] as String),
-  points: (json['points'] as num).toInt(),
+  pontos: (json['pontos'] as num).toInt(),
 );
 
 Map<String, dynamic> _$AchievementToJson(Achievement instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
-      'description': instance.description,
+      'descricao': instance.descricao,
       'icon': instance.icon,
       'unlockedAt': instance.unlockedAt.toIso8601String(),
-      'points': instance.points,
+      'pontos': instance.pontos,
     };
 
 Event _$EventFromJson(Map<String, dynamic> json) => Event(
   id: json['id'] as String,
-  name: json['name'] as String,
+  nome: json['nome'] as String,
   date: DateTime.parse(json['date'] as String),
   status: json['status'] as String,
   children: (json['children'] as List<dynamic>)
@@ -109,7 +109,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'id': instance.id,
-  'name': instance.name,
+  'nome': instance.nome,
   'date': instance.date.toIso8601String(),
   'status': instance.status,
   'children': instance.children,
@@ -118,8 +118,8 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
 
 Team _$TeamFromJson(Map<String, dynamic> json) => Team(
   id: json['id'] as String,
-  name: json['name'] as String,
-  color: json['color'] as String,
+  nome: json['nome'] as String,
+  cor: json['cor'] as String,
   totalPoints: (json['totalPoints'] as num).toInt(),
   ranking: (json['ranking'] as num).toInt(),
   childrenIds: (json['childrenIds'] as List<dynamic>)
@@ -129,8 +129,8 @@ Team _$TeamFromJson(Map<String, dynamic> json) => Team(
 
 Map<String, dynamic> _$TeamToJson(Team instance) => <String, dynamic>{
   'id': instance.id,
-  'name': instance.name,
-  'color': instance.color,
+  'nome': instance.nome,
+  'cor': instance.cor,
   'totalPoints': instance.totalPoints,
   'ranking': instance.ranking,
   'childrenIds': instance.childrenIds,
@@ -139,8 +139,8 @@ Map<String, dynamic> _$TeamToJson(Team instance) => <String, dynamic>{
 Notification _$NotificationFromJson(Map<String, dynamic> json) => Notification(
   id: json['id'] as String,
   title: json['title'] as String,
-  message: json['message'] as String,
-  type: json['type'] as String,
+  mensagem: json['mensagem'] as String,
+  tipo: json['tipo'] as String,
   childId: json['childId'] as String?,
   createdAt: DateTime.parse(json['createdAt'] as String),
   read: json['read'] as bool,
@@ -150,8 +150,8 @@ Map<String, dynamic> _$NotificationToJson(Notification instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
-      'message': instance.message,
-      'type': instance.type,
+      'mensagem': instance.mensagem,
+      'tipo': instance.tipo,
       'childId': instance.childId,
       'createdAt': instance.createdAt.toIso8601String(),
       'read': instance.read,
@@ -160,7 +160,7 @@ Map<String, dynamic> _$NotificationToJson(Notification instance) =>
 ScoreUpdate _$ScoreUpdateFromJson(Map<String, dynamic> json) => ScoreUpdate(
   childId: json['childId'] as String,
   childName: json['childName'] as String,
-  points: (json['points'] as num).toInt(),
+  pontos: (json['pontos'] as num).toInt(),
   checkpointName: json['checkpointName'] as String,
   timestamp: DateTime.parse(json['timestamp'] as String),
   teamColor: json['teamColor'] as String,
@@ -170,7 +170,7 @@ Map<String, dynamic> _$ScoreUpdateToJson(ScoreUpdate instance) =>
     <String, dynamic>{
       'childId': instance.childId,
       'childName': instance.childName,
-      'points': instance.points,
+      'pontos': instance.pontos,
       'checkpointName': instance.checkpointName,
       'timestamp': instance.timestamp.toIso8601String(),
       'teamColor': instance.teamColor,

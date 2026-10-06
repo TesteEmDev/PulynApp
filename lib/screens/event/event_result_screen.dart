@@ -62,7 +62,7 @@ class _EventResultScreenState extends State<EventResultScreen> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final eventName = widget.event['name'] as String? ?? 'Festa';
+    final eventName = widget.event['nome'] as String? ?? 'Festa';
     final children = (widget.event['children'] as List?)?.cast<Map<String, dynamic>>() ?? [];
     final rankings = widget.event['rankings'] as Map<String, dynamic>? ?? {};
 
@@ -230,7 +230,7 @@ class _ResultHeader extends StatelessWidget {
                 child: Text(
                   'Festa Encerrada!',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
+                        cor: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
@@ -243,7 +243,7 @@ class _ResultHeader extends StatelessWidget {
                 child: Text(
                   eventName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        cor: Colors.white.withValues(alpha: 0.9),
                       ),
                 ),
               ),
@@ -268,9 +268,9 @@ class _ChildResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = child['name'] as String? ?? 'Criança';
+    final nome = child['nome'] as String? ?? 'Criança';
     final team = child['team'] as Map<String, dynamic>? ?? {};
-    final teamName = team['name'] as String? ?? 'Sem time';
+    final teamName = team['nome'] as String? ?? 'Sem time';
     final score = child['finalScore'] as int? ?? 0;
     final rank = child['finalRank'] as int? ?? 0;
     final badges = (child['badges'] as List?)?.cast<String>() ?? [];
@@ -285,7 +285,7 @@ class _ChildResultCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(cor: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(16),
@@ -301,7 +301,7 @@ class _ChildResultCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      nome,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -310,7 +310,7 @@ class _ChildResultCard extends StatelessWidget {
                     Text(
                       'Team $teamName',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                            cor: Colors.grey[600],
                           ),
                     ),
                   ],
@@ -343,7 +343,7 @@ class _ChildResultCard extends StatelessWidget {
                 '💰 $score pontos',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
+                      cor: Theme.of(context).primaryColor,
                     ),
               ),
             ],
@@ -437,7 +437,7 @@ class _ChildrenRankingList extends StatelessWidget {
       itemCount: children.take(10).length,
       itemBuilder: (context, index) {
         final child = children[index];
-        final name = child['name'] as String? ?? 'Criança';
+        final nome = child['nome'] as String? ?? 'Criança';
         final score = child['score'] as int? ?? 0;
         final rank = index + 1;
 
@@ -451,7 +451,7 @@ class _ChildrenRankingList extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              cor: Colors.grey.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(12),
@@ -464,7 +464,7 @@ class _ChildrenRankingList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
+                        nome,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -476,7 +476,7 @@ class _ChildrenRankingList extends StatelessWidget {
                   '$score pts',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
+                        cor: Theme.of(context).primaryColor,
                       ),
                 ),
               ],
@@ -502,8 +502,8 @@ class _TeamsRankingList extends StatelessWidget {
       itemCount: teams.length,
       itemBuilder: (context, index) {
         final team = teams[index];
-        final name = team['name'] as String? ?? 'Time';
-        final score = team['score'] as int? ?? team['points'] as int? ?? 0;
+        final nome = team['nome'] as String? ?? 'Time';
+        final score = team['score'] as int? ?? team['pontos'] as int? ?? 0;
         final rank = index + 1;
 
         final rankEmoji = {
@@ -516,7 +516,7 @@ class _TeamsRankingList extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              cor: Colors.grey.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(12),
@@ -529,7 +529,7 @@ class _TeamsRankingList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
+                        nome,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -541,7 +541,7 @@ class _TeamsRankingList extends StatelessWidget {
                   '$score pts',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
+                        cor: Theme.of(context).primaryColor,
                       ),
                 ),
               ],
@@ -561,7 +561,7 @@ class _EmptyResult extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        cor: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(24),
@@ -590,7 +590,7 @@ class _EmptyRanking extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        cor: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(24),
@@ -598,7 +598,7 @@ class _EmptyRanking extends StatelessWidget {
         child: Text(
           'Ranking não disponível',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
+                cor: Colors.grey[600],
               ),
         ),
       ),

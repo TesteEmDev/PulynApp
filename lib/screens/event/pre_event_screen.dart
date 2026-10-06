@@ -78,8 +78,8 @@ class _PreEventScreenState extends State<PreEventScreen> {
   @override
   Widget build(BuildContext context) {
     final children = (event['children'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-    final eventName = event['name'] as String? ?? 'Evento';
-    final location = event['location'] as String? ?? 'Local desconhecido';
+    final eventName = event['nome'] as String? ?? 'Evento';
+    final localizacao = event['localizacao'] as String? ?? 'Local desconhecido';
     final userArrived = event['userArrived'] as bool? ?? false;
 
     return Scaffold(
@@ -97,7 +97,7 @@ class _PreEventScreenState extends State<PreEventScreen> {
               // Card principal do evento
               _EventHeaderCard(
                 eventName: eventName,
-                location: location,
+                localizacao: localizacao,
                 timeUntilStart: _timeUntilStart ?? Duration.zero,
                 formatCountdown: _formatCountdown,
               ),
@@ -177,13 +177,13 @@ class _PreEventScreenState extends State<PreEventScreen> {
 /// Widget para header do evento
 class _EventHeaderCard extends StatelessWidget {
   final String eventName;
-  final String location;
+  final String localizacao;
   final Duration timeUntilStart;
   final String Function(Duration) formatCountdown;
 
   const _EventHeaderCard({
     required this.eventName,
-    required this.location,
+    required this.localizacao,
     required this.timeUntilStart,
     required this.formatCountdown,
   });
@@ -208,7 +208,7 @@ class _EventHeaderCard extends StatelessWidget {
           Text(
             eventName,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
+                  cor: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -217,13 +217,13 @@ class _EventHeaderCard extends StatelessWidget {
           // Localização
           Row(
             children: [
-              const Icon(Icons.location_on, color: Colors.white, size: 20),
+              const Icon(Icons.location_on, cor: Colors.white, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  location,
+                  localizacao,
                   style: const TextStyle(
-                    color: Colors.white,
+                    cor: Colors.white,
                     fontSize: 14,
                   ),
                 ),
@@ -235,12 +235,12 @@ class _EventHeaderCard extends StatelessWidget {
           // Contador regressivo
           Row(
             children: [
-              const Icon(Icons.schedule, color: Colors.white, size: 20),
+              const Icon(Icons.schedule, cor: Colors.white, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Começa em: ${formatCountdown(timeUntilStart)}',
                 style: const TextStyle(
-                  color: Colors.white,
+                  cor: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -261,14 +261,14 @@ class _ArrivalConfirmed extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        border: Border.all(color: Colors.green),
+        cor: Colors.green.shade50,
+        border: Border.all(cor: Colors.green),
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          const Icon(Icons.check_circle, color: Colors.green, size: 24),
+          const Icon(Icons.check_circle, cor: Colors.green, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -278,14 +278,14 @@ class _ArrivalConfirmed extends StatelessWidget {
                   '✅ Você chegou!',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.green.shade900,
+                        cor: Colors.green.shade900,
                       ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Pronto para a festa começar',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.green.shade700,
+                        cor: Colors.green.shade700,
                       ),
                 ),
               ],
@@ -305,14 +305,14 @@ class _ArrivalWarning extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
-        border: Border.all(color: Colors.orange),
+        cor: Colors.orange.shade50,
+        border: Border.all(cor: Colors.orange),
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          const Icon(Icons.location_searching, color: Colors.orange, size: 24),
+          const Icon(Icons.location_searching, cor: Colors.orange, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -322,14 +322,14 @@ class _ArrivalWarning extends StatelessWidget {
                   '📍 Ainda não chegou',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.orange.shade900,
+                        cor: Colors.orange.shade900,
                       ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Chegue perto da festa para continuar',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.orange.shade700,
+                        cor: Colors.orange.shade700,
                       ),
                 ),
               ],
@@ -352,11 +352,11 @@ class _ChildCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = child['name'] as String? ?? 'Criança';
-    final age = child['age'] as int? ?? 0;
+    final nome = child['nome'] as String? ?? 'Criança';
+    final idade = child['idade'] as int? ?? 0;
     final team = child['team'] as Map<String, dynamic>? ?? {};
-    final teamName = team['name'] as String? ?? 'Sem time';
-    final teamColor = team['color'] as String?;
+    final teamName = team['nome'] as String? ?? 'Sem time';
+    final teamColor = team['cor'] as String?;
     final status = child['status'] as String? ?? 'unknown';
 
     final statusIcon = status == 'ready' ? '✅' : '⏳';
@@ -366,7 +366,7 @@ class _ChildCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(cor: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(12),
@@ -377,7 +377,7 @@ class _ChildCard extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: teamColor != null ? Color(int.parse('0xff${teamColor.replaceFirst('#', '')}')).withValues(alpha: 0.2) : Colors.grey.shade200,
+              cor: teamColor != null ? Color(int.parse('0xff${teamColor.replaceFirst('#', '')}')).withValues(alpha: 0.2) : Colors.grey.shade200,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -392,16 +392,16 @@ class _ChildCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  nome,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$age anos • Time $teamName',
+                  '$idade anos • Time $teamName',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
+                        cor: Colors.grey[600],
                       ),
                 ),
               ],
@@ -421,7 +421,7 @@ class _ChildCard extends StatelessWidget {
                 statusText,
                 style: TextStyle(
                   fontSize: 12,
-                  color: statusColor,
+                  cor: statusColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -441,7 +441,7 @@ class _EmptyChildrenMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        cor: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(24),
@@ -461,10 +461,10 @@ class _EmptyChildrenMessage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Escaneie o QR code da criança para vinculá-la',
+            'Escaneie o QR codigo da criança para vinculá-la',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
+                  cor: Colors.grey[600],
                 ),
           ),
         ],

@@ -82,7 +82,7 @@ class MyApp extends ConsumerWidget {
         routes: [
           GoRoute(
             path: '/',
-            builder: (context, state) => const _SplashScreen(),
+            builder: (context, estado) => const _SplashScreen(),
           ),
         ],
       ),
@@ -92,27 +92,27 @@ class MyApp extends ConsumerWidget {
         routes: [
           GoRoute(
             path: '/',
-            redirect: (context, state) {
+            redirect: (context, estado) {
               // Não precisa fazer redireção manual, o GoRouter cuida
               return user != null ? '/home' : _getInitialLocationForUnauth(isFirstTimeAsync);
             },
           ),
           GoRoute(
             path: '/login',
-            builder: (context, state) => const LoginScreen(),
+            builder: (context, estado) => const LoginScreen(),
           ),
           GoRoute(
             path: '/register',
-            builder: (context, state) => const RegisterScreen(),
+            builder: (context, estado) => const RegisterScreen(),
           ),
           GoRoute(
             path: '/invite',
-            builder: (context, state) => const InviteEntryScreen(),
+            builder: (context, estado) => const InviteEntryScreen(),
           ),
           GoRoute(
             path: '/family/invite/:token',
-            builder: (context, state) {
-              var token = state.pathParameters['token'];
+            builder: (context, estado) {
+              var token = estado.pathParameters['token'];
               log.i('[FamilyInvite] Token recebido (bruto): $token');
               
               // ✅ Se o token contém URL completa, extrai apenas o token
@@ -131,16 +131,16 @@ class MyApp extends ConsumerWidget {
           ),
           GoRoute(
             path: '/onboarding',
-            builder: (context, state) => const OnboardingScreen(),
+            builder: (context, estado) => const OnboardingScreen(),
           ),
           GoRoute(
             path: '/home',
-            builder: (context, state) => const HomeScreen(),
+            builder: (context, estado) => const HomeScreen(),
           ),
           GoRoute(
             path: '/child/:id',
-            builder: (context, state) {
-              final childId = state.pathParameters['id'];
+            builder: (context, estado) {
+              final childId = estado.pathParameters['id'];
               
               // ✅ Valida se childId existe
               if (childId == null || childId.isEmpty) {
@@ -158,15 +158,15 @@ class MyApp extends ConsumerWidget {
           ),
           GoRoute(
             path: '/ranking',
-            builder: (context, state) => const RankingScreen(),
+            builder: (context, estado) => const RankingScreen(),
           ),
           GoRoute(
             path: '/profile',
-            builder: (context, state) => const ProfileScreen(),
+            builder: (context, estado) => const ProfileScreen(),
           ),
           GoRoute(
             path: '/notifications',
-            builder: (context, state) => Scaffold(
+            builder: (context, estado) => Scaffold(
               appBar: AppBar(title: const Text('Notificações')),
               body: const Center(
                 child: Text(
@@ -178,7 +178,7 @@ class MyApp extends ConsumerWidget {
           ),
           GoRoute(
             path: '/linked-children',
-            builder: (context, state) {
+            builder: (context, estado) {
               return LinkedChildrenScreen(
                 apiUrl: ApiConfig.getApiBaseUrl(),
               );
@@ -186,14 +186,14 @@ class MyApp extends ConsumerWidget {
           ),
           GoRoute(
             path: '/manage-children',
-            builder: (context, state) {
+            builder: (context, estado) {
               return const ManageLinkedChildrenScreen();
             },
           ),
           GoRoute(
             path: '/pre-event',
-            builder: (context, state) {
-              final event = state.extra as Map<String, dynamic>?;
+            builder: (context, estado) {
+              final event = estado.extra as Map<String, dynamic>?;
               if (event == null) {
                 return const HomeScreen();
               }
@@ -202,8 +202,8 @@ class MyApp extends ConsumerWidget {
           ),
           GoRoute(
             path: '/event-result',
-            builder: (context, state) {
-              final event = state.extra as Map<String, dynamic>?;
+            builder: (context, estado) {
+              final event = estado.extra as Map<String, dynamic>?;
               if (event == null) {
                 return const HomeScreen();
               }
@@ -217,16 +217,16 @@ class MyApp extends ConsumerWidget {
         routes: [
           GoRoute(
             path: '/',
-            redirect: (context, state) => '/login',
-            builder: (context, state) => const LoginScreen(),
+            redirect: (context, estado) => '/login',
+            builder: (context, estado) => const LoginScreen(),
           ),
           GoRoute(
             path: '/login',
-            builder: (context, state) => const LoginScreen(),
+            builder: (context, estado) => const LoginScreen(),
           ),
           GoRoute(
             path: '/invite',
-            builder: (context, state) => const InviteEntryScreen(),
+            builder: (context, estado) => const InviteEntryScreen(),
           ),
         ],
       ),

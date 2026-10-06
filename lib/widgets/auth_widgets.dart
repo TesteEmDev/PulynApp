@@ -54,14 +54,14 @@ class AuthHeader extends StatelessWidget {
 class AuthInfoCard extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String? message;
+  final String? mensagem;
   final Color accent;
   final Widget? trailing;
 
   const AuthInfoCard({
     required this.icon,
     required this.title,
-    this.message,
+    this.mensagem,
     this.accent = PulynColors.primary,
     this.trailing,
     super.key,
@@ -72,9 +72,9 @@ class AuthInfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.10),
+        cor: accent.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: accent.withValues(alpha: 0.35)),
+        border: Border.all(cor: accent.withValues(alpha: 0.35)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -83,10 +83,10 @@ class AuthInfoCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.18),
+              cor: accent.withValues(alpha: 0.18),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: accent, size: 22),
+            child: Icon(icon, cor: accent, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -96,17 +96,17 @@ class AuthInfoCard extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Colors.white,
+                    cor: Colors.white,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                if (message != null) ...[
+                if (mensagem != null) ...[
                   const SizedBox(height: 2),
                   Text(
-                    message!,
+                    mensagem!,
                     style: const TextStyle(
-                      color: PulynColors.textSecondary,
+                      cor: PulynColors.textSecondary,
                       fontSize: 13,
                       height: 1.35,
                     ),
@@ -139,7 +139,7 @@ class AuthSectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: PulynColors.primary),
+        Icon(icon, size: 18, cor: PulynColors.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -148,7 +148,7 @@ class AuthSectionTitle extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  color: Colors.white,
+                  cor: Colors.white,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -156,7 +156,7 @@ class AuthSectionTitle extends StatelessWidget {
               if (subtitle != null)
                 Text(
                   subtitle!,
-                  style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                  style: const TextStyle(cor: PulynColors.textMuted, fontSize: 12),
                 ),
             ],
           ),
@@ -177,9 +177,9 @@ class AuthFormCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: PulynColors.darkCard,
+        cor: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: PulynColors.darkBorder),
+        border: Border.all(cor: PulynColors.darkBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -273,7 +273,7 @@ class AuthPrimaryButton extends StatelessWidget {
             ? const SizedBox(
                 width: 22,
                 height: 22,
-                child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
+                child: CircularProgressIndicator(strokeWidth: 2.4, cor: Colors.white),
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -303,9 +303,9 @@ class AuthPrimaryButton extends StatelessWidget {
 /// Passo numerado ("1 · A recepção revisa seu cadastro").
 class AuthStep extends StatelessWidget {
   final int number;
-  final String text;
+  final String texto;
 
-  const AuthStep({required this.number, required this.text, super.key});
+  const AuthStep({required this.number, required this.texto, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -317,13 +317,13 @@ class AuthStep extends StatelessWidget {
           height: 24,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: PulynColors.primary.withValues(alpha: 0.18),
+            cor: PulynColors.primary.withValues(alpha: 0.18),
             shape: BoxShape.circle,
           ),
           child: Text(
             '$number',
             style: const TextStyle(
-              color: PulynColors.primary,
+              cor: PulynColors.primary,
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
@@ -334,9 +334,9 @@ class AuthStep extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(top: 2),
             child: Text(
-              text,
+              texto,
               style: const TextStyle(
-                color: PulynColors.textSecondary,
+                cor: PulynColors.textSecondary,
                 fontSize: 14,
                 height: 1.4,
               ),

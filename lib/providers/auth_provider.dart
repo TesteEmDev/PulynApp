@@ -55,13 +55,13 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
             final Map<String, dynamic> userMap = jsonDecode(cachedUserJson);
             _cachedUser = User.fromJson(userMap);
             log.i('[AUTH] ✅ Usuário restaurado do cache: ${_cachedUser!.email}');
-            state = AsyncValue.data(_cachedUser);
+            estado = AsyncValue.data(_cachedUser);
             
             // ✅ Em background, tenta fazer refresh do usuário (sem bloquear)
             _refreshUserBackground();
           } catch (e) {
             log.e('[AUTH] ❌ Erro ao deserializar usuário: $e');
-            state = const AsyncValue.data(null);
+            estado = const AsyncValue.data(null);
           }
         } else {
           // Sem cache mas tem token, tenta carregar do servidor
@@ -70,11 +70,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         }
       } else {
         log.i('[AUTH] ❌ Sem token persistido');
-        state = const AsyncValue.data(null);
+        estado = const AsyncValue.data(null);
       }
     } catch (e) {
       log.e('[AUTH] ❌ Erro ao inicializar: $e');
-      state = const AsyncValue.data(null);
+      estado = const AsyncValue.data(null);
     }
   }
   
@@ -87,14 +87,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         final user = await apiService.getMyProfile();
         _cachedUser = user;
         _saveUserToCache(user);
-        state = AsyncValue.data(user);
+        estado = AsyncValue.data(user);
         log.i('[AUTH] ✅ Usuário carregado do servidor: ${user.email}');
       } catch (e) {
         // ✅ Se /familias/me não existir, mantém usuário em cache
         if (e.toString().contains('404')) {
           log.w('[AUTH] ⚠️ Endpoint /familias/me não disponível, usando cache');
           if (_cachedUser != null) {
-            state = AsyncValue.data(_cachedUser);
+            estado = AsyncValue.data(_cachedUser);
           }
         } else {
           rethrow;
@@ -102,7 +102,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       }
     } catch (e) {
       log.e('[AUTH] ❌ Erro ao carregar usuário do servidor: $e');
-      state = const AsyncValue.data(null);
+      estado = const AsyncValue.data(null);
     }
   }
   
@@ -115,14 +115,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         final user = await apiService.getMyProfile();
         _cachedUser = user;
         _saveUserToCache(user);
-        state = AsyncValue.data(user);
+        estado = AsyncValue.data(user);
         log.i('[AUTH] ✅ Usuário sincronizado em background');
       } catch (e) {
         // ✅ Se /familias/me não existir, mantém usuário em cache
         if (e.toString().contains('404')) {
           log.w('[AUTH] ⚠️ Background: Endpoint /familias/me não disponível, mantendo cache');
           if (_cachedUser != null) {
-            state = AsyncValue.data(_cachedUser);
+            estado = AsyncValue.data(_cachedUser);
           }
         } else {
           rethrow;
@@ -145,13 +145,13 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     }
   }
 
-  Future<void> login(String email, String password) async {
-    state = const AsyncValue.loading();
+  Future<void> login(String email, String senha) async {
+    estado = const AsyncValue.loading();
     try {
       await _ensureInitialized();
       final apiService = ref.read(apiServiceProvider);
       await apiService.init();
-      final loginResponse = await apiService.login(email, password);
+      final loginResponse = await apiService.login(email, senha);
       
       // ✅ Salva o usuário em cache
       _cachedUser = loginResponse.user;
@@ -161,19 +161,19 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       await _prefs.setString('auth_token', loginResponse.token);
       log.i('[AUTH] ✅ Login bem-sucedido para $email');
       
-      state = AsyncValue.data(loginResponse.user);
+      estado = AsyncValue.data(loginResponse.user);
     } catch (e, st) {
       log.e('[AUTH] ❌ Erro no login: $e');
-      state = AsyncValue.error(e, st);
+      estado = AsyncValue.error(e, st);
     }
   }
 
-  Future<void> register(String email, String password, String name) async {
-    state = const AsyncValue.loading();
+  Future<void> register(String email, String senha, String nome) async {
+    estado = const AsyncValue.loading();
     try {
       log.i('[AUTH] 📝 INICIANDO REGISTRO');
       log.i('[AUTH] 📧 Email: $email');
-      log.i('[AUTH] 👤 Nome: $name');
+      log.i('[AUTH] 👤 Nome: $nome');
       
       await _ensureInitialized();
       log.i('[AUTH] ✅ SharedPreferences inicializado');
@@ -183,7 +183,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] ✅ ApiService inicializado');
       
       log.i('[AUTH] 🔄 Chamando /auth/register...');
-      final loginResponse = await apiService.register(email, password, name);
+      final loginResponse = await apiService.register(email, senha, nome);
       log.i('[AUTH] ✅ Resposta recebida do servidor');
       log.i('[AUTH] 🎫 Token recebido: ${loginResponse.token.substring(0, 20)}...');
       
@@ -197,13 +197,13 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] 🔐 Token salvo em SharedPreferences');
       
       log.i('[AUTH] ✅ REGISTRO CONCLUÍDO COM SUCESSO');
-      log.i('[AUTH] 👤 Usuário: ${loginResponse.user.email} (${loginResponse.user.name})');
+      log.i('[AUTH] 👤 Usuário: ${loginResponse.user.email} (${loginResponse.user.nome})');
       
-      state = AsyncValue.data(loginResponse.user);
+      estado = AsyncValue.data(loginResponse.user);
     } catch (e, st) {
       log.e('[AUTH] ❌ ERRO NO REGISTRO: $e');
       log.e('[AUTH] 📍 StackTrace: $st');
-      state = AsyncValue.error(e, st);
+      estado = AsyncValue.error(e, st);
     }
   }
 
@@ -213,11 +213,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       await _prefs.remove('auth_token');
       await _prefs.remove('cached_user');
       _cachedUser = null;  // ✅ Limpa cache ao fazer logout
-      state = const AsyncValue.data(null);
+      estado = const AsyncValue.data(null);
       log.i('[AUTH] ✅ Logout realizado');
     } catch (e, st) {
       log.e('[AUTH] ❌ Erro ao fazer logout: $e');
-      state = AsyncValue.error(e, st);
+      estado = AsyncValue.error(e, st);
     }
   }
 
@@ -229,18 +229,18 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       final user = await apiService.getMyProfile();
       _cachedUser = user;
       _saveUserToCache(user);
-      state = AsyncValue.data(user);
+      estado = AsyncValue.data(user);
       log.i('[AUTH] ✅ Usuário atualizado');
     } catch (e, st) {
       log.w('[AUTH] ⚠️ Erro ao atualizar usuário: $e');
       // Se falhar, mantém o usuário anterior em cache
       if (_cachedUser != null) {
-        state = AsyncValue.data(_cachedUser);
+        estado = AsyncValue.data(_cachedUser);
       } else {
-        state = AsyncValue.error(e, st);
+        estado = AsyncValue.error(e, st);
       }
     }
   }
 
-  bool get isAuthenticated => state.whenData((user) => user != null).value ?? false;
+  bool get isAuthenticated => estado.whenData((user) => user != null).value ?? false;
 }

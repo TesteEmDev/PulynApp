@@ -19,7 +19,7 @@ class WebSocketStatusIndicator extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Tooltip(
-        message: isConnected ? 'Conectado' : 'Desconectado',
+        mensagem: isConnected ? 'Conectado' : 'Desconectado',
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -29,7 +29,7 @@ class WebSocketStatusIndicator extends ConsumerWidget {
               width: 8,
               height: 8,
               decoration: BoxDecoration(
-                color: isConnected ? Colors.green : Colors.grey,
+                cor: isConnected ? Colors.green : Colors.grey,
                 shape: BoxShape.circle,
               ),
             ),
@@ -39,7 +39,7 @@ class WebSocketStatusIndicator extends ConsumerWidget {
                 isConnected ? 'Online' : 'Offline',
                 style: TextStyle(
                   fontSize: 12,
-                  color: isConnected ? Colors.green : Colors.grey,
+                  cor: isConnected ? Colors.green : Colors.grey,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -65,17 +65,17 @@ class WebSocketDisconnectionBanner extends ConsumerWidget {
     }
 
     return Container(
-      color: Colors.orange,
+      cor: Colors.orange,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          const Icon(Icons.cloud_off, color: Colors.white, size: 20),
+          const Icon(Icons.cloud_off, cor: Colors.white, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: const Text(
               'Sem conexão - Alguns dados podem estar desatualizados',
               style: TextStyle(
-                color: Colors.white,
+                cor: Colors.white,
                 fontSize: 13,
               ),
             ),
@@ -86,7 +86,7 @@ class WebSocketDisconnectionBanner extends ConsumerWidget {
             },
             child: const Text(
               'Reconectar',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(cor: Colors.white),
             ),
           ),
         ],

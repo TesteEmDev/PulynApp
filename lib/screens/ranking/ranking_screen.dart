@@ -29,9 +29,9 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
   }
 
   /// Detecta swipe da esquerda para direita
-  void _handleHorizontalDragEnd(DragEndDetails details) {
+  void _handleHorizontalDragEnd(DragEndDetails detalhes) {
     // Se o swipe foi da esquerda para direita (velocidade positiva no eixo X)
-    if (details.velocity.pixelsPerSecond.dx > 0) {
+    if (detalhes.velocity.pixelsPerSecond.dx > 0) {
       if (_startPosition.dx < 50) {
         // Só ativa swipe se começar perto da borda esquerda
         context.go('/home');
@@ -39,8 +39,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     }
   }
 
-  void _handleHorizontalDragStart(DragStartDetails details) {
-    _startPosition = details.globalPosition;
+  void _handleHorizontalDragStart(DragStartDetails detalhes) {
+    _startPosition = detalhes.globalPosition;
   }
 
   @override
@@ -58,8 +58,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
           bottom: TabBar(
             controller: _tabController,
             tabs: const [
-              Tab(text: 'Crianças', icon: Icon(Icons.person_outline)),
-              Tab(text: 'Times', icon: Icon(Icons.people_outline)),
+              Tab(texto: 'Crianças', icon: Icon(Icons.person_outline)),
+              Tab(texto: 'Times', icon: Icon(Icons.people_outline)),
             ],
           ),
         ),
@@ -96,7 +96,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             final medal = _getMedalForPosition(index);
             return _buildRankingCard(
               position: index + 1,
-              name: child.nickname.isNotEmpty ? child.nickname : child.name,
+              nome: child.apelido.isNotEmpty ? child.apelido : child.nome,
               score: child.currentScore,
               teamColor: child.teamColor,
               medal: medal,
@@ -119,8 +119,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
         final teamsMap = <String, (String, int, String)>{};
         for (final child in children) {
           if (teamsMap.containsKey(child.teamName)) {
-            final (name, score, color) = teamsMap[child.teamName]!;
-            teamsMap[child.teamName] = (name, score + child.currentScore, color);
+            final (nome, score, cor) = teamsMap[child.teamName]!;
+            teamsMap[child.teamName] = (nome, score + child.currentScore, cor);
           } else {
             teamsMap[child.teamName] = (child.teamName, child.currentScore, child.teamColor);
           }
@@ -142,7 +142,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             final medal = _getMedalForPosition(index);
             return _buildTeamRankingCard(
               position: index + 1,
-              name: teamName,
+              nome: teamName,
               score: totalScore,
               teamColor: teamColor,
               medal: medal,
@@ -169,7 +169,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
 
   Widget _buildRankingCard({
     required int position,
-    required String name,
+    required String nome,
     required int score,
     required String teamColor,
     required String medal,
@@ -178,10 +178,10 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
+        cor: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isTop ? PulynColors.primary : PulynColors.darkBorder,
+          cor: isTop ? PulynColors.primary : PulynColors.darkBorder,
           width: isTop ? 2 : 1,
         ),
       ),
@@ -193,7 +193,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}')),
+              cor: Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}')),
               borderRadius: BorderRadius.circular(25),
             ),
             child: Center(
@@ -214,11 +214,11 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  nome,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: PulynColors.textPrimary,
+                    cor: PulynColors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -227,7 +227,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                   'Posição #$position',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: PulynColors.textMuted,
+                    cor: PulynColors.textMuted,
                   ),
                 ),
               ],
@@ -238,7 +238,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: PulynColors.primary.withValues(alpha: 0.2),
+              cor: PulynColors.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -246,7 +246,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: PulynColors.primary,
+                cor: PulynColors.primary,
               ),
             ),
           ),
@@ -257,7 +257,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
 
   Widget _buildTeamRankingCard({
     required int position,
-    required String name,
+    required String nome,
     required int score,
     required String teamColor,
     required String medal,
@@ -266,10 +266,10 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
+        cor: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isTop ? PulynColors.primary : PulynColors.darkBorder,
+          cor: isTop ? PulynColors.primary : PulynColors.darkBorder,
           width: isTop ? 2 : 1,
         ),
       ),
@@ -281,7 +281,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}')),
+              cor: Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}')),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
@@ -302,11 +302,11 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  nome,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: PulynColors.textPrimary,
+                    cor: PulynColors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -315,7 +315,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                   'Pontos totais do time',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: PulynColors.textMuted,
+                    cor: PulynColors.textMuted,
                   ),
                 ),
               ],
@@ -331,14 +331,14 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: PulynColors.accent,
+                  cor: PulynColors.accent,
                 ),
               ),
               const Text(
                 'pontos',
                 style: TextStyle(
                   fontSize: 11,
-                  color: PulynColors.textMuted,
+                  cor: PulynColors.textMuted,
                 ),
               ),
             ],
@@ -356,9 +356,9 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: PulynColors.darkCard,
+            cor: PulynColors.darkCard,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: PulynColors.darkBorder),
+            border: Border.all(cor: PulynColors.darkBorder),
           ),
           padding: const EdgeInsets.all(16),
           height: 80,
@@ -367,15 +367,15 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     );
   }
 
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(String mensagem) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: PulynColors.danger),
+          const Icon(Icons.error_outline, size: 64, cor: PulynColors.danger),
           const SizedBox(height: 16),
           Text(
-            message,
+            mensagem,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -392,15 +392,15 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     );
   }
 
-  Widget _buildEmptyState(String message) {
+  Widget _buildEmptyState(String mensagem) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
+          const Icon(Icons.inbox_outlined, size: 64, cor: PulynColors.textMuted),
           const SizedBox(height: 16),
           Text(
-            message,
+            mensagem,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -410,7 +410,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
   }
 }
 
-// Provider para carregar filhos com seus scores
+// Provider para carregar filhos com seus pontos
 final childrenProvider = FutureProvider.autoDispose((ref) async {
   final apiService = ref.watch(apiServiceProvider);
   await apiService.init();

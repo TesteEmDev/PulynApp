@@ -41,7 +41,7 @@ class _ManageLinkedChildrenScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ ${child.nickname} desvinculada com sucesso'),
+            content: Text('✅ ${child.apelido} desvinculada com sucesso'),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -86,7 +86,7 @@ class _ManageLinkedChildrenScreenState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const Icon(Icons.error_outline, size: 64, cor: Colors.red),
               const SizedBox(height: 16),
               Text('Erro ao carregar: $error'),
             ],
@@ -99,13 +99,13 @@ class _ManageLinkedChildrenScreenState
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.person_outline,
-                      size: 64, color: PulynColors.textMuted),
+                      size: 64, cor: PulynColors.textMuted),
                   SizedBox(height: 16),
                   Text(
                     'Nenhuma criança vinculada',
                     style: TextStyle(
                       fontSize: 16,
-                      color: PulynColors.textMuted,
+                      cor: PulynColors.textMuted,
                     ),
                   ),
                 ],
@@ -131,18 +131,18 @@ class _ManageLinkedChildrenScreenState
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              color: Color(int.parse(
+                              cor: Color(int.parse(
                                 '0xFF${child.teamColor.replaceFirst('#', '')}',
                               )),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Center(
                               child: Text(
-                                child.nickname.isNotEmpty
-                                    ? child.nickname[0].toUpperCase()
+                                child.apelido.isNotEmpty
+                                    ? child.apelido[0].toUpperCase()
                                     : '?',
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  cor: Colors.white,
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -155,19 +155,19 @@ class _ManageLinkedChildrenScreenState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  child.nickname.isNotEmpty
-                                      ? child.nickname
-                                      : child.name,
+                                  child.apelido.isNotEmpty
+                                      ? child.apelido
+                                      : child.nome,
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 Text(
-                                  '${child.age} anos • ${child.teamName}',
+                                  '${child.idade} anos • ${child.teamName}',
                                   style: const TextStyle(
                                     fontSize: 12,
-                                    color: PulynColors.textMuted,
+                                    cor: PulynColors.textMuted,
                                   ),
                                 ),
                               ],
@@ -179,7 +179,7 @@ class _ManageLinkedChildrenScreenState
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PulynColors.darkSurface,
+                          cor: PulynColors.darkSurface,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Column(
@@ -197,7 +197,7 @@ class _ManageLinkedChildrenScreenState
                               'Ranking: #${child.rank}',
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: PulynColors.textMuted,
+                                cor: PulynColors.textMuted,
                               ),
                             ),
                           ],
@@ -228,7 +228,7 @@ class _ManageLinkedChildrenScreenState
                                 builder: (context) => AlertDialog(
                                   title: const Text('Desvincullar?'),
                                   content: Text(
-                                    'Deseja desvincullar ${child.nickname.isNotEmpty ? child.nickname : child.name}?',
+                                    'Deseja desvincullar ${child.apelido.isNotEmpty ? child.apelido : child.nome}?',
                                   ),
                                   actions: [
                                     TextButton(
@@ -243,7 +243,7 @@ class _ManageLinkedChildrenScreenState
                                       },
                                       child: const Text(
                                         'Desvincullar',
-                                        style: TextStyle(color: Colors.red),
+                                        style: TextStyle(cor: Colors.red),
                                       ),
                                     ),
                                   ],

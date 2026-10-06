@@ -21,15 +21,15 @@ enum NfcSupport {
 
 /// A leitura não foi concluída (a pessoa cancelou, ou a pulseira não pôde ser lida).
 class NfcReadException implements Exception {
-  final String message;
+  final String mensagem;
 
   /// `true` quando a própria pessoa fechou a leitura (não é um erro a mostrar).
   final bool cancelled;
 
-  const NfcReadException(this.message, {this.cancelled = false});
+  const NfcReadException(this.mensagem, {this.cancelled = false});
 
   @override
-  String toString() => message;
+  String toString() => mensagem;
 }
 
 /// Converte o UID lido pelo celular no formato que o backend usa: hexadecimal,
@@ -134,8 +134,8 @@ class PlatformNfcReader implements NfcReader {
           await finish(uid: hex);
         },
         onSessionErrorIos: (error) {
-          log.e('[NFC] iOS erro: ${error.code}');
-          final cancelled = error.code == NfcReaderErrorCodeIos.readerSessionInvalidationErrorUserCanceled;
+          log.e('[NFC] iOS erro: ${error.codigo}');
+          final cancelled = error.codigo == NfcReaderErrorCodeIos.readerSessionInvalidationErrorUserCanceled;
           if (!completer.isCompleted) {
             completer.completeError(NfcReadException(
               cancelled ? 'Leitura cancelada.' : 'Não foi possível ler a pulseira.',

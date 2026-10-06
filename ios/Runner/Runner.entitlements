@@ -8,5 +8,11 @@
 	<array>
 		<string>applinks:app.pulyn.com</string>
 	</array>
+	<!-- Ler a pulseira NFC (NTAG) para vincular a criança. Exige a capacidade "Near Field -->
+	<!-- Communication Tag Reading" ativada no App ID da conta Apple Developer. -->
+	<key>com.apple.developer.nfc.readersession.formats</key>
+	<array>
+		<string>TAG</string>
+	</array>
 </dict>
 </plist>

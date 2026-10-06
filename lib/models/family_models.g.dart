@@ -43,7 +43,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
 
 Child _$ChildFromJson(Map<String, dynamic> json) => Child(
   id: json['id'] as String,
-  evento_id: json['evento_id'] as String?,
+  eventoId: json['evento_id'] as String?,
   name: json['name'] as String,
   nickname: json['nickname'] as String,
   age: (json['age'] as num).toInt(),
@@ -61,7 +61,7 @@ Child _$ChildFromJson(Map<String, dynamic> json) => Child(
 
 Map<String, dynamic> _$ChildToJson(Child instance) => <String, dynamic>{
   'id': instance.id,
-  'evento_id': instance.evento_id,
+  'evento_id': instance.eventoId,
   'name': instance.name,
   'nickname': instance.nickname,
   'age': instance.age,

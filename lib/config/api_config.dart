@@ -15,9 +15,15 @@ class ApiConfig {
   /// ⚠️ IMPORTANTE PARA EMULADOR ANDROID:
   /// - localhost → 10.0.2.2 (IP especial do emulador)
   /// - Se der timeout, tente o IP local da máquina (192.168.x.x)
-  static const String apiBaseUrlLocal = 'http://192.168.0.60:3001';
+  ///
+  /// Para usar outro IP sem editar o código:
+  ///   flutter run --dart-define=PULYN_LOCAL_API=http://SEU_IP:3001
+  static const String apiBaseUrlLocal = String.fromEnvironment(
+    'PULYN_LOCAL_API',
+    defaultValue: 'http://192.168.0.60:3001',
+  );
   static const String apiBaseUrlLocalIP = 'http://10.0.2.2:3001'; // Emulador Android
-  static const String apiBaseUrlLocalLAN = 'http://192.168.0.60:3001'; // Seu IP local
+  static const String apiBaseUrlLocalLAN = apiBaseUrlLocal; // Seu IP local
   static const String apiBaseUrlRender = 'https://backendpulyn.onrender.com'; // ✅ PRODUÇÃO
   static const String apiBaseUrlProd = 'https://api.pulyn.com.br';
   

@@ -54,7 +54,8 @@ class User {
 @JsonSerializable()
 class Child {
   final String id;
-  final String? evento_id;  // ✅ ADICIONADO - ID do evento para rastrear criança no mapa
+  @JsonKey(name: 'evento_id')
+  final String? eventoId;  // ID do evento para rastrear criança no mapa
   final String name;
   final String nickname;
   final int age;
@@ -69,7 +70,7 @@ class Child {
 
   Child({
     required this.id,
-    this.evento_id,  // ✅ Adicionado no construtor
+    this.eventoId,
     required this.name,
     required this.nickname,
     required this.age,

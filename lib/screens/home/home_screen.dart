@@ -436,7 +436,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             log.i('📍 [HOME_SCREEN] _buildEventMapSection - Crianças carregadas: ${children.length}');
             if (children.isNotEmpty) {
               for (var child in children) {
-                log.i('   - ${child.nickname}: evento_id=${child.evento_id}');
+                log.i('   - ${child.nickname}: evento_id=${child.eventoId}');
               }
             }
             

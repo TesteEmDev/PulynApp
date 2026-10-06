@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../providers/index.dart';
 import '../../utils/logger.dart';
 import '../onboarding/onboarding_screen.dart';
@@ -15,7 +14,7 @@ import 'home_screen.dart';
 /// 
 /// FASE 1: Sem evento → Onboarding (primeira vez)
 /// FASE 2: status='scheduled' → Pre-Event Screen
-/// FASE 3: status='active' → Event Live Map (existente)
+/// FASE 3: status='active' → Home (que contém o mapa ao vivo)
 /// FASE 4: status='completed' → Event Result Screen
 
 class EventPhaseRouter extends ConsumerWidget {
@@ -75,16 +74,9 @@ class EventPhaseRouter extends ConsumerWidget {
           // FASE 3: Evento ativo
           case 'active':
             log.i('[EVENT_PHASE_ROUTER] 📍 FASE 3: DURANTE A FESTA (active)');
-            // Ir para Event Live Map (já existe)
-            // Usar context.go para navegação
-            Future.microtask(() {
-              context.go('/event-map');
-            });
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
+            // O mapa ao vivo (EventMapWidget) fica dentro da Home; não existe
+            // uma rota '/event-map' separada.
+            return const HomeScreen();
 
           // FASE 4: Evento encerrado
           case 'completed':

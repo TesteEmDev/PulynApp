@@ -3,11 +3,15 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Ler a pulseira NFC da criança para vincular (alternativa ao QR Code). -->
+    <uses-permission android:name="android.permission.NFC" />
 
     <!-- A câmera só é usada para ler QR Code vinculando a criança; o app funciona sem ela,
          então não excluímos da Play Store aparelhos sem câmera. -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <!-- O NFC é opcional (o QR Code continua funcionando): não exclui aparelhos sem NFC da Play Store. -->
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
     
     <application
         android:label="Pulyn Family"
@@ -44,6 +48,18 @@
                     android:host="app.pulyn.com"
                     android:pathPrefix="/family/invite/" />
             </intent-filter>
+
+            <!-- ✅ NFC Intent Filter - Captura pulseiras NFC (impede Samsung app abrir) -->
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+                <action android:name="android.nfc.action.TECH_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <meta-data
+                android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

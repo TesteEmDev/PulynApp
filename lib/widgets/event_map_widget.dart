@@ -1082,10 +1082,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         
         // ✅ Busca checkpoints usando provider com cache
         final checkpointsAsync = ref.watch(checkpointsByEventProvider(eventoId));
-
+        
         // ✅ Zonas são do buffet (empresa), não mudam por evento
         final zonesAsync = ref.watch(zonesProvider);
-
+        
         return checkpointsAsync.when(
           loading: () => Container(
             height: 480,
@@ -1193,7 +1193,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       }
     }
     
-    // ✅ Fallback: calcular pela zona
+    // ✅ Fallback: calcular pela zona (sem zonas carregadas, cai no centro do mapa)
+    if (zones.isEmpty) {
+      return {'x': 0.5, 'y': 0.5};
+    }
     final zoneName = checkpoint['zone'] ?? checkpoint['location'] ?? 'Entrada';
     final zone = zones.firstWhere(
       (z) => _normalizeZoneName(z.name) == _normalizeZoneName(zoneName),

@@ -4,8 +4,8 @@ library;
 import '../config/api_config.dart';
 import 'network_helper.dart';
 
-/// Avatar ID list - matches backend ADVENTURER_AVATAR_IDS
-const List<String> ADVENTURER_AVATAR_IDS = [
+/// Avatar ID list - matches the backend ADVENTURER_AVATAR_IDS
+const List<String> adventurerAvatarIds = [
   'adventurer-1787066874693',
   'adventurer-1787066893641',
   'adventurer-1787066897643',
@@ -28,7 +28,7 @@ const List<String> ADVENTURER_AVATAR_IDS = [
   'adventurer-1787066964514',
 ];
 
-const String DEFAULT_AVATAR_ID = 'adventurer-1787066874693';
+const String defaultAvatarId = 'adventurer-1787066874693';
 
 /// Gets the base URL for API calls
 String _getBaseUrl() {
@@ -43,11 +43,11 @@ String _getBaseUrl() {
 /// Avatar files are served from the backend at /avatars/{avatarId}.svg
 /// If the ID is invalid or null, returns the default avatar URL
 String getAvatarUrl(String? avatarId) {
-  final id = avatarId ?? DEFAULT_AVATAR_ID;
+  final id = avatarId ?? defaultAvatarId;
   
   // Validate that the ID is a known avatar ID
-  if (!ADVENTURER_AVATAR_IDS.contains(id)) {
-    return getAvatarUrl(DEFAULT_AVATAR_ID);
+  if (!adventurerAvatarIds.contains(id)) {
+    return getAvatarUrl(defaultAvatarId);
   }
   
   // Return the full URL to the avatar SVG file
@@ -56,14 +56,14 @@ String getAvatarUrl(String? avatarId) {
 
 /// Checks if an avatar ID is valid
 bool isValidAvatarId(String? avatarId) {
-  return avatarId != null && ADVENTURER_AVATAR_IDS.contains(avatarId);
+  return avatarId != null && adventurerAvatarIds.contains(avatarId);
 }
 
 /// Gets a readable label for an avatar ID
 String getAvatarLabel(String? avatarId) {
   if (avatarId == null) return 'Avatar padrão';
   
-  final index = ADVENTURER_AVATAR_IDS.indexOf(avatarId);
+  final index = adventurerAvatarIds.indexOf(avatarId);
   if (index == -1) return 'Avatar padrão';
   
   return 'Avatar Adventurer ${index + 1}';

@@ -4,7 +4,9 @@ import 'package:permission_handler/permission_handler.dart';
 import '../config/theme.dart';
 import '../models/family_models.dart';
 import '../services/api_service.dart';
+import '../services/nfc_reader.dart';
 import '../utils/logger.dart';
+import 'bracelet_link_panel.dart';
 
 typedef PermissionCheck = Future<PermissionStatus> Function();
 typedef LinkChildRequest = Future<Map<String, dynamic>> Function(String qrCode);
@@ -52,6 +54,10 @@ class QrLinkPanel extends StatefulWidget {
   final LinkChildRequest? linkChild;
   final CameraViewBuilder? cameraBuilder;
 
+  /// Leitor de NFC e chamada de vínculo da alternativa "pulseira" (também substituíveis em teste).
+  final NfcReader? nfcReader;
+  final LinkBraceletRequest? linkBracelet;
+
   const QrLinkPanel({
     this.onLinked,
     this.onClose,
@@ -61,6 +67,8 @@ class QrLinkPanel extends StatefulWidget {
     this.openSettings,
     this.linkChild,
     this.cameraBuilder,
+    this.nfcReader,
+    this.linkBracelet,
     super.key,
   });
 
@@ -75,11 +83,36 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
   Child? _linkedChild;
   String _errorMessage = '';
 
+  // Alternativa: vincular encostando a pulseira NFC. Só é oferecida se o celular tem NFC.
+  bool _nfcOffered = false;
+  bool _useNfc = false;
+
   @override
   void initState() {
     super.initState();
     // A pessoa acabou de tocar em "Escanear": já pede a câmera, sem outro botão no meio.
     _startCamera();
+    _checkNfcOffer();
+  }
+
+  Future<void> _checkNfcOffer() async {
+    final support = await (widget.nfcReader ?? const PlatformNfcReader()).support();
+    if (!mounted) return;
+    setState(() => _nfcOffered = support != NfcSupport.unsupported);
+  }
+
+  void _backToQr() {
+    setState(() => _useNfc = false);
+    _startCamera();
+  }
+
+  Widget _nfcButton() {
+    if (!_nfcOffered) return const SizedBox.shrink();
+    return TextButton.icon(
+      onPressed: () => setState(() => _useNfc = true),
+      icon: const Icon(Icons.nfc_rounded),
+      label: const Text('Usar a pulseira (NFC)'),
+    );
   }
 
   /// Confere/pede a permissão e, com ela, liga a câmera.
@@ -154,15 +187,24 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final content = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildHeader(),
-        const SizedBox(height: 14),
-        _buildBody(),
-      ],
-    );
+    final content = _useNfc
+        ? BraceletLinkPanel(
+            framed: false,
+            reader: widget.nfcReader,
+            linkChild: widget.linkBracelet,
+            onLinked: widget.onLinked,
+            onClose: widget.onClose,
+            onUseQr: _backToQr,
+          )
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 14),
+              _buildBody(),
+            ],
+          );
 
     if (!widget.framed) return content;
 
@@ -288,6 +330,7 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
             ),
           ),
         ),
+        _nfcButton(),
         if (widget.onClose != null)
           TextButton(onPressed: widget.onClose, child: const Text('Cancelar')),
       ],
@@ -330,6 +373,7 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
           ),
           TextButton(onPressed: _startCamera, child: const Text('Já permiti, tentar de novo')),
         ],
+        _nfcButton(),
         if (widget.onClose != null)
           TextButton(onPressed: widget.onClose, child: const Text('Agora não')),
       ],

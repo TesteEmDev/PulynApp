@@ -159,8 +159,8 @@ class _PreEventScreenState extends State<PreEventScreen> {
                   height: 48,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      // Vai para Event Live Map (Fase 3)
-                      context.pushReplacement('/event-map');
+                      // O mapa ao vivo (Fase 3) fica na Home
+                      context.go('/home');
                     },
                     icon: const Icon(Icons.play_arrow),
                     label: const Text('Entrar na Festa'),

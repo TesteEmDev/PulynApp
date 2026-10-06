@@ -479,7 +479,7 @@ class ApiService {
     try {
       final response = await _dio.get('/company-map/floor-plan');
       final data = _validateResponseData(response.data);
-
+      
       // Backend retorna { floorPlan: { dataUrl, name, type } }
       final floorPlan = data['floorPlan'] as Map<String, dynamic>?;
       if (floorPlan != null) {
@@ -718,6 +718,30 @@ class ApiService {
   }
 
 
+  /// POST /family/bracelet/validate - Vincular criança lendo a pulseira NFC.
+  /// [uid] é o UID da pulseira em hexadecimal (veja `uidToHex`). Devolve o mesmo formato do QR
+  /// (`success` + `linkedChild`); o vínculo fica pendente até a recepção aprovar.
+  Future<Map<String, dynamic>> linkChildWithBracelet(String uid) async {
+    try {
+      if (!_initialized) await init();
+
+      final response = await _dio.post('/family/bracelet/validate', data: {'uid': uid});
+      final data = _validateResponseData(response.data);
+
+      if (data['success'] != true || data['linkedChild'] == null) {
+        throw Exception('${data['error'] ?? 'Dados da criança ausentes na resposta'}');
+      }
+      log.i('[API] Criança vinculada pela pulseira: ${data['linkedChild']['nickname'] ?? data['linkedChild']['name']}');
+      return data;
+    } on DioException catch (e) {
+      log.e('[API] Erro ao vincular pela pulseira: ${e.response?.statusCode} ${e.response?.data}');
+      var message = 'Erro ao vincular pela pulseira';
+      final body = e.response?.data;
+      if (body is Map && body['error'] is String) message = body['error'] as String;
+      throw Exception(message);
+    }
+  }
+
   /// ✅ POST /family/qrcode/validate - Vincular criança com QR code
 Future<Map<String, dynamic>> linkChildWithQRCode(String qrCodeValue) async {
   try {
@@ -743,7 +767,7 @@ Future<Map<String, dynamic>> linkChildWithQRCode(String qrCodeValue) async {
     
     // ✅ Validar que tem 'success' e 'linkedChild'
     if (data['success'] != true) {
-      log.e('[API] ❌ Resposta não confirmou sucesso: ${data}');
+      log.e('[API] ❌ Resposta não confirmou sucesso: $data');
       throw DioException(
         requestOptions: RequestOptions(path: '/family/qrcode/validate'),
         error: data['error'] ?? 'Resposta sem confirmação de sucesso',
@@ -753,7 +777,7 @@ Future<Map<String, dynamic>> linkChildWithQRCode(String qrCodeValue) async {
     
     final linkedChild = data['linkedChild'];
     if (linkedChild == null) {
-      log.e('[API] ❌ Falta "linkedChild" na resposta: ${data}');
+      log.e('[API] ❌ Falta "linkedChild" na resposta: $data');
       throw DioException(
         requestOptions: RequestOptions(path: '/family/qrcode/validate'),
         error: 'Dados da criança ausentes na resposta',

@@ -95,7 +95,7 @@ class ApiService {
       throw DioException(
         requestOptions: RequestOptions(path: ''),
         error: 'Response data is null',
-        tipo: DioExceptionType.unknown,
+        type: DioExceptionType.unknown,
       );
     }
     
@@ -103,7 +103,7 @@ class ApiService {
       throw DioException(
         requestOptions: RequestOptions(path: ''),
         error: 'Response data is not a Map: ${data.runtimeType}',
-        tipo: DioExceptionType.unknown,
+        type: DioExceptionType.unknown,
       );
     }
     
@@ -118,7 +118,7 @@ class ApiService {
       throw DioException(
         requestOptions: RequestOptions(path: ''),
         error: 'Response data is not a List: ${data.runtimeType}',
-        tipo: DioExceptionType.unknown,
+        type: DioExceptionType.unknown,
       );
     }
     
@@ -150,14 +150,14 @@ class ApiService {
         throw DioException(
           requestOptions: RequestOptions(path: '/auth/login'),
           error: 'Missing token or user in response',
-          tipo: DioExceptionType.unknown,
+          type: DioExceptionType.unknown,
         );
       }
       
       final user = User(
         id: userData['id'] ?? '',
         email: userData['email'] ?? email,
-        nome: userData['nome'] ?? userData['nomeFamilia'] ?? 'User',
+        name: userData['nome'] ?? userData['nomeFamilia'] ?? 'User',
         perfil: userData['perfil'] ?? 'family',
         empresaId: userData['empresaId'] ?? '',
         profileImage: userData['profileImage'],
@@ -220,14 +220,14 @@ class ApiService {
         throw DioException(
           requestOptions: RequestOptions(path: '/auth/register'),
           error: 'Missing token or user in response',
-          tipo: DioExceptionType.unknown,
+          type: DioExceptionType.unknown,
         );
       }
       
       final user = User(
         id: userData['id'] ?? '',
         email: userData['email'] ?? email,
-        nome: userData['nome'] ?? userData['nomeFamilia'] ?? nome,
+        name: userData['nome'] ?? userData['nomeFamilia'] ?? nome,
         perfil: userData['perfil'] ?? 'family',
         empresaId: userData['empresaId'] ?? userData['empresa_name'] ?? '',
         profileImage: userData['profileImage'],
@@ -633,7 +633,7 @@ class ApiService {
         final user = User(
           id: userData['id'] ?? '',
           email: userData['email'] ?? email,
-          nome: userData['nome'] ?? userData['nomeFamilia'] ?? parentName,
+          name: userData['nome'] ?? userData['nomeFamilia'] ?? parentName,
           perfil: userData['perfil'] ?? 'family',
           empresaId: userData['empresaId'] ?? '',
           profileImage: userData['profileImage'],
@@ -685,7 +685,7 @@ class ApiService {
       throw Exception('Formato de resposta não reconhecido');
       
     } on DioException catch (e) {
-      log.e('[API] ❌ ERRO NO REGISTRO COM CONVITE (Status ${e.response?.statusCode}): ${e.mensagem}');
+      log.e('[API] ❌ ERRO NO REGISTRO COM CONVITE (Status ${e.response?.statusCode}): ${e.message}');
       
       // Tenta extrair mensagem de erro do backend
       String errorMessage = 'Erro ao registrar';
@@ -771,7 +771,7 @@ Future<Map<String, dynamic>> linkChildWithQRCode(String qrCodeValue) async {
       throw DioException(
         requestOptions: RequestOptions(path: '/family/qrcode/validate'),
         error: data['error'] ?? 'Resposta sem confirmação de sucesso',
-        tipo: DioExceptionType.unknown,
+        type: DioExceptionType.unknown,
       );
     }
     
@@ -781,7 +781,7 @@ Future<Map<String, dynamic>> linkChildWithQRCode(String qrCodeValue) async {
       throw DioException(
         requestOptions: RequestOptions(path: '/family/qrcode/validate'),
         error: 'Dados da criança ausentes na resposta',
-        tipo: DioExceptionType.unknown,
+        type: DioExceptionType.unknown,
       );
     }
     
@@ -791,7 +791,7 @@ Future<Map<String, dynamic>> linkChildWithQRCode(String qrCodeValue) async {
     
     return data;
   } on DioException catch (e) {
-    log.e('[API] ❌ ERRO DIO ao vincular: ${e.mensagem}');
+    log.e('[API] ❌ ERRO DIO ao vincular: ${e.message}');
     log.e('[API] 🔴 Status Code: ${e.response?.statusCode}');
     log.e('[API] 📝 Resposta do erro: ${e.response?.data}');
     log.e('[API] 📍 Stack: ${StackTrace.current}');

@@ -67,10 +67,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     FocusScope.of(context).unfocus();
 
-    final nome = _nameController.texto.trim();
-    final email = _emailController.texto.trim();
-    final senha = _passwordController.texto;
-    final confirmPassword = _confirmPasswordController.texto;
+    final nome = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final senha = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
 
     // Validação de senhas correspondentes
     if (senha != confirmPassword) {
@@ -81,7 +81,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     // Validação de força de senha
     final passwordValidation = _validationService.validatePassword(senha);
     if (!passwordValidation.valid) {
-      _showError('❌ ${passwordValidation.mensagem}');
+      _showError('❌ ${passwordValidation.message}');
       return;
     }
 
@@ -136,7 +136,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Email é obrigatório';
     }
     final result = _validationService.validateEmail(value);
-    return result.valid ? null : result.mensagem;
+    return result.valid ? null : result.message;
   }
 
   String? _validatePassword(String? value) {
@@ -144,7 +144,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Senha é obrigatória';
     }
     final result = _validationService.validatePassword(value);
-    return result.valid ? null : result.mensagem;
+    return result.valid ? null : result.message;
   }
 
   String? _validateConfirmPassword(String? value) {
@@ -152,10 +152,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Confirme a senha';
     }
     final result = _validationService.validatePasswordMatch(
-      _passwordController.texto,
+      _passwordController.text,
       value,
     );
-    return result.valid ? null : result.mensagem;
+    return result.valid ? null : result.message;
   }
 
   String? _validateName(String? value) {
@@ -163,7 +163,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Nome é obrigatório';
     }
     final result = _validationService.validateName(value);
-    return result.valid ? null : result.mensagem;
+    return result.valid ? null : result.message;
   }
 
   @override
@@ -202,7 +202,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           enabled: !_isLoading,
                           textCapitalization: TextCapitalization.words,
                           textInputAction: TextInputAction.next,
-                          autofillHints: const [AutofillHints.nome],
+                          autofillHints: const [AutofillHints.name],
                           decoration: const InputDecoration(
                             labelText: 'Nome completo',
                             hintText: 'João Silva',

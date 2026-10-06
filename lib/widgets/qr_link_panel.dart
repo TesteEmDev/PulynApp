@@ -16,7 +16,7 @@ typedef CameraViewBuilder = Widget Function(BuildContext context, ValueChanged<S
 Child childFromLinkedChild(Map<String, dynamic> data) {
   return Child(
     id: '${data['id'] ?? ''}',
-    nome: '${data['nome'] ?? ''}',
+    name: '${data['nome'] ?? ''}',
     apelido: '${data['apelido'] ?? ''}',
     idade: data['idade'] is num ? (data['idade'] as num).toInt() : 0,
     teamName: '${data['evento'] ?? 'Sem time'}',
@@ -211,9 +211,9 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        cor: PulynColors.darkCard,
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(cor: PulynColors.primary.withValues(alpha: 0.4)),
+        border: Border.all(color: PulynColors.primary.withValues(alpha: 0.4)),
       ),
       child: content,
     );
@@ -222,19 +222,19 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
   Widget _buildHeader() {
     return Row(
       children: [
-        const Icon(Icons.qr_code_scanner_rounded, cor: PulynColors.primary),
+        const Icon(Icons.qr_code_scanner_rounded, color: PulynColors.primary),
         const SizedBox(width: 10),
         const Expanded(
           child: Text(
             'Vincular criança',
-            style: TextStyle(cor: Colors.white, fontSize: 17, fontWeight: FontWeight.w700),
+            style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700),
           ),
         ),
         if (widget.onClose != null)
           IconButton(
             tooltip: 'Fechar',
             icon: const Icon(Icons.close_rounded),
-            cor: PulynColors.textMuted,
+            color: PulynColors.textMuted,
             visualDensity: VisualDensity.compact,
             onPressed: widget.onClose,
           ),
@@ -274,7 +274,7 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
         children: [
           indicator,
           const SizedBox(height: 16),
-          Text(texto, style: const TextStyle(cor: PulynColors.textSecondary)),
+          Text(texto, style: const TextStyle(color: PulynColors.textSecondary)),
         ],
       ),
     );
@@ -300,7 +300,7 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
                       width: 200,
                       height: 200,
                       decoration: BoxDecoration(
-                        border: Border.all(cor: Colors.white.withValues(alpha: 0.9), width: 3),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 3),
                         borderRadius: BorderRadius.circular(18),
                       ),
                     ),
@@ -315,12 +315,12 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          cor: Colors.black.withValues(alpha: 0.55),
+                          color: Colors.black.withValues(alpha: 0.55),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
                           'Aponte a câmera para o QR Code',
-                          style: TextStyle(cor: Colors.white, fontSize: 13),
+                          style: TextStyle(color: Colors.white, fontSize: 13),
                         ),
                       ),
                     ),
@@ -343,12 +343,12 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Icon(Icons.no_photography_outlined, size: 44, cor: PulynColors.warning),
+        const Icon(Icons.no_photography_outlined, size: 44, color: PulynColors.warning),
         const SizedBox(height: 12),
         const Text(
           'Precisamos da câmera',
           textAlign: TextAlign.center,
-          style: TextStyle(cor: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
         ),
         const SizedBox(height: 6),
         Text(
@@ -356,7 +356,7 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
               ? 'Para ler o QR Code, permita o acesso à câmera.'
               : 'O acesso à câmera está desativado. Ative nas configurações do app e volte aqui.',
           textAlign: TextAlign.center,
-          style: const TextStyle(cor: PulynColors.textSecondary, height: 1.4),
+          style: const TextStyle(color: PulynColors.textSecondary, height: 1.4),
         ),
         const SizedBox(height: 16),
         if (_canAskAgain)
@@ -392,16 +392,16 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
           height: 64,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            cor: PulynColors.success.withValues(alpha: 0.15),
+            color: PulynColors.success.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.check_rounded, size: 36, cor: PulynColors.success),
+          child: const Icon(Icons.check_rounded, size: 36, color: PulynColors.success),
         ),
         const SizedBox(height: 12),
         const Text(
           'Criança vinculada!',
           textAlign: TextAlign.center,
-          style: TextStyle(cor: Colors.white, fontWeight: FontWeight.w800, fontSize: 18),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18),
         ),
         const SizedBox(height: 4),
         Text(
@@ -411,7 +411,7 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
             if (child.teamName.isNotEmpty) child.teamName,
           ].join(' · '),
           textAlign: TextAlign.center,
-          style: const TextStyle(cor: PulynColors.textSecondary),
+          style: const TextStyle(color: PulynColors.textSecondary),
         ),
         const SizedBox(height: 16),
         OutlinedButton.icon(
@@ -430,12 +430,12 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Icon(Icons.error_outline_rounded, size: 44, cor: PulynColors.danger),
+        const Icon(Icons.error_outline_rounded, size: 44, color: PulynColors.danger),
         const SizedBox(height: 12),
         Text(
           _errorMessage.isEmpty ? 'Não foi possível vincular a criança.' : _errorMessage,
           textAlign: TextAlign.center,
-          style: const TextStyle(cor: Colors.white, height: 1.4),
+          style: const TextStyle(color: Colors.white, height: 1.4),
         ),
         const SizedBox(height: 16),
         ElevatedButton.icon(
@@ -490,14 +490,14 @@ class _CameraViewState extends State<_CameraView> {
       errorBuilder: (context, error) {
         log.e('[QR] Erro na câmera: $error');
         return const ColoredBox(
-          cor: Colors.black,
+          color: Colors.black,
           child: Center(
             child: Padding(
               padding: EdgeInsets.all(20),
               child: Text(
                 'Não foi possível abrir a câmera.\nConfira a permissão do app e se outro app não está usando a câmera.',
                 textAlign: TextAlign.center,
-                style: TextStyle(cor: Colors.white70, height: 1.4),
+                style: TextStyle(color: Colors.white70, height: 1.4),
               ),
             ),
           ),

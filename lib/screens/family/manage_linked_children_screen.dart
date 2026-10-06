@@ -86,7 +86,7 @@ class _ManageLinkedChildrenScreenState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, cor: Colors.red),
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               Text('Erro ao carregar: $error'),
             ],
@@ -99,13 +99,13 @@ class _ManageLinkedChildrenScreenState
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.person_outline,
-                      size: 64, cor: PulynColors.textMuted),
+                      size: 64, color: PulynColors.textMuted),
                   SizedBox(height: 16),
                   Text(
                     'Nenhuma criança vinculada',
                     style: TextStyle(
                       fontSize: 16,
-                      cor: PulynColors.textMuted,
+                      color: PulynColors.textMuted,
                     ),
                   ),
                 ],
@@ -131,7 +131,7 @@ class _ManageLinkedChildrenScreenState
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              cor: Color(int.parse(
+                              color: Color(int.parse(
                                 '0xFF${child.teamColor.replaceFirst('#', '')}',
                               )),
                               borderRadius: BorderRadius.circular(12),
@@ -142,7 +142,7 @@ class _ManageLinkedChildrenScreenState
                                     ? child.apelido[0].toUpperCase()
                                     : '?',
                                 style: const TextStyle(
-                                  cor: Colors.white,
+                                  color: Colors.white,
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -167,7 +167,7 @@ class _ManageLinkedChildrenScreenState
                                   '${child.idade} anos • ${child.teamName}',
                                   style: const TextStyle(
                                     fontSize: 12,
-                                    cor: PulynColors.textMuted,
+                                    color: PulynColors.textMuted,
                                   ),
                                 ),
                               ],
@@ -179,7 +179,7 @@ class _ManageLinkedChildrenScreenState
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          cor: PulynColors.darkSurface,
+                          color: PulynColors.darkSurface,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Column(
@@ -197,7 +197,7 @@ class _ManageLinkedChildrenScreenState
                               'Ranking: #${child.rank}',
                               style: const TextStyle(
                                 fontSize: 12,
-                                cor: PulynColors.textMuted,
+                                color: PulynColors.textMuted,
                               ),
                             ),
                           ],
@@ -243,7 +243,7 @@ class _ManageLinkedChildrenScreenState
                                       },
                                       child: const Text(
                                         'Desvincullar',
-                                        style: TextStyle(cor: Colors.red),
+                                        style: TextStyle(color: Colors.red),
                                       ),
                                     ),
                                   ],

@@ -25,9 +25,9 @@ class CheckpointHeatmapWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        cor: PulynColors.darkCard,
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(cor: PulynColors.darkBorder),
+        border: Border.all(color: PulynColors.darkBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +44,7 @@ class CheckpointHeatmapWidget extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        cor: PulynColors.textMuted,
+                        color: PulynColors.textMuted,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -101,12 +101,12 @@ class CheckpointHeatmapWidget extends StatelessWidget {
     
     return Container(
       decoration: BoxDecoration(
-        cor: isConquered
+        color: isConquered
             ? PulynColors.success.withValues(alpha: 0.2)
             : PulynColors.darkBorder,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          cor: isConquered ? PulynColors.success : Colors.transparent,
+          color: isConquered ? PulynColors.success : Colors.transparent,
           width: 2,
         ),
       ),
@@ -131,7 +131,7 @@ class CheckpointHeatmapWidget extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  cor: isConquered ? PulynColors.success : PulynColors.textMuted,
+                  color: isConquered ? PulynColors.success : PulynColors.textMuted,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

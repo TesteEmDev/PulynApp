@@ -287,7 +287,7 @@ class CheckpointsCacheNotifier extends StateNotifier<Map<String, List<Map<String
   CheckpointsCacheNotifier() : super({});
 
   void setCheckpoints(String eventoId, List<Map<String, dynamic>> checkpoints) {
-    estado = {...estado, eventoId: checkpoints};
+    state = {...state, eventoId: checkpoints};
   }
 
   List<Map<String, dynamic>>? getCheckpoints(String eventoId) {
@@ -295,7 +295,7 @@ class CheckpointsCacheNotifier extends StateNotifier<Map<String, List<Map<String
   }
 
   void clearCache() {
-    estado = {};
+    state = {};
   }
 }
 
@@ -505,8 +505,8 @@ class RealtimeTrackingNotifier extends StateNotifier<Map<String, CheckpointReadi
   }) {
     log.i('[TRACKING_NOTIFIER] 📍 Atualizando criança $childId → checkpoint $checkpointName');
     
-    estado = {
-      ...estado,
+    state = {
+      ...state,
       childId: CheckpointReading(
         checkpointId: checkpointId,
         checkpointName: checkpointName,
@@ -515,7 +515,7 @@ class RealtimeTrackingNotifier extends StateNotifier<Map<String, CheckpointReadi
       ),
     };
     
-    log.i('[TRACKING_NOTIFIER] ✅ Estado atualizado. Total: ${estado.length} crianças rastreadas');
+    log.i('[TRACKING_NOTIFIER] ✅ Estado atualizado. Total: ${state.length} crianças rastreadas');
   }
   
   /// Obtém o último checkpoint de uma criança
@@ -526,10 +526,10 @@ class RealtimeTrackingNotifier extends StateNotifier<Map<String, CheckpointReadi
   /// Limpa o rastreamento de uma criança (ou de todas)
   void clearTracking({String? childId}) {
     if (childId != null) {
-      estado = {...estado}..remove(childId);
+      state = {...estado}..remove(childId);
       log.i('[TRACKING_NOTIFIER] 🗑️ Rastreamento de $childId removido');
     } else {
-      estado = {};
+      state = {};
       log.i('[TRACKING_NOTIFIER] 🗑️ Todos os rastreamentos removidos');
     }
   }

@@ -117,7 +117,7 @@ class WebSocketService {
             }
           }
         } catch (e) {
-          log.e('[WebSocket] ❌ Erro ao decodificar mensagem: $e');
+          log.e('[WebSocket] ❌ Erro ao decodificar message: $e');
         }
       },
       onError: (error) {
@@ -169,7 +169,7 @@ class WebSocketService {
           log.i('[WebSocket] 📤 Mensagem enviada: $tipo');
         }
       } catch (e) {
-        log.e('[WebSocket] ❌ Erro ao enviar mensagem: $e');
+        log.e('[WebSocket] ❌ Erro ao enviar message: $e');
       }
     } else {
       log.w('[WebSocket] ⚠️ Não conectado, mensagem não enviada');

@@ -20,7 +20,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
   }
 
   void _handleInviteCode() {
-    final codigo = _codeController.texto.trim();
+    final codigo = _codeController.text.trim();
     
     if (codigo.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -78,7 +78,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                 'Acompanhe a jornada do seu filho em tempo real',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  cor: Colors.grey,
+                  color: Colors.grey,
                 ),
               ),
               
@@ -88,10 +88,10 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  cor: Colors.blue.withValues(alpha: 0.1),
+                  color: Colors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    cor: Colors.blue.withValues(alpha: 0.3),
+                    color: Colors.blue.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
@@ -99,7 +99,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                     Icon(
                       Icons.card_giftcard,
                       size: 48,
-                      cor: Colors.blue.shade300,
+                      color: Colors.blue.shade300,
                     ),
                     const SizedBox(height: 16),
                     const Text(
@@ -116,7 +116,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        cor: Colors.grey.shade400,
+                        color: Colors.grey.shade400,
                       ),
                     ),
                   ],
@@ -163,7 +163,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  cor: Colors.grey.withValues(alpha: 0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -181,7 +181,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        cor: Colors.grey.shade400,
+                        color: Colors.grey.shade400,
                       ),
                     ),
                   ],

@@ -26,7 +26,7 @@ class NfcReadException implements Exception {
   /// `true` quando a própria pessoa fechou a leitura (não é um erro a mostrar).
   final bool cancelled;
 
-  const NfcReadException(this.mensagem, {this.cancelled = false});
+  const NfcReadException(this.message, {this.cancelled = false});
 
   @override
   String toString() => mensagem;

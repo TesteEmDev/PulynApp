@@ -40,7 +40,7 @@ class User {
   User({
     required this.id,
     required this.email,
-    required this.nome,
+    required this.name,
     this.profileImage,
     required this.perfil,
     required this.empresaId,
@@ -54,7 +54,7 @@ class User {
 @JsonSerializable()
 class Child {
   final String id;
-  @JsonKey(nome: 'eventoId')
+  @JsonKey(name: 'eventoId')
   final String? eventoId;  // ID do evento para rastrear criança no mapa
   final String nome;
   final String apelido;
@@ -133,7 +133,7 @@ class Event {
 
   Event({
     required this.id,
-    required this.nome,
+    required this.name,
     required this.date,
     required this.status,
     required this.children,
@@ -149,15 +149,15 @@ class Event {
 class Team {
   final String id;
   final String nome;
-  final String cor;
+  final String color;
   final int totalPoints;
   final int ranking;
   final List<String> childrenIds;
 
   Team({
     required this.id,
-    required this.nome,
-    required this.cor,
+    required this.name,
+    required this.color,
     required this.totalPoints,
     required this.ranking,
     required this.childrenIds,
@@ -173,7 +173,7 @@ class Notification {
   final String id;
   final String title;
   final String mensagem;
-  final String tipo;
+  final String type;
   final String? childId;
   final DateTime createdAt;
   final bool read;
@@ -181,8 +181,8 @@ class Notification {
   Notification({
     required this.id,
     required this.title,
-    required this.mensagem,
-    required this.tipo,
+    required this.message,
+    required this.type,
     this.childId,
     required this.createdAt,
     required this.read,

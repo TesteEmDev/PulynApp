@@ -230,7 +230,7 @@ class _ResultHeader extends StatelessWidget {
                 child: Text(
                   'Festa Encerrada!',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        cor: Colors.white,
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
@@ -243,7 +243,7 @@ class _ResultHeader extends StatelessWidget {
                 child: Text(
                   eventName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        cor: Colors.white.withValues(alpha: 0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                 ),
               ),
@@ -285,7 +285,7 @@ class _ChildResultCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        border: Border.all(cor: Colors.grey.shade300),
+        border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(16),
@@ -310,7 +310,7 @@ class _ChildResultCard extends StatelessWidget {
                     Text(
                       'Team $teamName',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            cor: Colors.grey[600],
+                            color: Colors.grey[600],
                           ),
                     ),
                   ],
@@ -343,7 +343,7 @@ class _ChildResultCard extends StatelessWidget {
                 '💰 $score pontos',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      cor: Theme.of(context).primaryColor,
+                      color: Theme.of(context).primaryColor,
                     ),
               ),
             ],
@@ -451,7 +451,7 @@ class _ChildrenRankingList extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8),
           child: Container(
             decoration: BoxDecoration(
-              cor: Colors.grey.shade50,
+              color: Colors.grey.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(12),
@@ -476,7 +476,7 @@ class _ChildrenRankingList extends StatelessWidget {
                   '$score pts',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        cor: Theme.of(context).primaryColor,
+                        color: Theme.of(context).primaryColor,
                       ),
                 ),
               ],
@@ -516,7 +516,7 @@ class _TeamsRankingList extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8),
           child: Container(
             decoration: BoxDecoration(
-              cor: Colors.grey.shade50,
+              color: Colors.grey.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(12),
@@ -541,7 +541,7 @@ class _TeamsRankingList extends StatelessWidget {
                   '$score pts',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        cor: Theme.of(context).primaryColor,
+                        color: Theme.of(context).primaryColor,
                       ),
                 ),
               ],
@@ -561,7 +561,7 @@ class _EmptyResult extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        cor: Colors.grey.shade100,
+        color: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(24),
@@ -590,7 +590,7 @@ class _EmptyRanking extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        cor: Colors.grey.shade100,
+        color: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(24),
@@ -598,7 +598,7 @@ class _EmptyRanking extends StatelessWidget {
         child: Text(
           'Ranking não disponível',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                cor: Colors.grey[600],
+                color: Colors.grey[600],
               ),
         ),
       ),

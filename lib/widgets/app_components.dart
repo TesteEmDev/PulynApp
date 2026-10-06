@@ -40,7 +40,7 @@ class LazyImage extends StatelessWidget {
           return Container(
             width: width,
             height: height,
-            cor: PulynColors.darkSurface,
+            color: PulynColors.darkSurface,
             child: Center(
               child: CircularProgressIndicator(
                 value: progress.expectedTotalBytes != null
@@ -55,9 +55,9 @@ class LazyImage extends StatelessWidget {
           return Container(
             width: width,
             height: height,
-            cor: PulynColors.darkSurface,
+            color: PulynColors.darkSurface,
             child: const Center(
-              child: Icon(Icons.broken_image, cor: PulynColors.textMuted),
+              child: Icon(Icons.broken_image, color: PulynColors.textMuted),
             ),
           );
         },
@@ -110,12 +110,12 @@ class PulynCard extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            cor: borderColor ?? (isHighlight ? PulynColors.primary : PulynColors.darkBorder),
+            color: borderColor ?? (isHighlight ? PulynColors.primary : PulynColors.darkBorder),
             width: isHighlight ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              cor: (isHighlight ? PulynColors.primary : Colors.black).withValues(alpha: 0.15),
+              color: (isHighlight ? PulynColors.primary : Colors.black).withValues(alpha: 0.15),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -140,7 +140,7 @@ class AvatarCard extends StatelessWidget {
   const AvatarCard({
     super.key,
     required this.initials,
-    required this.nome,
+    required this.name,
     required this.subtitle,
     required this.avatarColor,
     this.badge,
@@ -169,7 +169,7 @@ class AvatarCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      cor: avatarColor.withValues(alpha: 0.4),
+                      color: avatarColor.withValues(alpha: 0.4),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -179,7 +179,7 @@ class AvatarCard extends StatelessWidget {
                   child: Text(
                     initials,
                     style: const TextStyle(
-                      cor: Colors.white,
+                      color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -191,13 +191,13 @@ class AvatarCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    cor: PulynColors.accent,
+                    color: PulynColors.accent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     '$badge',
                     style: const TextStyle(
-                      cor: Colors.white,
+                      color: Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -216,7 +216,7 @@ class AvatarCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    cor: PulynColors.textPrimary,
+                    color: PulynColors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -226,7 +226,7 @@ class AvatarCard extends StatelessWidget {
                   subtitle,
                   style: const TextStyle(
                     fontSize: 13,
-                    cor: PulynColors.textMuted,
+                    color: PulynColors.textMuted,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -234,7 +234,7 @@ class AvatarCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios, size: 16, cor: PulynColors.textMuted),
+          const Icon(Icons.arrow_forward_ios, size: 16, color: PulynColors.textMuted),
         ],
       ),
     );
@@ -289,7 +289,7 @@ class PulynButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: isSecondary
-              ? const BorderSide(cor: PulynColors.primary, width: 2)
+              ? const BorderSide(color: PulynColors.primary, width: 2)
               : BorderSide.none,
         ),
         elevation: isSecondary ? 0 : 4,
@@ -321,24 +321,24 @@ class PulynIconButton extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        cor: backgroundColor ?? PulynColors.primary,
+        color: backgroundColor ?? PulynColors.primary,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            cor: (backgroundColor ?? PulynColors.primary).withValues(alpha: 0.4),
+            color: (backgroundColor ?? PulynColors.primary).withValues(alpha: 0.4),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
-        cor: Colors.transparent,
+        color: Colors.transparent,
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(12),
           child: Icon(
             icon,
-            cor: iconColor ?? Colors.white,
+            color: iconColor ?? Colors.white,
             size: 24,
           ),
         ),
@@ -367,7 +367,7 @@ class PulynTextField extends StatefulWidget {
     required this.label,
     this.hint,
     required this.controller,
-    this.keyboardType = TextInputType.texto,
+    this.keyboardType = TextInputType.text,
     this.obscureText = false,
     this.prefixIcon,
     this.validator,
@@ -397,7 +397,7 @@ class _PulynTextFieldState extends State<PulynTextField> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            cor: PulynColors.textPrimary,
+            color: PulynColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -409,7 +409,7 @@ class _PulynTextFieldState extends State<PulynTextField> {
           validator: widget.validator,
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: const TextStyle(cor: PulynColors.textMuted),
+            hintStyle: const TextStyle(color: PulynColors.textMuted),
             prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
             suffixIcon: widget.obscureText
                 ? IconButton(
@@ -421,19 +421,19 @@ class _PulynTextFieldState extends State<PulynTextField> {
             fillColor: PulynColors.darkSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(cor: PulynColors.darkBorder),
+              borderSide: const BorderSide(color: PulynColors.darkBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(cor: PulynColors.primary, width: 2),
+              borderSide: const BorderSide(color: PulynColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(cor: PulynColors.danger, width: 2),
+              borderSide: const BorderSide(color: PulynColors.danger, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
-          style: const TextStyle(cor: PulynColors.textPrimary),
+          style: const TextStyle(color: PulynColors.textPrimary),
         ),
       ],
     );
@@ -475,7 +475,7 @@ class ScoreBadge extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          cor: (backgroundColor ?? PulynColors.accent).withValues(alpha: 0.5),
+          color: (backgroundColor ?? PulynColors.accent).withValues(alpha: 0.5),
         ),
       ),
       child: Column(
@@ -486,7 +486,7 @@ class ScoreBadge extends StatelessWidget {
             style: TextStyle(
               fontSize: isLarge ? 20 : 16,
               fontWeight: FontWeight.bold,
-              cor: backgroundColor ?? PulynColors.accent,
+              color: backgroundColor ?? PulynColors.accent,
             ),
           ),
           if (label != null) ...[
@@ -495,7 +495,7 @@ class ScoreBadge extends StatelessWidget {
               label!,
               style: const TextStyle(
                 fontSize: 11,
-                cor: PulynColors.textMuted,
+                color: PulynColors.textMuted,
               ),
             ),
           ],
@@ -508,13 +508,13 @@ class ScoreBadge extends StatelessWidget {
 /// Status indicator com cor
 class StatusIndicator extends StatelessWidget {
   final String label;
-  final Color cor;
+  final Color color;
   final IconData? icon;
 
   const StatusIndicator({
     super.key,
     required this.label,
-    required this.cor,
+    required this.color,
     this.icon,
   });
 
@@ -523,15 +523,15 @@ class StatusIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        cor: cor.withValues(alpha: 0.2),
+        color: cor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(cor: cor.withValues(alpha: 0.5)),
+        border: Border.all(color: cor.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 14, cor: cor),
+            Icon(icon, size: 14, color: color),
             const SizedBox(width: 6),
           ],
           Text(
@@ -539,7 +539,7 @@ class StatusIndicator extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              cor: cor,
+              color: color,
             ),
           ),
         ],
@@ -575,12 +575,12 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, cor: PulynColors.textMuted),
+            Icon(icon, size: 64, color: PulynColors.textMuted),
             const SizedBox(height: 16),
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    cor: PulynColors.textPrimary,
+                    color: PulynColors.textPrimary,
                     fontWeight: FontWeight.bold,
                   ),
               textAlign: TextAlign.center,
@@ -589,7 +589,7 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 subtitle!,
-                style: const TextStyle(cor: PulynColors.textMuted),
+                style: const TextStyle(color: PulynColors.textMuted),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -611,7 +611,7 @@ class ErrorState extends StatelessWidget {
 
   const ErrorState({
     super.key,
-    required this.mensagem,
+    required this.message,
     this.onRetry,
   });
 
@@ -622,19 +622,19 @@ class ErrorState extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          const Icon(Icons.error_outline, cor: PulynColors.danger, size: 48),
+          const Icon(Icons.error_outline, color: PulynColors.danger, size: 48),
           const SizedBox(height: 12),
           Text(
             'Algo deu errado',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  cor: PulynColors.danger,
+                  color: PulynColors.danger,
                   fontWeight: FontWeight.bold,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             mensagem,
-            style: const TextStyle(cor: PulynColors.textMuted),
+            style: const TextStyle(color: PulynColors.textMuted),
             textAlign: TextAlign.center,
           ),
           if (onRetry != null) ...[
@@ -673,7 +673,7 @@ class SkeletonLoader extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        cor: PulynColors.darkSurface,
+        color: PulynColors.darkSurface,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
     );
@@ -708,7 +708,7 @@ class SectionHeader extends StatelessWidget {
           title,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            cor: PulynColors.textPrimary,
+            color: PulynColors.textPrimary,
           ),
         ),
         if (actionLabel != null && onAction != null)
@@ -742,7 +742,7 @@ class RankingCard extends StatelessWidget {
   const RankingCard({
     super.key,
     required this.position,
-    required this.nome,
+    required this.name,
     required this.score,
     required this.teamColor,
     required this.medal,
@@ -770,7 +770,7 @@ class RankingCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(27),
                 boxShadow: [
                   BoxShadow(
-                    cor: teamColor.withValues(alpha: 0.4),
+                    color: teamColor.withValues(alpha: 0.4),
                     blurRadius: 8,
                   )
                 ],
@@ -792,7 +792,7 @@ class RankingCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      cor: PulynColors.textPrimary,
+                      color: PulynColors.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -801,7 +801,7 @@ class RankingCard extends StatelessWidget {
                     'Posição #$position',
                     style: const TextStyle(
                       fontSize: 12,
-                      cor: PulynColors.textMuted,
+                      color: PulynColors.textMuted,
                     ),
                   ),
                 ],
@@ -819,7 +819,7 @@ class RankingCard extends StatelessWidget {
 class NotificationCard extends StatelessWidget {
   final String title;
   final String mensagem;
-  final String tipo;
+  final String type;
   final bool isRead;
   final VoidCallback? onTap;
   final VoidCallback? onMarkAsRead;
@@ -828,8 +828,8 @@ class NotificationCard extends StatelessWidget {
   const NotificationCard({
     super.key,
     required this.title,
-    required this.mensagem,
-    required this.tipo,
+    required this.message,
+    required this.type,
     this.isRead = false,
     this.onTap,
     this.onMarkAsRead,
@@ -862,7 +862,7 @@ class NotificationCard extends StatelessWidget {
               child: Center(
                 child: Icon(
                   _getNotificationIcon(tipo),
-                  cor: _getNotificationColor(tipo),
+                  color: _getNotificationColor(tipo),
                   size: 24,
                 ),
               ),
@@ -879,7 +879,7 @@ class NotificationCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      cor: PulynColors.textPrimary,
+                      color: PulynColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -887,7 +887,7 @@ class NotificationCard extends StatelessWidget {
                     mensagem,
                     style: const TextStyle(
                       fontSize: 12,
-                      cor: PulynColors.textMuted,
+                      color: PulynColors.textMuted,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -900,7 +900,7 @@ class NotificationCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        cor: PulynColors.primary.withValues(alpha: 0.2),
+                        color: PulynColors.primary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Text(
@@ -908,7 +908,7 @@ class NotificationCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          cor: PulynColors.primary,
+                          color: PulynColors.primary,
                         ),
                       ),
                     ),
@@ -936,11 +936,11 @@ class NotificationCard extends StatelessWidget {
                     onTap: onDelete,
                     child: const Row(
                       children: [
-                        Icon(Icons.delete, size: 18, cor: Colors.red),
+                        Icon(Icons.delete, size: 18, color: Colors.red),
                         SizedBox(width: 12),
                         Text(
                           'Deletar',
-                          style: TextStyle(cor: Colors.red),
+                          style: TextStyle(color: Colors.red),
                         ),
                       ],
                     ),
@@ -948,7 +948,7 @@ class NotificationCard extends StatelessWidget {
               ],
               child: const Icon(
                 Icons.more_vert,
-                cor: PulynColors.textMuted,
+                color: PulynColors.textMuted,
                 size: 20,
               ),
             ),
@@ -998,14 +998,14 @@ class StatCard extends StatelessWidget {
   final String title;
   final String value;
   final IconData icon;
-  final Color cor;
+  final Color color;
 
   const StatCard({
     super.key,
     required this.title,
     required this.value,
     required this.icon,
-    required this.cor,
+    required this.color,
   });
 
   @override
@@ -1015,13 +1015,13 @@ class StatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(icon, size: 28, cor: cor),
+          Icon(icon, size: 28, color: color),
           const SizedBox(height: 12),
           Text(
             title,
             style: const TextStyle(
               fontSize: 12,
-              cor: PulynColors.textMuted,
+              color: PulynColors.textMuted,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1030,7 +1030,7 @@ class StatCard extends StatelessWidget {
             value,
             style: const TextStyle(
               fontSize: 16,
-              cor: PulynColors.textPrimary,
+              color: PulynColors.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),

@@ -58,8 +58,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
           bottom: TabBar(
             controller: _tabController,
             tabs: const [
-              Tab(texto: 'Crianças', icon: Icon(Icons.person_outline)),
-              Tab(texto: 'Times', icon: Icon(Icons.people_outline)),
+              Tab(text: 'Crianças', icon: Icon(Icons.person_outline)),
+              Tab(text: 'Times', icon: Icon(Icons.people_outline)),
             ],
           ),
         ),
@@ -96,7 +96,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             final medal = _getMedalForPosition(index);
             return _buildRankingCard(
               position: index + 1,
-              nome: child.apelido.isNotEmpty ? child.apelido : child.nome,
+              name: child.apelido.isNotEmpty ? child.apelido : child.nome,
               score: child.currentScore,
               teamColor: child.teamColor,
               medal: medal,
@@ -119,8 +119,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
         final teamsMap = <String, (String, int, String)>{};
         for (final child in children) {
           if (teamsMap.containsKey(child.teamName)) {
-            final (nome, score, cor) = teamsMap[child.teamName]!;
-            teamsMap[child.teamName] = (nome, score + child.currentScore, cor);
+            final (nome, score, color) = teamsMap[child.teamName]!;
+            teamsMap[child.teamName] = (nome, score + child.currentScore, color);
           } else {
             teamsMap[child.teamName] = (child.teamName, child.currentScore, child.teamColor);
           }
@@ -142,7 +142,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             final medal = _getMedalForPosition(index);
             return _buildTeamRankingCard(
               position: index + 1,
-              nome: teamName,
+              name: teamName,
               score: totalScore,
               teamColor: teamColor,
               medal: medal,
@@ -178,10 +178,10 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        cor: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
+        color: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          cor: isTop ? PulynColors.primary : PulynColors.darkBorder,
+          color: isTop ? PulynColors.primary : PulynColors.darkBorder,
           width: isTop ? 2 : 1,
         ),
       ),
@@ -193,7 +193,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              cor: Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}')),
+              color: Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}')),
               borderRadius: BorderRadius.circular(25),
             ),
             child: Center(
@@ -218,7 +218,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    cor: PulynColors.textPrimary,
+                    color: PulynColors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -227,7 +227,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                   'Posição #$position',
                   style: const TextStyle(
                     fontSize: 12,
-                    cor: PulynColors.textMuted,
+                    color: PulynColors.textMuted,
                   ),
                 ),
               ],
@@ -238,7 +238,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              cor: PulynColors.primary.withValues(alpha: 0.2),
+              color: PulynColors.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -246,7 +246,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                cor: PulynColors.primary,
+                color: PulynColors.primary,
               ),
             ),
           ),
@@ -266,10 +266,10 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        cor: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
+        color: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          cor: isTop ? PulynColors.primary : PulynColors.darkBorder,
+          color: isTop ? PulynColors.primary : PulynColors.darkBorder,
           width: isTop ? 2 : 1,
         ),
       ),
@@ -281,7 +281,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              cor: Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}')),
+              color: Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}')),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
@@ -306,7 +306,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    cor: PulynColors.textPrimary,
+                    color: PulynColors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -315,7 +315,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                   'Pontos totais do time',
                   style: const TextStyle(
                     fontSize: 12,
-                    cor: PulynColors.textMuted,
+                    color: PulynColors.textMuted,
                   ),
                 ),
               ],
@@ -331,14 +331,14 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  cor: PulynColors.accent,
+                  color: PulynColors.accent,
                 ),
               ),
               const Text(
                 'pontos',
                 style: TextStyle(
                   fontSize: 11,
-                  cor: PulynColors.textMuted,
+                  color: PulynColors.textMuted,
                 ),
               ),
             ],
@@ -356,9 +356,9 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            cor: PulynColors.darkCard,
+            color: PulynColors.darkCard,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(cor: PulynColors.darkBorder),
+            border: Border.all(color: PulynColors.darkBorder),
           ),
           padding: const EdgeInsets.all(16),
           height: 80,
@@ -372,7 +372,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, cor: PulynColors.danger),
+          const Icon(Icons.error_outline, size: 64, color: PulynColors.danger),
           const SizedBox(height: 16),
           Text(
             mensagem,
@@ -397,7 +397,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.inbox_outlined, size: 64, cor: PulynColors.textMuted),
+          const Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
           const SizedBox(height: 16),
           Text(
             mensagem,

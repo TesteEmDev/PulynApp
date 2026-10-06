@@ -29,8 +29,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final authState = ref.watch(authProvider);
     authState.whenData((user) {
       if (user != null) {
-        _nameController.texto = user.nome;
-        _emailController.texto = user.email;
+        _nameController.text = user.nome;
+        _emailController.text = user.email;
       }
     });
   }
@@ -73,7 +73,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             },
             child: const Text(
               'Logout',
-              style: TextStyle(cor: Colors.red),
+              style: TextStyle(color: Colors.red),
             ),
           ),
         ],
@@ -189,14 +189,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           width: 100,
           height: 100,
           decoration: BoxDecoration(
-            cor: PulynColors.primary,
+            color: PulynColors.primary,
             borderRadius: BorderRadius.circular(50),
           ),
           child: Center(
             child: Text(
               user.nome.isNotEmpty ? user.nome[0].toUpperCase() : '?',
               style: const TextStyle(
-                cor: Colors.white,
+                color: Colors.white,
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
               ),
@@ -208,7 +208,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Text(
           user.nome,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            cor: PulynColors.textPrimary,
+            color: PulynColors.textPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -216,7 +216,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Text(
           user.email,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            cor: PulynColors.textMuted,
+            color: PulynColors.textMuted,
           ),
         ),
         // Role badge
@@ -224,7 +224,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            cor: PulynColors.primary.withValues(alpha: 0.2),
+            color: PulynColors.primary.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -232,7 +232,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              cor: PulynColors.primary,
+              color: PulynColors.primary,
             ),
           ),
         ),
@@ -280,14 +280,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        cor: PulynColors.darkCard,
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(cor: PulynColors.darkBorder),
+        border: Border.all(color: PulynColors.darkBorder),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(icon, cor: PulynColors.primary, size: 24),
+          Icon(icon, color: PulynColors.primary, size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -297,7 +297,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   label,
                   style: const TextStyle(
                     fontSize: 12,
-                    cor: PulynColors.textMuted,
+                    color: PulynColors.textMuted,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -306,7 +306,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   value,
                   style: const TextStyle(
                     fontSize: 14,
-                    cor: PulynColors.textPrimary,
+                    color: PulynColors.textPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -338,16 +338,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             fillColor: PulynColors.darkCard,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(cor: PulynColors.darkBorder),
+              borderSide: const BorderSide(color: PulynColors.darkBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(cor: PulynColors.darkBorder),
+              borderSide: const BorderSide(color: PulynColors.darkBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                cor: PulynColors.primary,
+                color: PulynColors.primary,
                 width: 2,
               ),
             ),
@@ -366,15 +366,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             fillColor: PulynColors.darkSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(cor: PulynColors.darkBorder),
+              borderSide: const BorderSide(color: PulynColors.darkBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(cor: PulynColors.darkBorder),
+              borderSide: const BorderSide(color: PulynColors.darkBorder),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(cor: PulynColors.darkBorder),
+              borderSide: const BorderSide(color: PulynColors.darkBorder),
             ),
           ),
         ),
@@ -383,7 +383,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           'Email não pode ser alterado',
           style: TextStyle(
             fontSize: 12,
-            cor: PulynColors.textMuted,
+            color: PulynColors.textMuted,
           ),
         ),
       ],
@@ -446,14 +446,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        cor: PulynColors.darkCard,
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(cor: PulynColors.darkBorder),
+        border: Border.all(color: PulynColors.darkBorder),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(icon, cor: PulynColors.primary),
+          Icon(icon, color: PulynColors.primary),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -464,14 +464,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    cor: PulynColors.textPrimary,
+                    color: PulynColors.textPrimary,
                   ),
                 ),
                 Text(
                   subtitle,
                   style: const TextStyle(
                     fontSize: 12,
-                    cor: PulynColors.textMuted,
+                    color: PulynColors.textMuted,
                   ),
                 ),
               ],
@@ -497,14 +497,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          cor: PulynColors.darkCard,
+          color: PulynColors.darkCard,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(cor: PulynColors.darkBorder),
+          border: Border.all(color: PulynColors.darkBorder),
         ),
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(icon, cor: PulynColors.primary),
+            Icon(icon, color: PulynColors.primary),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -515,14 +515,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      cor: PulynColors.textPrimary,
+                      color: PulynColors.textPrimary,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: const TextStyle(
                       fontSize: 12,
-                      cor: PulynColors.textMuted,
+                      color: PulynColors.textMuted,
                     ),
                   ),
                 ],
@@ -531,7 +531,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              cor: PulynColors.textMuted,
+              color: PulynColors.textMuted,
             ),
           ],
         ),
@@ -547,7 +547,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const Icon(
             Icons.error_outline,
             size: 64,
-            cor: PulynColors.danger,
+            color: PulynColors.danger,
           ),
           const SizedBox(height: 16),
           const Text('Erro ao carregar perfil'),

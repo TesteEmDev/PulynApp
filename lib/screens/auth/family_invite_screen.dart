@@ -78,7 +78,7 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
 
         // Se já tem email no convite, preenche
         if (invite['email'] != null) {
-          _emailController.texto = invite['email'];
+          _emailController.text = invite['email'];
         }
 
         // Se tem criança vinculada, não precisa de formulário de crianças
@@ -117,11 +117,11 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
     // 🔽 Fecha o teclado
     FocusScope.of(context).unfocus();
 
-    final nome = _nameController.texto.trim();
-    final email = _emailController.texto.trim();
-    final senha = _passwordController.texto;
+    final nome = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final senha = _passwordController.text;
 
-    if (senha != _confirmPasswordController.texto) {
+    if (senha != _confirmPasswordController.text) {
       _showError('As senhas não conferem');
       return;
     }
@@ -233,7 +233,7 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
     if (value == null || value.isEmpty) {
       return 'Confirme a senha';
     }
-    if (value != _passwordController.texto) {
+    if (value != _passwordController.text) {
       return 'As senhas não conferem';
     }
     return null;
@@ -332,7 +332,7 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
             AuthInfoCard(
               icon: Icons.celebration_rounded,
               title: eventName,
-              mensagem: eventDate.isNotEmpty ? 'Data: $eventDate' : 'Convite para o evento',
+              message: eventDate.isNotEmpty ? 'Data: $eventDate' : 'Convite para o evento',
               accent: PulynColors.accent,
             ),
             const SizedBox(height: 24),
@@ -347,7 +347,7 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
                   enabled: !_isSubmitting,
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.next,
-                  autofillHints: const [AutofillHints.nome],
+                  autofillHints: const [AutofillHints.name],
                   decoration: const InputDecoration(
                     labelText: 'Nome completo',
                     hintText: 'João Silva',
@@ -392,14 +392,14 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
               AuthInfoCard(
                 icon: Icons.child_care_rounded,
                 title: '${linkedChild['nome'] ?? 'Sem nome'}',
-                mensagem: 'Criança já vinculada ao seu convite',
+                message: 'Criança já vinculada ao seu convite',
                 accent: PulynColors.success,
               )
             else
               const AuthInfoCard(
                 icon: Icons.qr_code_scanner_rounded,
                 title: 'Seu filho é vinculado depois',
-                mensagem: 'Depois de entrar, escaneie o QR Code que a recepção entregar para acompanhar seu filho.',
+                message: 'Depois de entrar, escaneie o QR Code que a recepção entregar para acompanhar seu filho.',
               ),
             const SizedBox(height: 24),
 
@@ -434,10 +434,10 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
               width: 84,
               height: 84,
               decoration: BoxDecoration(
-                cor: PulynColors.danger.withValues(alpha: 0.14),
+                color: PulynColors.danger.withValues(alpha: 0.14),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.link_off_rounded, size: 40, cor: PulynColors.danger),
+              child: const Icon(Icons.link_off_rounded, size: 40, color: PulynColors.danger),
             ),
           ),
           const SizedBox(height: 24),
@@ -497,10 +497,10 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
               width: 84,
               height: 84,
               decoration: BoxDecoration(
-                cor: PulynColors.success.withValues(alpha: 0.14),
+                color: PulynColors.success.withValues(alpha: 0.14),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_rounded, size: 44, cor: PulynColors.success),
+              child: const Icon(Icons.check_rounded, size: 44, color: PulynColors.success),
             ),
           ),
           const SizedBox(height: 24),
@@ -520,7 +520,7 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
             children: [
               for (int i = 0; i < steps.length; i++) ...[
                 if (i > 0) const SizedBox(height: 14),
-                AuthStep(number: i + 1, texto: steps[i]),
+                AuthStep(number: i + 1, text: steps[i]),
               ],
             ],
           ),

@@ -81,7 +81,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   width: _currentPage == index ? 24 : 8,
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
-                    cor: _currentPage == index
+                    color: _currentPage == index
                         ? Theme.of(context).primaryColor
                         : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(4),
@@ -147,7 +147,7 @@ class _OnboardingCard extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
-                cor: Theme.of(context).primaryColor,
+                color: Theme.of(context).primaryColor,
                 width: 3,
               ),
               borderRadius: BorderRadius.circular(16),
@@ -184,7 +184,7 @@ class _OnboardingCard extends StatelessWidget {
             descricao,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  cor: Colors.grey[600],
+                  color: Colors.grey[600],
                 ),
           ),
         ),

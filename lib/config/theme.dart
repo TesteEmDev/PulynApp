@@ -52,18 +52,18 @@ final ThemeData appTheme = ThemeData(
     elevation: 0,
     centerTitle: false,
     titleTextStyle: TextStyle(
-      cor: PulynColors.textPrimary,
+      color: PulynColors.textPrimary,
       fontSize: 20,
       fontWeight: FontWeight.w600,
     ),
   ),
   cardTheme: CardThemeData(
-    cor: PulynColors.darkCard,
+    color: PulynColors.darkCard,
     elevation: 0,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
       side: const BorderSide(
-        cor: PulynColors.darkBorder,
+        color: PulynColors.darkBorder,
         width: 1,
       ),
     ),
@@ -73,22 +73,22 @@ final ThemeData appTheme = ThemeData(
     fillColor: PulynColors.darkSurface,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(cor: PulynColors.darkBorder),
+      borderSide: const BorderSide(color: PulynColors.darkBorder),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(cor: PulynColors.darkBorder),
+      borderSide: const BorderSide(color: PulynColors.darkBorder),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(cor: PulynColors.primary, width: 2),
+      borderSide: const BorderSide(color: PulynColors.primary, width: 2),
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(cor: PulynColors.danger),
+      borderSide: const BorderSide(color: PulynColors.danger),
     ),
-    labelStyle: const TextStyle(cor: PulynColors.textSecondary),
-    hintStyle: const TextStyle(cor: PulynColors.textMuted),
+    labelStyle: const TextStyle(color: PulynColors.textSecondary),
+    hintStyle: const TextStyle(color: PulynColors.textMuted),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
@@ -105,7 +105,7 @@ final ThemeData appTheme = ThemeData(
   outlinedButtonTheme: OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
       foregroundColor: PulynColors.primary,
-      side: const BorderSide(cor: PulynColors.darkBorder),
+      side: const BorderSide(color: PulynColors.darkBorder),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
@@ -121,32 +121,32 @@ final ThemeData appTheme = ThemeData(
     displaySmall: TextStyle(
       fontSize: 28,
       fontWeight: FontWeight.bold,
-      cor: PulynColors.textPrimary,
+      color: PulynColors.textPrimary,
     ),
     headlineSmall: TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.w600,
-      cor: PulynColors.textPrimary,
+      color: PulynColors.textPrimary,
     ),
     titleLarge: TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.w600,
-      cor: PulynColors.textPrimary,
+      color: PulynColors.textPrimary,
     ),
     titleMedium: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w500,
-      cor: PulynColors.textPrimary,
+      color: PulynColors.textPrimary,
     ),
     bodyMedium: TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w400,
-      cor: PulynColors.textSecondary,
+      color: PulynColors.textSecondary,
     ),
     bodySmall: TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w400,
-      cor: PulynColors.textMuted,
+      color: PulynColors.textMuted,
     ),
   ),
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
@@ -154,6 +154,6 @@ final ThemeData appTheme = ThemeData(
     selectedItemColor: PulynColors.primary,
     unselectedItemColor: PulynColors.textMuted,
     elevation: 0,
-    tipo: BottomNavigationBarType.fixed,
+    type: BottomNavigationBarType.fixed,
   ),
 );

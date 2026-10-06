@@ -51,8 +51,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     FocusScope.of(context).unfocus();
 
-    final email = _emailController.texto.trim();
-    final senha = _passwordController.texto;
+    final email = _emailController.text.trim();
+    final senha = _passwordController.text;
 
     setState(() => _isLoading = true);
 
@@ -103,7 +103,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return 'Email é obrigatório';
     }
     final result = _validationService.validateEmail(value);
-    return result.valid ? null : result.mensagem;
+    return result.valid ? null : result.message;
   }
 
   String? _validatePassword(String? value) {
@@ -222,15 +222,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Divider
                 Row(
                   children: [
-                    Expanded(child: Divider(cor: Colors.grey.withValues(alpha: 0.3))),
+                    Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.3))),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
                         'ou',
-                        style: TextStyle(cor: Colors.grey.withValues(alpha: 0.6)),
+                        style: TextStyle(color: Colors.grey.withValues(alpha: 0.6)),
                       ),
                     ),
-                    Expanded(child: Divider(cor: Colors.grey.withValues(alpha: 0.3))),
+                    Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.3))),
                   ],
                 ),
 

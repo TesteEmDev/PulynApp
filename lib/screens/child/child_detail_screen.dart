@@ -47,7 +47,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
       body: RefreshIndicator(
         onRefresh: _refreshData,
         backgroundColor: PulynColors.darkCard,
-        cor: PulynColors.primary,
+        color: PulynColors.primary,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -119,9 +119,9 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
   Widget _buildHeaderSkeleton() {
     return Container(
       decoration: BoxDecoration(
-        cor: PulynColors.darkCard,
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(cor: PulynColors.darkBorder),
+        border: Border.all(color: PulynColors.darkBorder),
       ),
       padding: const EdgeInsets.all(20),
       child: Row(
@@ -130,7 +130,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              cor: Colors.grey[800],
+              color: Colors.grey[800],
               borderRadius: BorderRadius.circular(16),
             ),
           ),
@@ -143,7 +143,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                   width: 150,
                   height: 20,
                   decoration: BoxDecoration(
-                    cor: Colors.grey[800],
+                    color: Colors.grey[800],
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -152,7 +152,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                   width: 100,
                   height: 16,
                   decoration: BoxDecoration(
-                    cor: Colors.grey[800],
+                    color: Colors.grey[800],
                     borderRadius: BorderRadius.circular(6),
                   ),
                 ),
@@ -167,19 +167,19 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
   Widget _buildErrorCard(String mensagem) {
     return Container(
       decoration: BoxDecoration(
-        cor: PulynColors.darkSurface,
+        color: PulynColors.darkSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(cor: PulynColors.danger, width: 1.5),
+        border: Border.all(color: PulynColors.danger, width: 1.5),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          const Icon(Icons.error, cor: PulynColors.danger, size: 24),
+          const Icon(Icons.error, color: PulynColors.danger, size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               mensagem,
-              style: const TextStyle(cor: PulynColors.textPrimary),
+              style: const TextStyle(color: PulynColors.textPrimary),
             ),
           ),
         ],
@@ -191,7 +191,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
     return Center(
       child: Column(
         children: [
-          const Icon(Icons.inbox_outlined, size: 64, cor: PulynColors.textMuted),
+          const Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
           const SizedBox(height: 16),
           Text(
             title,
@@ -201,7 +201,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
           Text(
             descricao,
             textAlign: TextAlign.center,
-            style: const TextStyle(cor: PulynColors.textMuted),
+            style: const TextStyle(color: PulynColors.textMuted),
           ),
         ],
       ),
@@ -217,9 +217,9 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            cor: PulynColors.darkCard,
+            color: PulynColors.darkCard,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(cor: PulynColors.darkBorder),
+            border: Border.all(color: PulynColors.darkBorder),
           ),
           padding: const EdgeInsets.all(16),
           height: 80,
@@ -231,9 +231,9 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
   Widget _buildChildHeaderCard(Child child) {
     return Container(
       decoration: BoxDecoration(
-        cor: PulynColors.darkSurface,
+        color: PulynColors.darkSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(cor: PulynColors.darkBorder),
+        border: Border.all(color: PulynColors.darkBorder),
       ),
       padding: const EdgeInsets.all(20),
       child: Row(
@@ -243,7 +243,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              cor: Color(int.parse(
+              color: Color(int.parse(
                 '0xFF${child.teamColor.replaceFirst('#', '')}',
               )),
               borderRadius: BorderRadius.circular(16),
@@ -252,7 +252,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
               child: Text(
                 child.apelido.isNotEmpty ? child.apelido[0].toUpperCase() : '?',
                 style: const TextStyle(
-                  cor: Colors.white,
+                  color: Colors.white,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
@@ -269,7 +269,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    cor: PulynColors.textPrimary,
+                    color: PulynColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -277,14 +277,14 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                   child.teamName,
                   style: const TextStyle(
                     fontSize: 14,
-                    cor: PulynColors.textMuted,
+                    color: PulynColors.textMuted,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    cor: PulynColors.primary.withValues(alpha: 0.2),
+                    color: PulynColors.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -292,7 +292,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      cor: PulynColors.primary,
+                      color: PulynColors.primary,
                     ),
                   ),
                 ),
@@ -316,25 +316,25 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
           title: 'Pontos',
           value: '${child.currentScore}',
           icon: Icons.star_outlined,
-          cor: PulynColors.primary,
+          color: PulynColors.primary,
         ),
         _buildStatCard(
           title: 'Time',
           value: child.teamName,
           icon: Icons.group_outlined,
-          cor: PulynColors.accent,
+          color: PulynColors.accent,
         ),
         _buildStatCard(
           title: 'Idade',
           value: '${child.idade} anos',
           icon: Icons.cake_outlined,
-          cor: PulynColors.success,
+          color: PulynColors.success,
         ),
         _buildStatCard(
           title: 'Status',
           value: 'Ativo',
           icon: Icons.check_circle_outlined,
-          cor: PulynColors.warning,
+          color: PulynColors.warning,
         ),
       ],
     );
@@ -344,26 +344,26 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
     required String title,
     required String value,
     required IconData icon,
-    required Color cor,
+    required Color color,
   }) {
     return Container(
       decoration: BoxDecoration(
-        cor: PulynColors.darkCard,
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(cor: PulynColors.darkBorder),
+        border: Border.all(color: PulynColors.darkBorder),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(icon, size: 28, cor: cor),
+          Icon(icon, size: 28, color: color),
           const SizedBox(height: 12),
           Text(
             title,
             style: const TextStyle(
               fontSize: 12,
-              cor: PulynColors.textMuted,
+              color: PulynColors.textMuted,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -372,7 +372,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
             value,
             style: const TextStyle(
               fontSize: 16,
-              cor: PulynColors.textPrimary,
+              color: PulynColors.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -385,9 +385,9 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        cor: PulynColors.darkCard,
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(cor: PulynColors.darkBorder),
+        border: Border.all(color: PulynColors.darkBorder),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -396,12 +396,12 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              cor: PulynColors.primary.withValues(alpha: 0.2),
+              color: PulynColors.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
               Icons.emoji_events,
-              cor: PulynColors.primary,
+              color: PulynColors.primary,
               size: 24,
             ),
           ),
@@ -415,7 +415,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    cor: PulynColors.textPrimary,
+                    color: PulynColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -423,7 +423,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                   achievement.descricao,
                   style: const TextStyle(
                     fontSize: 12,
-                    cor: PulynColors.textMuted,
+                    color: PulynColors.textMuted,
                   ),
                 ),
               ],

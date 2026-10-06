@@ -286,8 +286,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           const TabBar(
             tabs: [
-              Tab(texto: 'Crianças', icon: Icon(Icons.person_outline)),
-              Tab(texto: 'Times', icon: Icon(Icons.people_outline)),
+              Tab(text: 'Crianças', icon: Icon(Icons.person_outline)),
+              Tab(text: 'Times', icon: Icon(Icons.people_outline)),
             ],
           ),
           Expanded(
@@ -328,7 +328,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildRankingCard(
                   position: index + 1,
-                  nome: child.apelido.isNotEmpty ? child.apelido : child.nome,
+                  name: child.apelido.isNotEmpty ? child.apelido : child.nome,
                   score: child.currentScore,
                   teamColor: child.teamColor,
                   medal: _getMedalForPosition(index),
@@ -359,8 +359,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final teamsMap = <String, (String, int, String)>{};
         for (final child in children) {
           if (teamsMap.containsKey(child.teamName)) {
-            final (nome, score, cor) = teamsMap[child.teamName]!;
-            teamsMap[child.teamName] = (nome, score + child.currentScore, cor);
+            final (nome, score, color) = teamsMap[child.teamName]!;
+            teamsMap[child.teamName] = (nome, score + child.currentScore, color);
           } else {
             teamsMap[child.teamName] = (child.teamName, child.currentScore, child.teamColor);
           }
@@ -383,7 +383,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildTeamRankingCard(
                   position: index + 1,
-                  nome: teamName,
+                  name: teamName,
                   score: totalScore,
                   teamColor: teamColor,
                   medal: _getMedalForPosition(index),
@@ -463,9 +463,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       height: 480, // Mapa maior e com mais espaço pra arrastar/zoom
       decoration: BoxDecoration(
-        cor: PulynColors.darkCard,
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(cor: PulynColors.darkBorder),
+        border: Border.all(color: PulynColors.darkBorder),
       ),
       child: const Center(
         child: CircularProgressIndicator(),
@@ -477,19 +477,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       height: 480, // Mapa maior e com mais espaço pra arrastar/zoom
       decoration: BoxDecoration(
-        cor: PulynColors.darkCard,
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(cor: PulynColors.danger),
+        border: Border.all(color: PulynColors.danger),
       ),
       child: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, cor: PulynColors.danger, size: 48),
+            Icon(Icons.error_outline, color: PulynColors.danger, size: 48),
             SizedBox(height: 16),
             Text(
               'Erro ao carregar mapa',
-              style: TextStyle(cor: PulynColors.danger),
+              style: TextStyle(color: PulynColors.danger),
             ),
           ],
         ),
@@ -501,19 +501,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       height: 480, // Mapa maior e com mais espaço pra arrastar/zoom
       decoration: BoxDecoration(
-        cor: PulynColors.darkCard,
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(cor: PulynColors.darkBorder),
+        border: Border.all(color: PulynColors.darkBorder),
       ),
       child: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.map_outlined, cor: PulynColors.textMuted, size: 48),
+            Icon(Icons.map_outlined, color: PulynColors.textMuted, size: 48),
             SizedBox(height: 16),
             Text(
               'Mapa aparecerá quando você vincular filhos',
-              style: TextStyle(cor: PulynColors.textMuted),
+              style: TextStyle(color: PulynColors.textMuted),
               textAlign: TextAlign.center,
             ),
           ],
@@ -538,7 +538,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            cor: PulynColors.primary.withValues(alpha: 0.2),
+            color: PulynColors.primary.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -552,7 +552,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               data: (user) => Text(
                 'Olá, ${(user?.nome ?? 'Usuário').split(' ').first}! 👋',
                 style: const TextStyle(
-                  cor: Colors.white,
+                  color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -562,7 +562,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               error: (_, _) => const Text(
                 'Olá! 👋',
                 style: TextStyle(
-                  cor: Colors.white,
+                  color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -570,7 +570,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               loading: () => const Text(
                 'Carregando...',
                 style: TextStyle(
-                  cor: Colors.white,
+                  color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -579,7 +579,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const Icon(
             Icons.family_restroom,
-            cor: Colors.white70,
+            color: Colors.white70,
             size: 24,
           ),
         ],
@@ -632,9 +632,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            cor: PulynColors.darkSurface,
+            color: PulynColors.darkSurface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(cor: PulynColors.danger, width: 2),
+            border: Border.all(color: PulynColors.danger, width: 2),
           ),
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -642,13 +642,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.error_outline, cor: PulynColors.danger, size: 24),
+                  const Icon(Icons.error_outline, color: PulynColors.danger, size: 24),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Erro ao carregar',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        cor: PulynColors.danger,
+                        color: PulynColors.danger,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -701,20 +701,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (children.isEmpty)
           Container(
             decoration: BoxDecoration(
-              cor: PulynColors.darkSurface,
+              color: PulynColors.darkSurface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(cor: PulynColors.darkBorder),
+              border: Border.all(color: PulynColors.darkBorder),
             ),
             padding: const EdgeInsets.all(32),
             child: Center(
               child: Column(
                 children: [
-                  const Icon(Icons.person_outline, size: 56, cor: PulynColors.textMuted),
+                  const Icon(Icons.person_outline, size: 56, color: PulynColors.textMuted),
                   const SizedBox(height: 16),
                   Text(
                     'Nenhum filho vinculado',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      cor: PulynColors.textMuted,
+                      color: PulynColors.textMuted,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -764,10 +764,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(cor: PulynColors.darkBorder, width: 1),
+          border: Border.all(color: PulynColors.darkBorder, width: 1),
           boxShadow: [
             BoxShadow(
-              cor: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -792,7 +792,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    cor: teamColor.withValues(alpha: 0.3),
+                    color: teamColor.withValues(alpha: 0.3),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -802,7 +802,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Text(
                   child.apelido.isNotEmpty ? child.apelido[0].toUpperCase() : '?',
                   style: const TextStyle(
-                    cor: Colors.white,
+                    color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -822,7 +822,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      cor: PulynColors.textPrimary,
+                      color: PulynColors.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -832,7 +832,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     '${child.idade} anos • ${child.teamName}',
                     style: const TextStyle(
                       fontSize: 12,
-                      cor: PulynColors.textMuted,
+                      color: PulynColors.textMuted,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -853,7 +853,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(cor: PulynColors.accent.withValues(alpha: 0.4)),
+                border: Border.all(color: PulynColors.accent.withValues(alpha: 0.4)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -863,7 +863,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      cor: PulynColors.accent,
+                      color: PulynColors.accent,
                     ),
                   ),
                   const SizedBox(width: 2),
@@ -871,7 +871,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     'pts',
                     style: TextStyle(
                       fontSize: 10,
-                      cor: PulynColors.textMuted,
+                      color: PulynColors.textMuted,
                     ),
                   ),
                 ],
@@ -881,7 +881,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              cor: PulynColors.textMuted,
+              color: PulynColors.textMuted,
             ),
           ],
         ),
@@ -929,12 +929,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          cor: isTop ? PulynColors.primary : PulynColors.darkBorder,
+          color: isTop ? PulynColors.primary : PulynColors.darkBorder,
           width: isTop ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            cor: (isTop ? PulynColors.primary : Colors.black)
+            color: (isTop ? PulynColors.primary : Colors.black)
                 .withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 4),
@@ -949,12 +949,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 54,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [cor, cor.withValues(alpha: 0.7)],
+                colors: [color, cor.withValues(alpha: 0.7)],
               ),
               borderRadius: BorderRadius.circular(27),
               boxShadow: [
                 BoxShadow(
-                  cor: cor.withValues(alpha: 0.4),
+                  color: cor.withValues(alpha: 0.4),
                   blurRadius: 8,
                 )
               ],
@@ -976,7 +976,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    cor: PulynColors.textPrimary,
+                    color: PulynColors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -985,7 +985,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   'Posição #$position',
                   style: const TextStyle(
                     fontSize: 12,
-                    cor: PulynColors.textMuted,
+                    color: PulynColors.textMuted,
                   ),
                 ),
               ],
@@ -1002,7 +1002,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                cor: PulynColors.primary.withValues(alpha: 0.5),
+                color: PulynColors.primary.withValues(alpha: 0.5),
               ),
             ),
             child: Column(
@@ -1013,14 +1013,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    cor: PulynColors.primary,
+                    color: PulynColors.primary,
                   ),
                 ),
                 const Text(
                   'pts',
                   style: TextStyle(
                     fontSize: 11,
-                    cor: PulynColors.textMuted,
+                    color: PulynColors.textMuted,
                   ),
                 ),
               ],
@@ -1058,12 +1058,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          cor: isTop ? PulynColors.primary : PulynColors.darkBorder,
+          color: isTop ? PulynColors.primary : PulynColors.darkBorder,
           width: isTop ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            cor: (isTop ? PulynColors.primary : Colors.black)
+            color: (isTop ? PulynColors.primary : Colors.black)
                 .withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 4),
@@ -1078,12 +1078,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 54,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [cor, cor.withValues(alpha: 0.7)],
+                colors: [color, cor.withValues(alpha: 0.7)],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  cor: cor.withValues(alpha: 0.4),
+                  color: cor.withValues(alpha: 0.4),
                   blurRadius: 8,
                 )
               ],
@@ -1105,7 +1105,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    cor: PulynColors.textPrimary,
+                    color: PulynColors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1114,7 +1114,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   'Pontos totais',
                   style: TextStyle(
                     fontSize: 12,
-                    cor: PulynColors.textMuted,
+                    color: PulynColors.textMuted,
                   ),
                 ),
               ],
@@ -1128,14 +1128,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  cor: PulynColors.accent,
+                  color: PulynColors.accent,
                 ),
               ),
               const Text(
                 'pontos',
                 style: TextStyle(
                   fontSize: 11,
-                  cor: PulynColors.textMuted,
+                  color: PulynColors.textMuted,
                 ),
               ),
             ],
@@ -1153,9 +1153,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         padding: const EdgeInsets.only(bottom: 12),
         child: Container(
           decoration: BoxDecoration(
-            cor: PulynColors.darkCard,
+            color: PulynColors.darkCard,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(cor: PulynColors.darkBorder),
+            border: Border.all(color: PulynColors.darkBorder),
           ),
           height: 80,
         ),
@@ -1168,7 +1168,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, cor: PulynColors.danger),
+          const Icon(Icons.error_outline, size: 64, color: PulynColors.danger),
           const SizedBox(height: 16),
           Text(mensagem, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
         ],
@@ -1181,7 +1181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.inbox_outlined, size: 64, cor: PulynColors.textMuted),
+          const Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
           const SizedBox(height: 16),
           Text(mensagem, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
         ],

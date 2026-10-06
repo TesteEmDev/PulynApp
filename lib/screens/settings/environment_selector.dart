@@ -111,9 +111,9 @@ class _EnvironmentSelectorScreenState
               // Info Card
               Container(
                 decoration: BoxDecoration(
-                  cor: Colors.blue.shade50,
+                  color: Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(cor: Colors.blue.shade200),
+                  border: Border.all(color: Colors.blue.shade200),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -136,7 +136,7 @@ class _EnvironmentSelectorScreenState
                       'Selecionado: ${_selectedEnvironment.toString().split('.').last.toUpperCase()}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        cor: Colors.blue,
+                        color: Colors.blue,
                       ),
                     ),
                   ],
@@ -216,16 +216,16 @@ class _EnvironmentSelectorScreenState
               // Connection Status
               Container(
                 decoration: BoxDecoration(
-                  cor: Colors.green.shade50,
+                  color: Colors.green.shade50,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(cor: Colors.green.shade200),
+                  border: Border.all(color: Colors.green.shade200),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
                     Icon(
                       Icons.check_circle,
-                      cor: Colors.green.shade600,
+                      color: Colors.green.shade600,
                       size: 24,
                     ),
                     const SizedBox(width: 12),
@@ -254,9 +254,9 @@ class _EnvironmentSelectorScreenState
               // Instructions
               Container(
                 decoration: BoxDecoration(
-                  cor: Colors.orange.shade50,
+                  color: Colors.orange.shade50,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(cor: Colors.orange.shade200),
+                  border: Border.all(color: Colors.orange.shade200),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -341,10 +341,10 @@ class _EnvironmentSelectorScreenState
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          cor: isSelected ? Colors.blue.shade50 : Colors.white,
+          color: isSelected ? Colors.blue.shade50 : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            cor: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
+            color: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -372,7 +372,7 @@ class _EnvironmentSelectorScreenState
                     url,
                     style: TextStyle(
                       fontSize: 12,
-                      cor: Colors.grey.shade600,
+                      color: Colors.grey.shade600,
                       fontFamily: 'monospace',
                     ),
                     maxLines: 1,
@@ -385,7 +385,7 @@ class _EnvironmentSelectorScreenState
               isSelected
                   ? Icons.radio_button_checked
                   : Icons.radio_button_unchecked,
-              cor: isSelected ? Colors.blue : Colors.grey,
+              color: isSelected ? Colors.blue : Colors.grey,
               size: 24,
             ),
           ],
@@ -401,9 +401,9 @@ class _EnvironmentSelectorScreenState
   }) {
     return Container(
       decoration: BoxDecoration(
-        cor: Colors.grey.shade50,
+        color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(cor: Colors.grey.shade200),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       padding: const EdgeInsets.all(12),
       child: Row(
@@ -423,7 +423,7 @@ class _EnvironmentSelectorScreenState
                   url,
                   style: TextStyle(
                     fontSize: 12,
-                    cor: Colors.grey.shade600,
+                    color: Colors.grey.shade600,
                     fontFamily: 'monospace',
                   ),
                   maxLines: 1,

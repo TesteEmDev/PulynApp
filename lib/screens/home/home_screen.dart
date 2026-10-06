@@ -17,7 +17,7 @@ class ChildrenRefreshNotifier extends StateNotifier<int> {
   ChildrenRefreshNotifier() : super(0);
   
   void refresh() {
-    estado++;
+    state++;
   }
 }
 
@@ -328,7 +328,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildRankingCard(
                   position: index + 1,
-                  name: child.apelido.isNotEmpty ? child.apelido : child.nome,
+                  nome: child.apelido.isNotEmpty ? child.apelido : child.nome,
                   score: child.currentScore,
                   teamColor: child.teamColor,
                   medal: _getMedalForPosition(index),
@@ -383,7 +383,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildTeamRankingCard(
                   position: index + 1,
-                  name: teamName,
+                  nome: teamName,
                   score: totalScore,
                   teamColor: teamColor,
                   medal: _getMedalForPosition(index),
@@ -949,7 +949,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 54,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [color, cor.withValues(alpha: 0.7)],
+                colors: [cor, cor.withValues(alpha: 0.7)],
               ),
               borderRadius: BorderRadius.circular(27),
               boxShadow: [
@@ -1078,7 +1078,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 54,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [color, cor.withValues(alpha: 0.7)],
+                colors: [cor, cor.withValues(alpha: 0.7)],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [

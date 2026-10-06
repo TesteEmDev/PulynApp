@@ -20,7 +20,7 @@ class ZoneConfig {
   final double h;
 
   ZoneConfig({
-    required this.name,
+    required this.nome,
     required this.color,
     required this.x,
     required this.y,
@@ -984,7 +984,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   List<ZoneConfig> _getDefaultZones() {
     return [
       ZoneConfig(
-        name: 'Entrada',
+        nome: 'Entrada',
         color: const Color(0xFF1E9BD7),
         x: 30,
         y: 5,
@@ -992,7 +992,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         h: 18,
       ),
       ZoneConfig(
-        name: 'Área Verde',
+        nome: 'Área Verde',
         color: const Color(0xFF10B981),
         x: 5,
         y: 28,
@@ -1000,7 +1000,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         h: 38,
       ),
       ZoneConfig(
-        name: 'Área Azul',
+        nome: 'Área Azul',
         color: const Color(0xFF1E9BD7),
         x: 53,
         y: 28,
@@ -1008,7 +1008,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         h: 38,
       ),
       ZoneConfig(
-        name: 'Área Central',
+        nome: 'Área Central',
         color: const Color(0xFFF59E0B),
         x: 20,
         y: 70,
@@ -1346,7 +1346,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
             log.i('🎨 [MAP] Convertendo zona: ${zona['nome']} (x:$x, y:$y, w:$w, h:$h)');
             
             return ZoneConfig(
-              name: sanitizeUtf16((zona['nome'] ?? 'Zona Desconhecida').toString()),
+              nome: sanitizeUtf16((zona['nome'] ?? 'Zona Desconhecida').toString()),
               color: _getZoneColor(zona['cor']),
               x: x,
               y: y,
@@ -1569,10 +1569,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: zona.cor.withValues(alpha: 0.8),  // ✅ Aumentei alpha para 0.8
+                                      color: zona.color.withValues(alpha: 0.8),  // ✅ Aumentei alpha para 0.8
                                       width: 2,
                                     ),
-                                    color: zona.cor.withValues(alpha: 0.2),  // ✅ Aumentei alpha para 0.2
+                                    color: zona.color.withValues(alpha: 0.2),  // ✅ Aumentei alpha para 0.2
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(8),
@@ -1624,7 +1624,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                           height: 40,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            border: Border.all(color: color, width: 3),
+                                            border: Border.all(color: cor, width: 3),
                                             color: PulynColors.darkCard.withValues(alpha: 0.95),
                                             boxShadow: [
                                               BoxShadow(
@@ -1641,7 +1641,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                                 : checkpoint['status'] == 'online'
                                                   ? Icons.radio_button_unchecked
                                                   : Icons.cancel,
-                                              color: color,
+                                              color: cor,
                                               size: 20,
                                             ),
                                           ),
@@ -1938,7 +1938,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
             color: color,
             boxShadow: [
               BoxShadow(
-                color: cor.withValues(alpha: 0.3),
+                color: Colors.grey.withValues(alpha: 0.3),
                 blurRadius: 4,
                 spreadRadius: 1,
               ),
@@ -1965,7 +1965,7 @@ class _FloorPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..cor = const Color(0xFF3a4a5a).withValues(alpha: 0.15)
+      ..color = const Color(0xFF3a4a5a).withValues(alpha: 0.15)
       ..strokeWidth = 1;
 
     // Desenhar grade de piso

@@ -133,7 +133,7 @@ void main() {
       expect(find.text('Lia · 7 anos · Festa da Lia'), findsOneWidget);
       expect(p.linked, hasLength(1));
       expect(p.linked.single.id, 'c1');
-      expect(p.linked.single.nickname, 'Lia');
+      expect(p.linked.single.apelido, 'Lia');
     });
 
     testWidgets('leituras repetidas do mesmo QR enquanto valida não vinculam duas vezes', (tester) async {
@@ -219,14 +219,14 @@ void main() {
   });
 
   test('childFromLinkedChild converte a resposta do backend', () {
-    final child = childFromLinkedChild({'id': 'c9', 'name': 'Davi Lima', 'nickname': 'Davi', 'age': 9, 'evento': 'Festa'});
+    final child = childFromLinkedChild({'id': 'c9', 'nome': 'Davi Lima', 'apelido': 'Davi', 'idade': 9, 'evento': 'Festa'});
     expect(child.id, 'c9');
-    expect(child.age, 9);
+    expect(child.idade, 9);
     expect(child.teamName, 'Festa');
 
     final vazio = childFromLinkedChild({});
     expect(vazio.id, '');
-    expect(vazio.age, 0);
+    expect(vazio.idade, 0);
     expect(vazio.teamName, 'Sem time');
   });
 }

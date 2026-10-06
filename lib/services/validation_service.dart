@@ -45,7 +45,7 @@ class ValidationService {
     if (senha.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'Senha é obrigatória',
+        mensagem: 'Senha é obrigatória',
         strength: PasswordStrength.empty,
       );
     }
@@ -53,7 +53,7 @@ class ValidationService {
     if (senha.length < 6) {
       return ValidationResult(
         valid: false,
-        message: 'Senha deve ter no mínimo 6 caracteres',
+        mensagem: 'Senha deve ter no mínimo 6 caracteres',
         strength: PasswordStrength.weak,
       );
     }
@@ -86,7 +86,7 @@ class ValidationService {
 
     return ValidationResult(
       valid: true,
-      message: mensagem,
+      mensagem: mensagem,
       strength: passwordStrength,
     );
   }
@@ -98,21 +98,21 @@ class ValidationService {
     if (nome.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'Nome é obrigatório',
+        mensagem: 'Nome é obrigatório',
       );
     }
 
     if (nome.length < 2) {
       return ValidationResult(
         valid: false,
-        message: 'Nome deve ter no mínimo 2 caracteres',
+        mensagem: 'Nome deve ter no mínimo 2 caracteres',
       );
     }
 
     if (nome.length > 100) {
       return ValidationResult(
         valid: false,
-        message: 'Nome não pode ter mais de 100 caracteres',
+        mensagem: 'Nome não pode ter mais de 100 caracteres',
       );
     }
 
@@ -120,7 +120,7 @@ class ValidationService {
     if (RegExp(r'\d').hasMatch(nome)) {
       return ValidationResult(
         valid: false,
-        message: 'Nome não pode conter números',
+        mensagem: 'Nome não pode conter números',
       );
     }
 
@@ -129,13 +129,13 @@ class ValidationService {
     if (parts.length < 2) {
       return ValidationResult(
         valid: false,
-        message: 'Por favor, insira seu nome completo (nome e sobrenome)',
+        mensagem: 'Por favor, insira seu nome completo (nome e sobrenome)',
       );
     }
 
     log.i('[VALIDATION] ✅ Nome válido');
 
-    return ValidationResult(valid: true, message: 'Nome válido');
+    return ValidationResult(valid: true, mensagem: 'Nome válido');
   }
 
   /// Valida email
@@ -145,7 +145,7 @@ class ValidationService {
     if (email.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'Email é obrigatório',
+        mensagem: 'Email é obrigatório',
       );
     }
 
@@ -154,13 +154,13 @@ class ValidationService {
     if (!emailRegex.hasMatch(email)) {
       return ValidationResult(
         valid: false,
-        message: 'Email inválido',
+        mensagem: 'Email inválido',
       );
     }
 
     log.i('[VALIDATION] ✅ Email válido');
 
-    return ValidationResult(valid: true, message: 'Email válido');
+    return ValidationResult(valid: true, mensagem: 'Email válido');
   }
 
   /// Valida confirmação de senha
@@ -170,20 +170,20 @@ class ValidationService {
     if (confirmPassword.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'Confirmação de senha é obrigatória',
+        mensagem: 'Confirmação de senha é obrigatória',
       );
     }
 
     if (senha != confirmPassword) {
       return ValidationResult(
         valid: false,
-        message: 'As senhas não correspondem',
+        mensagem: 'As senhas não correspondem',
       );
     }
 
     log.i('[VALIDATION] ✅ Senhas correspondem');
 
-    return ValidationResult(valid: true, message: 'Senhas correspondem');
+    return ValidationResult(valid: true, mensagem: 'Senhas correspondem');
   }
 
   /// Valida CPF (opcional, se necessário)
@@ -195,14 +195,14 @@ class ValidationService {
     if (cleanCPF.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'CPF é obrigatório',
+        mensagem: 'CPF é obrigatório',
       );
     }
 
     if (cleanCPF.length != 11) {
       return ValidationResult(
         valid: false,
-        message: 'CPF deve ter 11 dígitos',
+        mensagem: 'CPF deve ter 11 dígitos',
       );
     }
 
@@ -210,7 +210,7 @@ class ValidationService {
     if (RegExp(r'^(\d)\1{10}$').hasMatch(cleanCPF)) {
       return ValidationResult(
         valid: false,
-        message: 'CPF inválido',
+        mensagem: 'CPF inválido',
       );
     }
 
@@ -232,13 +232,13 @@ class ValidationService {
         int.parse(cleanCPF[10]) != secondDigit) {
       return ValidationResult(
         valid: false,
-        message: 'CPF inválido',
+        mensagem: 'CPF inválido',
       );
     }
 
     log.i('[VALIDATION] ✅ CPF válido');
 
-    return ValidationResult(valid: true, message: 'CPF válido');
+    return ValidationResult(valid: true, mensagem: 'CPF válido');
   }
 
   /// Valida telefone
@@ -250,20 +250,20 @@ class ValidationService {
     if (cleanPhone.isEmpty) {
       return ValidationResult(
         valid: false,
-        message: 'Telefone é obrigatório',
+        mensagem: 'Telefone é obrigatório',
       );
     }
 
     if (cleanPhone.length < 10 || cleanPhone.length > 11) {
       return ValidationResult(
         valid: false,
-        message: 'Telefone deve ter 10 ou 11 dígitos',
+        mensagem: 'Telefone deve ter 10 ou 11 dígitos',
       );
     }
 
     log.i('[VALIDATION] ✅ Telefone válido');
 
-    return ValidationResult(valid: true, message: 'Telefone válido');
+    return ValidationResult(valid: true, mensagem: 'Telefone válido');
   }
 }
 
@@ -274,12 +274,12 @@ class ValidationResult {
 
   ValidationResult({
     required this.valid,
-    required this.message,
+    required this.mensagem,
     this.strength,
   });
 
   @override
-  String toString() => 'ValidationResult(valid: $valid, message: $mensagem)';
+  String toString() => 'ValidationResult(valid: $valid, mensagem: $mensagem)';
 }
 
 enum PasswordStrength {

@@ -12,9 +12,9 @@ import 'package:pulyn_app/widgets/event_map_widget.dart';
 void main() {
   final child = Child(
     id: 'c1',
-    name: 'Lia Souza',
-    nickname: 'Lia',
-    age: 7,
+    nome: 'Lia Souza',
+    apelido: 'Lia',
+    idade: 7,
     currentScore: 0,
     totalScore: 0,
     teamId: 't1',

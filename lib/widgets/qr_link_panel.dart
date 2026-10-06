@@ -16,7 +16,7 @@ typedef CameraViewBuilder = Widget Function(BuildContext context, ValueChanged<S
 Child childFromLinkedChild(Map<String, dynamic> data) {
   return Child(
     id: '${data['id'] ?? ''}',
-    name: '${data['nome'] ?? ''}',
+    nome: '${data['nome'] ?? ''}',
     apelido: '${data['apelido'] ?? ''}',
     idade: data['idade'] is num ? (data['idade'] as num).toInt() : 0,
     teamName: '${data['evento'] ?? 'Sem time'}',

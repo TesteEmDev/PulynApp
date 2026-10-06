@@ -96,7 +96,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             final medal = _getMedalForPosition(index);
             return _buildRankingCard(
               position: index + 1,
-              name: child.apelido.isNotEmpty ? child.apelido : child.nome,
+              nome: child.apelido.isNotEmpty ? child.apelido : child.nome,
               score: child.currentScore,
               teamColor: child.teamColor,
               medal: medal,
@@ -142,7 +142,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             final medal = _getMedalForPosition(index);
             return _buildTeamRankingCard(
               position: index + 1,
-              name: teamName,
+              nome: teamName,
               score: totalScore,
               teamColor: teamColor,
               medal: medal,

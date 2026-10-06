@@ -157,7 +157,7 @@ class ApiService {
       final user = User(
         id: userData['id'] ?? '',
         email: userData['email'] ?? email,
-        name: userData['nome'] ?? userData['nomeFamilia'] ?? 'User',
+        nome: userData['nome'] ?? userData['nomeFamilia'] ?? 'User',
         perfil: userData['perfil'] ?? 'family',
         empresaId: userData['empresaId'] ?? '',
         profileImage: userData['profileImage'],
@@ -227,7 +227,7 @@ class ApiService {
       final user = User(
         id: userData['id'] ?? '',
         email: userData['email'] ?? email,
-        name: userData['nome'] ?? userData['nomeFamilia'] ?? nome,
+        nome: userData['nome'] ?? userData['nomeFamilia'] ?? nome,
         perfil: userData['perfil'] ?? 'family',
         empresaId: userData['empresaId'] ?? userData['empresa_name'] ?? '',
         profileImage: userData['profileImage'],
@@ -633,7 +633,7 @@ class ApiService {
         final user = User(
           id: userData['id'] ?? '',
           email: userData['email'] ?? email,
-          name: userData['nome'] ?? userData['nomeFamilia'] ?? parentName,
+          nome: userData['nome'] ?? userData['nomeFamilia'] ?? parentName,
           perfil: userData['perfil'] ?? 'family',
           empresaId: userData['empresaId'] ?? '',
           profileImage: userData['profileImage'],

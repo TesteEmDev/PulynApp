@@ -140,7 +140,7 @@ class AvatarCard extends StatelessWidget {
   const AvatarCard({
     super.key,
     required this.initials,
-    required this.name,
+    required this.nome,
     required this.subtitle,
     required this.avatarColor,
     this.badge,
@@ -523,9 +523,9 @@ class StatusIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: cor.withValues(alpha: 0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: cor.withValues(alpha: 0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -611,7 +611,7 @@ class ErrorState extends StatelessWidget {
 
   const ErrorState({
     super.key,
-    required this.message,
+    required this.mensagem,
     this.onRetry,
   });
 
@@ -742,7 +742,7 @@ class RankingCard extends StatelessWidget {
   const RankingCard({
     super.key,
     required this.position,
-    required this.name,
+    required this.nome,
     required this.score,
     required this.teamColor,
     required this.medal,
@@ -828,7 +828,7 @@ class NotificationCard extends StatelessWidget {
   const NotificationCard({
     super.key,
     required this.title,
-    required this.message,
+    required this.mensagem,
     required this.type,
     this.isRead = false,
     this.onTap,
@@ -853,16 +853,16 @@ class NotificationCard extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    _getNotificationColor(tipo).withValues(alpha: 0.3),
-                    _getNotificationColor(tipo).withValues(alpha: 0.1),
+                    _getNotificationColor(type).withValues(alpha: 0.3),
+                    _getNotificationColor(type).withValues(alpha: 0.1),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
                 child: Icon(
-                  _getNotificationIcon(tipo),
-                  color: _getNotificationColor(tipo),
+                  _getNotificationIcon(type),
+                  color: _getNotificationColor(type),
                   size: 24,
                 ),
               ),
@@ -958,8 +958,8 @@ class NotificationCard extends StatelessWidget {
     );
   }
 
-  IconData _getNotificationIcon(String tipo) {
-    switch (tipo) {
+  IconData _getNotificationIcon(String type) {
+    switch (type) {
       case 'score':
         return Icons.star;
       case 'achievement':
@@ -975,8 +975,8 @@ class NotificationCard extends StatelessWidget {
     }
   }
 
-  Color _getNotificationColor(String tipo) {
-    switch (tipo) {
+  Color _getNotificationColor(String type) {
+    switch (type) {
       case 'score':
         return PulynColors.primary;
       case 'achievement':

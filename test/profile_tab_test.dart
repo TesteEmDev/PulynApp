@@ -8,9 +8,9 @@ import 'package:pulyn_app/screens/profile/profile_tab.dart';
 
 Child _child(String id, String nickname, {int score = 0, String team = 'Time Azul', String color = '#1E9BD7'}) => Child(
       id: id,
-      name: '$nickname Souza',
-      nickname: nickname,
-      age: 7,
+      nome: '$nickname Souza',
+      apelido: nickname,
+      idade: 7,
       currentScore: score,
       totalScore: score,
       teamId: 't-$id',
@@ -23,8 +23,8 @@ Child _child(String id, String nickname, {int score = 0, String team = 'Time Azu
 final _user = User(
   id: 'u1',
   email: 'ana@email.com',
-  name: 'Ana Souza',
-  role: 'family',
+  nome: 'Ana Souza',
+  perfil: 'family',
   empresaId: 'e1',
 );
 

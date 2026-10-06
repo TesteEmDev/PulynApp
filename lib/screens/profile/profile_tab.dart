@@ -447,7 +447,7 @@ class _ChildTile extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [color, cor.withValues(alpha: 0.7)],
+                    colors: [cor, cor.withValues(alpha: 0.7)],
                   ),
                 ),
                 child: Text(

@@ -26,7 +26,7 @@ class NfcReadException implements Exception {
   /// `true` quando a própria pessoa fechou a leitura (não é um erro a mostrar).
   final bool cancelled;
 
-  const NfcReadException(this.message, {this.cancelled = false});
+  const NfcReadException(this.mensagem, {this.cancelled = false});
 
   @override
   String toString() => mensagem;
@@ -134,8 +134,8 @@ class PlatformNfcReader implements NfcReader {
           await finish(uid: hex);
         },
         onSessionErrorIos: (error) {
-          log.e('[NFC] iOS erro: ${error.codigo}');
-          final cancelled = error.codigo == NfcReaderErrorCodeIos.readerSessionInvalidationErrorUserCanceled;
+          log.e('[NFC] iOS erro: ${error.code}');
+          final cancelled = error.code == NfcReaderErrorCodeIos.readerSessionInvalidationErrorUserCanceled;
           if (!completer.isCompleted) {
             completer.completeError(NfcReadException(
               cancelled ? 'Leitura cancelada.' : 'Não foi possível ler a pulseira.',

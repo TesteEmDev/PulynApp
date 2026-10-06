@@ -332,7 +332,7 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
             AuthInfoCard(
               icon: Icons.celebration_rounded,
               title: eventName,
-              message: eventDate.isNotEmpty ? 'Data: $eventDate' : 'Convite para o evento',
+              mensagem: eventDate.isNotEmpty ? 'Data: $eventDate' : 'Convite para o evento',
               accent: PulynColors.accent,
             ),
             const SizedBox(height: 24),
@@ -392,14 +392,14 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
               AuthInfoCard(
                 icon: Icons.child_care_rounded,
                 title: '${linkedChild['nome'] ?? 'Sem nome'}',
-                message: 'Criança já vinculada ao seu convite',
+                mensagem: 'Criança já vinculada ao seu convite',
                 accent: PulynColors.success,
               )
             else
               const AuthInfoCard(
                 icon: Icons.qr_code_scanner_rounded,
                 title: 'Seu filho é vinculado depois',
-                message: 'Depois de entrar, escaneie o QR Code que a recepção entregar para acompanhar seu filho.',
+                mensagem: 'Depois de entrar, escaneie o QR Code que a recepção entregar para acompanhar seu filho.',
               ),
             const SizedBox(height: 24),
 
@@ -520,7 +520,7 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
             children: [
               for (int i = 0; i < steps.length; i++) ...[
                 if (i > 0) const SizedBox(height: 14),
-                AuthStep(number: i + 1, text: steps[i]),
+                AuthStep(number: i + 1, texto: steps[i]),
               ],
             ],
           ),

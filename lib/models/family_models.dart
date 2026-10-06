@@ -40,7 +40,7 @@ class User {
   User({
     required this.id,
     required this.email,
-    required this.name,
+    required this.nome,
     this.profileImage,
     required this.perfil,
     required this.empresaId,
@@ -133,7 +133,7 @@ class Event {
 
   Event({
     required this.id,
-    required this.name,
+    required this.nome,
     required this.date,
     required this.status,
     required this.children,
@@ -156,7 +156,7 @@ class Team {
 
   Team({
     required this.id,
-    required this.name,
+    required this.nome,
     required this.color,
     required this.totalPoints,
     required this.ranking,
@@ -181,7 +181,7 @@ class Notification {
   Notification({
     required this.id,
     required this.title,
-    required this.message,
+    required this.mensagem,
     required this.type,
     this.childId,
     required this.createdAt,

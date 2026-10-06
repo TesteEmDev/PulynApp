@@ -95,7 +95,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
       uid = await _reader.readBraceletUid();
       log.i('[BRACELET] ✅ UID lido: $uid');
     } on NfcReadException catch (e) {
-      log.w('[BRACELET] ⚠️ NFC Exception: ${e.message} (cancelled: ${e.cancelled})');
+      log.w('[BRACELET] ⚠️ NFC Exception: ${e.mensagem} (cancelled: ${e.cancelled})');
       if (!mounted) return;
       // A pessoa fechou a janela de leitura: volta ao botão, sem mostrar erro.
       setState(() {
@@ -103,8 +103,8 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
           log.i('[BRACELET] 📴 Leitura cancelada pelo usuário');
           _step = _Step.ready;
         } else {
-          log.e('[BRACELET] ❌ Erro NFC: ${e.message}');
-          _errorMessage = e.message;
+          log.e('[BRACELET] ❌ Erro NFC: ${e.mensagem}');
+          _errorMessage = e.mensagem;
           _step = _Step.error;
         }
       });
@@ -211,7 +211,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
           icon: Icons.phonelink_erase_rounded,
           color: PulynColors.warning,
           title: 'Este celular não lê pulseiras',
-          text: 'Seu aparelho não tem NFC. Use o QR Code que a recepção entregou.',
+          texto: 'Seu aparelho não tem NFC. Use o QR Code que a recepção entregou.',
           showQrButton: true,
         );
       case _Step.disabled:
@@ -219,7 +219,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
           icon: Icons.nfc_rounded,
           color: PulynColors.warning,
           title: 'O NFC está desligado',
-          text: 'Ative o NFC nas configurações do celular e toque em "Tentar de novo".',
+          texto: 'Ative o NFC nas configurações do celular e toque em "Tentar de novo".',
           retryLabel: 'Tentar de novo',
           onRetry: _prepare,
           showQrButton: true,
@@ -229,7 +229,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
           icon: Icons.nfc_rounded,
           color: PulynColors.primary,
           title: 'Encoste a pulseira',
-          text: 'Toque em "Ler pulseira" e encoste a pulseira do seu filho atrás do celular.',
+          texto: 'Toque em "Ler pulseira" e encoste a pulseira do seu filho atrás do celular.',
           retryLabel: 'Ler pulseira',
           onRetry: _startReading,
           showQrButton: true,

@@ -81,7 +81,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     // Validação de força de senha
     final passwordValidation = _validationService.validatePassword(senha);
     if (!passwordValidation.valid) {
-      _showError('❌ ${passwordValidation.message}');
+      _showError('❌ ${passwordValidation.mensagem}');
       return;
     }
 
@@ -136,7 +136,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Email é obrigatório';
     }
     final result = _validationService.validateEmail(value);
-    return result.valid ? null : result.message;
+    return result.valid ? null : result.mensagem;
   }
 
   String? _validatePassword(String? value) {
@@ -144,7 +144,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Senha é obrigatória';
     }
     final result = _validationService.validatePassword(value);
-    return result.valid ? null : result.message;
+    return result.valid ? null : result.mensagem;
   }
 
   String? _validateConfirmPassword(String? value) {
@@ -155,7 +155,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       _passwordController.text,
       value,
     );
-    return result.valid ? null : result.message;
+    return result.valid ? null : result.mensagem;
   }
 
   String? _validateName(String? value) {
@@ -163,7 +163,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return 'Nome é obrigatório';
     }
     final result = _validationService.validateName(value);
-    return result.valid ? null : result.message;
+    return result.valid ? null : result.mensagem;
   }
 
   @override

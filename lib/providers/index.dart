@@ -142,8 +142,8 @@ class MapRefreshNotifier extends StateNotifier<int> {
   MapRefreshNotifier() : super(0);
   
   void refresh() {
-    estado++;
-    log.i('[MAP] 🔄 Trigger refresh: $estado');
+    state++;
+    log.i('[MAP] 🔄 Trigger refresh: $state');
   }
 }
 
@@ -291,7 +291,7 @@ class CheckpointsCacheNotifier extends StateNotifier<Map<String, List<Map<String
   }
 
   List<Map<String, dynamic>>? getCheckpoints(String eventoId) {
-    return estado[eventoId];
+    return state[eventoId];
   }
 
   void clearCache() {
@@ -520,13 +520,13 @@ class RealtimeTrackingNotifier extends StateNotifier<Map<String, CheckpointReadi
   
   /// Obtém o último checkpoint de uma criança
   CheckpointReading? getChildLastCheckpoint(String childId) {
-    return estado[childId];
+    return state[childId];
   }
   
   /// Limpa o rastreamento de uma criança (ou de todas)
   void clearTracking({String? childId}) {
     if (childId != null) {
-      state = {...estado}..remove(childId);
+      state = {...state}..remove(childId);
       log.i('[TRACKING_NOTIFIER] 🗑️ Rastreamento de $childId removido');
     } else {
       state = {};

@@ -26,7 +26,7 @@ Map<String, dynamic> _$LoginResponseToJson(LoginResponse instance) =>
 User _$UserFromJson(Map<String, dynamic> json) => User(
   id: json['id'] as String,
   email: json['email'] as String,
-  name: json['nome'] as String,
+  nome: json['nome'] as String,
   profileImage: json['profileImage'] as String?,
   perfil: json['perfil'] as String,
   empresaId: json['empresaId'] as String,
@@ -44,7 +44,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
 Child _$ChildFromJson(Map<String, dynamic> json) => Child(
   id: json['id'] as String,
   eventoId: json['eventoId'] as String?,
-  name: json['nome'] as String,
+  nome: json['nome'] as String,
   apelido: json['apelido'] as String,
   idade: (json['idade'] as num).toInt(),
   profileImage: json['profileImage'] as String?,
@@ -96,7 +96,7 @@ Map<String, dynamic> _$AchievementToJson(Achievement instance) =>
 
 Event _$EventFromJson(Map<String, dynamic> json) => Event(
   id: json['id'] as String,
-  name: json['nome'] as String,
+  nome: json['nome'] as String,
   date: DateTime.parse(json['date'] as String),
   status: json['status'] as String,
   children: (json['children'] as List<dynamic>)
@@ -118,8 +118,8 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
 
 Team _$TeamFromJson(Map<String, dynamic> json) => Team(
   id: json['id'] as String,
-  name: json['nome'] as String,
-  color: json['cor'] as String,
+  nome: json['nome'] as String,
+  color: json['color'] as String,
   totalPoints: (json['totalPoints'] as num).toInt(),
   ranking: (json['ranking'] as num).toInt(),
   childrenIds: (json['childrenIds'] as List<dynamic>)
@@ -130,7 +130,7 @@ Team _$TeamFromJson(Map<String, dynamic> json) => Team(
 Map<String, dynamic> _$TeamToJson(Team instance) => <String, dynamic>{
   'id': instance.id,
   'nome': instance.nome,
-  'cor': instance.color,
+  'color': instance.color,
   'totalPoints': instance.totalPoints,
   'ranking': instance.ranking,
   'childrenIds': instance.childrenIds,
@@ -139,8 +139,8 @@ Map<String, dynamic> _$TeamToJson(Team instance) => <String, dynamic>{
 Notification _$NotificationFromJson(Map<String, dynamic> json) => Notification(
   id: json['id'] as String,
   title: json['title'] as String,
-  message: json['mensagem'] as String,
-  type: json['tipo'] as String,
+  mensagem: json['mensagem'] as String,
+  type: json['type'] as String,
   childId: json['childId'] as String?,
   createdAt: DateTime.parse(json['createdAt'] as String),
   read: json['read'] as bool,
@@ -150,8 +150,8 @@ Map<String, dynamic> _$NotificationToJson(Notification instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
-      'mensagem': instance.message,
-      'tipo': instance.tipo,
+      'mensagem': instance.mensagem,
+      'type': instance.type,
       'childId': instance.childId,
       'createdAt': instance.createdAt.toIso8601String(),
       'read': instance.read,

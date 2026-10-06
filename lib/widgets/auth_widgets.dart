@@ -61,7 +61,7 @@ class AuthInfoCard extends StatelessWidget {
   const AuthInfoCard({
     required this.icon,
     required this.title,
-    this.message,
+    this.mensagem,
     this.accent = PulynColors.primary,
     this.trailing,
     super.key,
@@ -305,7 +305,7 @@ class AuthStep extends StatelessWidget {
   final int number;
   final String texto;
 
-  const AuthStep({required this.number, required this.text, super.key});
+  const AuthStep({required this.number, required this.texto, super.key});
 
   @override
   Widget build(BuildContext context) {

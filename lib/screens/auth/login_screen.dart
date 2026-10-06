@@ -103,7 +103,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return 'Email é obrigatório';
     }
     final result = _validationService.validateEmail(value);
-    return result.valid ? null : result.message;
+    return result.valid ? null : result.mensagem;
   }
 
   String? _validatePassword(String? value) {

@@ -5,9 +5,9 @@ import 'package:pulyn_app/screens/home/home_screen.dart';
 
 Child _child() => Child(
       id: 'c1',
-      name: 'Lia',
-      nickname: 'Lia',
-      age: 7,
+      nome: 'Lia',
+      apelido: 'Lia',
+      idade: 7,
       currentScore: 0,
       totalScore: 0,
       teamId: 't',

@@ -54,7 +54,7 @@ class User {
 @JsonSerializable()
 class Child {
   final String id;
-  @JsonKey(name: 'evento_id')
+  @JsonKey(name: 'eventoId')
   final String? eventoId;  // ID do evento para rastrear criança no mapa
   final String name;
   final String nickname;

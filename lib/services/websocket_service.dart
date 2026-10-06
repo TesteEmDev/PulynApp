@@ -31,8 +31,8 @@ class WebSocketService {
           .replaceFirst('http://', 'ws://')
           .replaceFirst('/api', ''); // Remove /api path como no frontend
 
-      // ✅ Adiciona evento_id como query parameter (igual frontend web)
-      final fullWsUrl = '$wsUrl?evento_id=$eventoId';
+      // ✅ Adiciona eventoId como query parameter (igual frontend web)
+      final fullWsUrl = '$wsUrl?eventoId=$eventoId';
 
       log.i('[WebSocket] URL final: $fullWsUrl');
       
@@ -80,7 +80,7 @@ class WebSocketService {
       send({
         'type': 'HEARTBEAT',
         'payload': {
-          'evento_id': eventoId,
+          'eventoId': eventoId,
           'timestamp': DateTime.now().toIso8601String(),
         },
       });

@@ -28,12 +28,12 @@ class ScoreEntry {
       id: json['id'] as String? ?? '',
       childId: json['childId'] ?? json['child_id'] ?? '',
       childName: json['childName'] ?? json['child_name'] ?? 'Criança',
-      checkpointId: json['checkpointId'] ?? json['checkpoint_id'] ?? '',
+      checkpointId: json['checkpointId'] ?? json['checkpointId'] ?? '',
       checkpointName: json['checkpointName'] ?? json['checkpoint_name'] ?? 'Checkpoint',
       points: (json['points'] as num?)?.toInt() ?? 0,
       timestamp: json['timestamp'] != null ? DateTime.parse(json['timestamp']) : DateTime.now(),
       teamColor: json['teamColor'] ?? json['team_color'] ?? '#FFFFFF',
-      gameType: json['gameType'] ?? json['game_type'] ?? 'unknown',
+      gameType: json['gameType'] ?? json['tipoJogo'] ?? 'unknown',
     );
   }
 

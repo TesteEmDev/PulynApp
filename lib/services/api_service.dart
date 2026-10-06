@@ -157,9 +157,9 @@ class ApiService {
       final user = User(
         id: userData['id'] ?? '',
         email: userData['email'] ?? email,
-        name: userData['name'] ?? userData['family_name'] ?? 'User',
+        name: userData['name'] ?? userData['nomeFamilia'] ?? 'User',
         role: userData['role'] ?? 'family',
-        empresaId: userData['empresa_id'] ?? '',
+        empresaId: userData['empresaId'] ?? '',
         profileImage: userData['profileImage'],
       );
       
@@ -199,7 +199,7 @@ class ApiService {
           'email': email,
           'password': password,
           'name': name,
-          'family_name': familyName ?? name,
+          'nomeFamilia': familyName ?? name,
         },
       );
       
@@ -227,9 +227,9 @@ class ApiService {
       final user = User(
         id: userData['id'] ?? '',
         email: userData['email'] ?? email,
-        name: userData['name'] ?? userData['family_name'] ?? name,
+        name: userData['name'] ?? userData['nomeFamilia'] ?? name,
         role: userData['role'] ?? 'family',
-        empresaId: userData['empresa_id'] ?? userData['empresa_name'] ?? '',
+        empresaId: userData['empresaId'] ?? userData['empresa_name'] ?? '',
         profileImage: userData['profileImage'],
       );
       
@@ -397,7 +397,7 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /ranking/criancas/:evento_id - Com validação
+  /// ✅ GET /ranking/criancas/:eventoId - Com validação
   Future<List<Map<String, dynamic>>> getRankingChildren(String eventoId) async {
     try {
       final response = await _dio.get('/ranking/criancas/$eventoId');
@@ -408,7 +408,7 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /ranking/times/:evento_id - Com validação
+  /// ✅ GET /ranking/times/:eventoId - Com validação
   Future<List<Map<String, dynamic>>> getRankingTeams(String eventoId) async {
     try {
       final response = await _dio.get('/ranking/times/$eventoId');
@@ -419,7 +419,7 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /familias/children - Busca filhos da família com evento_id
+  /// ✅ GET /familias/children - Busca filhos da família com eventoId
   Future<Map<String, dynamic>?> getActiveEvent() async {
     try {
       final response = await _dio.get('/familias/children');
@@ -434,17 +434,17 @@ class ApiService {
         return null;
       }
       
-      // Extrai evento_id da primeira criança
+      // Extrai eventoId da primeira criança
       final firstChild = children.first;
       if (firstChild is! Map<String, dynamic>) return null;
       
-      final eventoId = firstChild['evento_id'] as String?;
+      final eventoId = firstChild['eventoId'] as String?;
       if (eventoId == null || eventoId.isEmpty) {
-        log.w('[API] ⚠️ Criança sem evento_id');
+        log.w('[API] ⚠️ Criança sem eventoId');
         return null;
       }
       
-      log.i('[API] ✅ evento_id extraído: $eventoId');
+      log.i('[API] ✅ eventoId extraído: $eventoId');
       return {
         'id': eventoId,
         'name': 'Evento Ativo',
@@ -494,10 +494,10 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /brincadeiras?evento_id={id} - Brincadeiras do evento
+  /// ✅ GET /brincadeiras?eventoId={id} - Brincadeiras do evento
   Future<List<Map<String, dynamic>>> getBrincadeiras(String eventoId) async {
     try {
-      final response = await _dio.get('/brincadeiras', queryParameters: {'evento_id': eventoId});
+      final response = await _dio.get('/brincadeiras', queryParameters: {'eventoId': eventoId});
       
       final data = _validateResponseList(response.data);
       return data.map((item) => item as Map<String, dynamic>).toList();
@@ -633,9 +633,9 @@ class ApiService {
         final user = User(
           id: userData['id'] ?? '',
           email: userData['email'] ?? email,
-          name: userData['name'] ?? userData['family_name'] ?? parentName,
+          name: userData['name'] ?? userData['nomeFamilia'] ?? parentName,
           role: userData['role'] ?? 'family',
-          empresaId: userData['empresa_id'] ?? '',
+          empresaId: userData['empresaId'] ?? '',
           profileImage: userData['profileImage'],
         );
         

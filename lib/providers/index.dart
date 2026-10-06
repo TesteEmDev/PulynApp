@@ -68,7 +68,7 @@ final activeGameProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((re
         'description': activeGame['gameDescription'] ?? 'Jogo em andamento',
         'type': activeGame['gameType'] ?? 'standard',
         'duration': activeGame['duration'],
-        'default_points': activeGame['default_points'],
+        'pontosPadrao': activeGame['pontosPadrao'],
         'hasActiveGame': activeGame['hasActiveGame'] ?? false,
       };
     }
@@ -92,7 +92,7 @@ final activeGameProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((re
           'description': activeGame['gameDescription'] ?? 'Jogo em andamento',
           'type': activeGame['gameType'] ?? 'standard',
           'duration': activeGame['duration'],
-          'default_points': activeGame['default_points'],
+          'pontosPadrao': activeGame['pontosPadrao'],
           'hasActiveGame': activeGame['hasActiveGame'] ?? false,
         };
       } else {
@@ -205,10 +205,10 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
 
   if (scoreLog.isNotEmpty) {
     // Mais recentes primeiro. O backend já devolve em ordem decrescente de
-    // created_at; inverter a lista (como era feito) fazia a criança voltar ao
+    // criadoEm; inverter a lista (como era feito) fazia a criança voltar ao
     // checkpoint MAIS ANTIGO ao reabrir o app. Ordena explicitamente.
     DateTime createdAt(Map<String, dynamic> e) =>
-        DateTime.tryParse('${e['created_at'] ?? e['createdAt'] ?? ''}') ??
+        DateTime.tryParse('${e['criadoEm'] ?? e['createdAt'] ?? ''}') ??
         DateTime.fromMillisecondsSinceEpoch(0);
     final sorted = [...scoreLog]..sort((a, b) => createdAt(b).compareTo(createdAt(a)));
 
@@ -220,13 +220,13 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
           childId = entry['child_id'] as String?;
         } else if (entry.containsKey('childId')) {
           childId = entry['childId'] as String?;
-        } else if (entry.containsKey('crianca_id')) {
-          childId = entry['crianca_id'] as String?;
+        } else if (entry.containsKey('criancaId')) {
+          childId = entry['criancaId'] as String?;
         }
         
         String? checkpointId;
-        if (entry.containsKey('checkpoint_id')) {
-          checkpointId = entry['checkpoint_id'] as String?;
+        if (entry.containsKey('checkpointId')) {
+          checkpointId = entry['checkpointId'] as String?;
         } else if (entry.containsKey('checkpointId')) {
           checkpointId = entry['checkpointId'] as String?;
         } else if (entry.containsKey('checkpoint')) {
@@ -253,7 +253,7 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
           lastCheckpointMap[childId] = {
             'checkpointId': checkpointId,
             'checkpointName': checkpointName,
-            'timestamp': entry['created_at'] ?? DateTime.now().toIso8601String(),
+            'timestamp': entry['criadoEm'] ?? DateTime.now().toIso8601String(),
             'points': entry['points'] ?? 0,
           };
         }
@@ -422,8 +422,8 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
       log.i('⚡ PULSEIRA LIDA - Criança: ${payload['child_name'] ?? payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpoint_name'] ?? payload['checkpointName'] ?? 'N/A'} | Pontos: ${payload['points'] ?? 0}');
 
       try {
-        final childId = payload['criancaId'] ?? payload['crianca_id'] ?? payload['child_id'] ?? payload['childId'];
-        final checkpointId = payload['checkpointId'] ?? payload['checkpoint_id'] ?? payload['checkpoint'];
+        final childId = payload['criancaId'] ?? payload['criancaId'] ?? payload['child_id'] ?? payload['childId'];
+        final checkpointId = payload['checkpointId'] ?? payload['checkpointId'] ?? payload['checkpoint'];
         final checkpointName = payload['checkpointName'] ?? payload['checkpoint_name'] ?? '';
         final points = payload['points'] ?? 0;
 
@@ -450,8 +450,8 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
       log.i('🏆 TERRITÓRIO CONQUISTADO - Criança: ${payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpointId'] ?? 'N/A'}');
 
       try {
-        final childId = payload['criancaId'] ?? payload['crianca_id'] ?? payload['child_id'] ?? payload['childId'];
-        final checkpointId = payload['checkpointId'] ?? payload['checkpoint_id'];
+        final childId = payload['criancaId'] ?? payload['criancaId'] ?? payload['child_id'] ?? payload['childId'];
+        final checkpointId = payload['checkpointId'] ?? payload['checkpointId'];
         final checkpointName = payload['checkpointName'] ?? payload['checkpoint_name'] ?? '';
         final teamColor = payload['teamColor'] ?? '#FFFFFF';
         final points = payload['points'] ?? 10;

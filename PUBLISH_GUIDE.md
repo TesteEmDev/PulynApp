@@ -14,7 +14,7 @@
 
 ### 1. Verificar Keystore
 ```bash
-keytool -list -v -keystore android/app/pulyn_release.keystore -alias pulyn_key -storepass pulyn2026 -keypass pulyn2026
+keytool -list -v -keystore android/app/pulyn_release.keystore -alias pulyn_key -storepass <SENHA_DO_KEYSTORE: ver cofre de senhas> -keypass <SENHA_DO_KEYSTORE: ver cofre de senhas>
 ```
 
 ### 2. Build Release APK
@@ -148,9 +148,9 @@ flutter run --release
 
 **Keystore Android:**
 - Arquivo: `android/app/pulyn_release.keystore`
-- Senha Store: `pulyn2026`
+- Senha Store: `<SENHA_DO_KEYSTORE: ver cofre de senhas>`
 - Alias: `pulyn_key`
-- Senha Key: `pulyn2026`
+- Senha Key: `<SENHA_DO_KEYSTORE: ver cofre de senhas>`
 
 ⚠️ **NÃO commitar para Git!** Já está em `.gitignore`.
 

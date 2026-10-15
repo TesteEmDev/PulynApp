@@ -45,13 +45,13 @@ class _FakeInviteApi extends ApiService {
     lastChildren = children;
     final handler = onRegister;
     if (handler != null) return handler();
-    return {'type': 'created', 'message': 'Conta criada! Entre no app e vincule seu filho pelo QR Code.'};
+    return {'tipo': 'created', 'mensagem': 'Conta criada! Entre no app e vincule seu filho pelo QR Code.'};
   }
 }
 
 const _invite = <String, dynamic>{
   'email': null,
-  'event': {'name': 'Festa da Lia', 'date': '2026-10-05'},
+  'event': {'nome': 'Festa da Lia', 'date': '2026-10-05'},
 };
 
 void main() {
@@ -208,8 +208,8 @@ void main() {
 
     testWidgets('convite já vinculado a uma criança: cadastro pendente de aprovação, com tela própria', (tester) async {
       final api = _FakeInviteApi(
-        invite: {..._invite, 'child': {'name': 'Pedro Lima'}},
-        onRegister: () async => {'type': 'pending', 'message': 'Aguarde a aprovação da recepção.'},
+        invite: {..._invite, 'child': {'nome': 'Pedro Lima'}},
+        onRegister: () async => {'tipo': 'pending', 'mensagem': 'Aguarde a aprovação da recepção.'},
       );
       await pumpApp(tester, initial: '/family/invite/ok', api: api);
 
@@ -256,7 +256,7 @@ void main() {
       expect(find.text('Criar cadastro'), findsNothing);
       expect(api.registerCalls, 1);
 
-      pending.complete({'type': 'created', 'message': 'ok'});
+      pending.complete({'tipo': 'created', 'mensagem': 'ok'});
       await tester.pumpAndSettle();
       expect(find.text('Conta criada!'), findsOneWidget);
       expect(api.registerCalls, 1);

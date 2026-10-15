@@ -9,7 +9,7 @@ import 'package:pulyn_app/widgets/qr_link_panel.dart';
 
 const _okResponse = <String, dynamic>{
   'success': true,
-  'linkedChild': {'id': 'c1', 'name': 'Lia Souza', 'nickname': 'Lia', 'age': 7, 'evento': 'Festa da Lia'},
+  'linkedChild': {'id': 'c1', 'nome': 'Lia Souza', 'apelido': 'Lia', 'idade': 7, 'evento': 'Festa da Lia'},
 };
 
 void main() {

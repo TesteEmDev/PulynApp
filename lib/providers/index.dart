@@ -215,31 +215,11 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
     for (final entry in sorted) {
       try {
         // ✅ Tentar TODOS os possíveis nomes de campo
-        String? childId;
-        if (entry.containsKey('child_id')) {
-          childId = entry['child_id'] as String?;
-        } else if (entry.containsKey('childId')) {
-          childId = entry['childId'] as String?;
-        } else if (entry.containsKey('criancaId')) {
-          childId = entry['criancaId'] as String?;
-        }
-        
-        String? checkpointId;
-        if (entry.containsKey('checkpointId')) {
-          checkpointId = entry['checkpointId'] as String?;
-        } else if (entry.containsKey('checkpointId')) {
-          checkpointId = entry['checkpointId'] as String?;
-        } else if (entry.containsKey('checkpoint')) {
-          checkpointId = entry['checkpoint'] as String?;
-        }
-        
-        String? checkpointName;
-        if (entry.containsKey('checkpoint_name')) {
-          checkpointName = entry['checkpoint_name'] as String?;
-        } else if (entry.containsKey('checkpointName')) {
-          checkpointName = entry['checkpointName'] as String?;
-        }
-        
+        // Chaves do GET /leituras/evento/:id/historico (camelCase)
+        final childId = entry['childId'] as String?;
+        final checkpointId = entry['checkpointId'] as String?;
+        final checkpointName = entry['checkpointNome'] as String?;
+
         if (childId == null) {
           continue;
         }
@@ -419,12 +399,12 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
       // ✅ O WebSocketService entrega a mensagem inteira ({tipo, payload}),
       // não só o payload — os campos ficam dentro de data['payload'].
       final payload = (data['payload'] as Map?)?.cast<String, dynamic>() ?? data;
-      log.i('⚡ PULSEIRA LIDA - Criança: ${payload['child_name'] ?? payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpoint_name'] ?? payload['checkpointName'] ?? 'N/A'} | Pontos: ${payload['pontos'] ?? 0}');
+      log.i('⚡ PULSEIRA LIDA - Criança: ${payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpointName'] ?? 'N/A'} | Pontos: ${payload['pontos'] ?? 0}');
 
       try {
-        final childId = payload['criancaId'] ?? payload['criancaId'] ?? payload['child_id'] ?? payload['childId'];
-        final checkpointId = payload['checkpointId'] ?? payload['checkpointId'] ?? payload['checkpoint'];
-        final checkpointName = payload['checkpointName'] ?? payload['checkpoint_name'] ?? '';
+        final childId = payload['criancaId'];
+        final checkpointId = payload['checkpointId'];
+        final checkpointName = payload['checkpointName'] ?? '';
         final pontos = payload['pontos'] ?? 0;
 
         if (childId != null && checkpointId != null) {
@@ -450,9 +430,9 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
       log.i('🏆 TERRITÓRIO CONQUISTADO - Criança: ${payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpointId'] ?? 'N/A'}');
 
       try {
-        final childId = payload['criancaId'] ?? payload['criancaId'] ?? payload['child_id'] ?? payload['childId'];
-        final checkpointId = payload['checkpointId'] ?? payload['checkpointId'];
-        final checkpointName = payload['checkpointName'] ?? payload['checkpoint_name'] ?? '';
+        final childId = payload['criancaId'];
+        final checkpointId = payload['checkpointId'];
+        final checkpointName = payload['checkpointName'] ?? '';
         final teamColor = payload['teamColor'] ?? '#FFFFFF';
         final pontos = payload['pontos'] ?? 10;
 

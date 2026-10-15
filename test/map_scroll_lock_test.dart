@@ -38,7 +38,7 @@ void main() {
         apiServiceProvider.overrideWithValue(_FakeApi()),
         activeEventProvider.overrideWith((ref) => Stream.value({'id': 'e1'})),
         checkpointsByEventProvider.overrideWith((ref, id) async => [
-              {'id': 'cp1', 'name': 'Torre', 'zone': 'Entrada', 'points': 10, 'status': 'online', 'map_x': 200, 'map_y': 150},
+              {'id': 'cp1', 'nome': 'Torre', 'zona': 'Entrada', 'pontos': 10, 'status': 'online', 'mapaX': 200, 'mapaY': 150},
             ]),
         zonesProvider.overrideWith((ref) async => <Map<String, dynamic>>[]),
         mapChildrenRealtimeProvider.overrideWith((ref) => Stream.value([child])),

@@ -286,11 +286,11 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /leituras/eventos/{eventoId}/historico - Histórico de conquistas
+  /// ✅ GET /leituras/evento/{eventoId}/historico - Histórico de conquistas
   Future<List<Map<String, dynamic>>> getScoreHistory(String eventoId) async {
     try {
       final response = await _dio.get(
-        '/leituras/eventos/$eventoId/historico',
+        '/leituras/evento/$eventoId/historico',
         // allGames=1: inclui leituras de Tesouro/Monstro/Zone Conquest, que não
         // gravam em `pontuacoes` — necessário pro rastreio do avatar.
         queryParameters: {'allGames': '1'},
@@ -358,10 +358,10 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /familias/children/:id/pontos - Com validação
+  /// ✅ GET /familias/children/:id/scores - Com validação
   Future<Map<String, dynamic>> getChildScores(String childId) async {
     try {
-      final response = await _dio.get('/familias/children/$childId/pontos');
+      final response = await _dio.get('/familias/children/$childId/scores');
       return _validateResponseData(response.data);
     } catch (e) {
       rethrow;
@@ -397,10 +397,10 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /ranking/criancas/:eventoId - Com validação
+  /// ✅ GET /ranking/evento/:eventoId/ranking/crianca - Com validação
   Future<List<Map<String, dynamic>>> getRankingChildren(String eventoId) async {
     try {
-      final response = await _dio.get('/ranking/criancas/$eventoId');
+      final response = await _dio.get('/ranking/evento/$eventoId/ranking/crianca');
       final data = _validateResponseList(response.data);
       return data.map((item) => item as Map<String, dynamic>).toList();
     } catch (e) {
@@ -408,10 +408,10 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /ranking/times/:eventoId - Com validação
+  /// ✅ GET /ranking/evento/:eventoId/ranking/time - Com validação
   Future<List<Map<String, dynamic>>> getRankingTeams(String eventoId) async {
     try {
-      final response = await _dio.get('/ranking/times/$eventoId');
+      final response = await _dio.get('/ranking/evento/$eventoId/ranking/time');
       final data = _validateResponseList(response.data);
       return data.map((item) => item as Map<String, dynamic>).toList();
     } catch (e) {
@@ -474,10 +474,10 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /company-map/floor-plano - Planta baixa do buffet (imagem base64, vale para todos os eventos)
+  /// ✅ GET /company-map/floor-plan - Planta baixa do buffet (imagem base64, vale para todos os eventos)
   Future<String?> getFloorPlan() async {
     try {
-      final response = await _dio.get('/company-map/floor-plano');
+      final response = await _dio.get('/company-map/floor-plan');
       final data = _validateResponseData(response.data);
       
       // Backend retorna { floorPlan: { dataUrl, nome, tipo } }
@@ -519,19 +519,7 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /familias/active-event/checkpoints - Checkpoints do evento ativo
-  Future<List<Map<String, dynamic>>> getActiveEventCheckpoints() async {
-    try {
-      final response = await _dio.get('/familias/active-event/checkpoints');
-      
-      final data = _validateResponseList(response.data);
-      return data.map((item) => item as Map<String, dynamic>).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  /// ✅ GET /checkpoints/evento/{eventoId} - Checkpoints de um evento específico (mesmo que admin usa)
+  /// ✅ GET /pontoVerificacao/evento/{eventoId} - Checkpoints de um evento específico (mesmo que admin usa)
   Future<List<Map<String, dynamic>>> getCheckpointsByEvent(String eventoId) async {
     try {
       log.i('[API] 🔍 Buscando checkpoints para evento: $eventoId');
@@ -541,7 +529,7 @@ class ApiService {
         return [];
       }
       
-      final response = await _dio.get('/checkpoints/evento/$eventoId');
+      final response = await _dio.get('/pontoVerificacao/evento/$eventoId');
       
       log.i('[API] ✅ Checkpoints carregados com sucesso: ${response.data}');
       

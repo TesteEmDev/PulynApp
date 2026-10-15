@@ -24,8 +24,8 @@ void main() {
   );
 
   final checkpoints = <Map<String, dynamic>>[
-    {'id': 'cp1', 'name': 'Torre Encantada', 'zone': 'Entrada', 'points': 10, 'status': 'online', 'map_x': 90, 'map_y': 90},
-    {'id': 'cp2', 'name': 'Caverna Misteriosa', 'zone': 'Entrada', 'points': 15, 'status': 'online', 'map_x': 330, 'map_y': 220},
+    {'id': 'cp1', 'nome': 'Torre Encantada', 'zona': 'Entrada', 'pontos': 10, 'status': 'online', 'mapaX': 90, 'mapaY': 90},
+    {'id': 'cp2', 'nome': 'Caverna Misteriosa', 'zona': 'Entrada', 'pontos': 15, 'status': 'online', 'mapaX': 330, 'mapaY': 220},
   ];
 
   // Onde a criança está (muda durante o teste, como uma leitura de pulseira).
@@ -46,7 +46,7 @@ void main() {
           // um GET de floor-plan ao construir — isso deixa um timer pendente
           // no teste. _FakeApi('') resolve na hora, sem rede.
           apiServiceProvider.overrideWithValue(api ?? _FakeApi('')),
-          activeEventProvider.overrideWith((ref) => Stream.value({'id': 'e1', 'name': 'Festa'})),
+          activeEventProvider.overrideWith((ref) => Stream.value({'id': 'e1', 'nome': 'Festa'})),
           checkpointsByEventProvider.overrideWith((ref, id) async => [...checkpoints, ...?extraCheckpoints]),
           zonesProvider.overrideWith((ref) async => zones ?? <Map<String, dynamic>>[]),
           mapChildrenRealtimeProvider.overrideWith((ref) => Stream.value([child])),
@@ -320,7 +320,7 @@ void main() {
     phone(tester);
     // Zona salva pelo admin web com parte fora do canvas 450x320
     await tester.pumpWidget(app(zones: [
-      {'id': 'z1', 'name': 'Zona Extra', 'color': '#22C55E', 'x': 330, 'y': 200, 'width': 300, 'height': 200},
+      {'id': 'z1', 'nome': 'Zona Extra', 'color': '#22C55E', 'x': 330, 'y': 200, 'width': 300, 'height': 200},
     ]));
     await settle(tester, 500);
 
@@ -345,7 +345,7 @@ void main() {
   testWidgets('checkpoint fora do canvas aparece e continua tocável', (tester) async {
     phone(tester);
     await tester.pumpWidget(app(extraCheckpoints: [
-      {'id': 'cp3', 'name': 'Ponto Distante', 'zone': 'Entrada', 'points': 5, 'status': 'online', 'map_x': 520, 'map_y': 120},
+      {'id': 'cp3', 'nome': 'Ponto Distante', 'zona': 'Entrada', 'pontos': 5, 'status': 'online', 'mapaX': 520, 'mapaY': 120},
     ]));
     await settle(tester, 500);
 
@@ -456,11 +456,11 @@ void main() {
   testWidgets('checkpoints offline não aparecem no mapa nem ampliam a área', (tester) async {
     phone(tester);
     await tester.pumpWidget(app(extraCheckpoints: [
-      {'id': 'off1', 'name': 'Sem Sinal', 'zone': 'Entrada', 'points': 5, 'status': 'offline', 'map_x': 200, 'map_y': 100},
+      {'id': 'off1', 'nome': 'Sem Sinal', 'zona': 'Entrada', 'pontos': 5, 'status': 'offline', 'mapaX': 200, 'mapaY': 100},
       // longe do canvas: se contasse, o mapa cresceria para abranger esse ponto
-      {'id': 'off2', 'name': 'Offline Distante', 'zone': 'Entrada', 'points': 5, 'status': 'offline', 'map_x': 700, 'map_y': 100},
+      {'id': 'off2', 'nome': 'Offline Distante', 'zona': 'Entrada', 'pontos': 5, 'status': 'offline', 'mapaX': 700, 'mapaY': 100},
       // sem status = offline (mesma regra do admin e do backend)
-      {'id': 'off3', 'name': 'Sem Status', 'zone': 'Entrada', 'points': 5, 'map_x': 250, 'map_y': 200},
+      {'id': 'off3', 'nome': 'Sem Status', 'zona': 'Entrada', 'pontos': 5, 'mapaX': 250, 'mapaY': 200},
     ]));
     await settle(tester, 500);
 
@@ -479,7 +479,7 @@ void main() {
   testWidgets('criança que estava num checkpoint que ficou offline continua aparecendo', (tester) async {
     phone(tester);
     await tester.pumpWidget(app(extraCheckpoints: [
-      {'id': 'off1', 'name': 'Sem Sinal', 'zone': 'Entrada', 'points': 5, 'status': 'offline', 'map_x': 200, 'map_y': 150},
+      {'id': 'off1', 'nome': 'Sem Sinal', 'zona': 'Entrada', 'pontos': 5, 'status': 'offline', 'mapaX': 200, 'mapaY': 150},
     ]));
     await settle(tester, 500);
 

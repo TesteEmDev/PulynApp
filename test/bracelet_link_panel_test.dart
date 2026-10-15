@@ -33,7 +33,7 @@ class _FakeReader implements NfcReader {
 
 const _linked = <String, dynamic>{
   'success': true,
-  'linkedChild': {'id': 'c1', 'name': 'Lia Souza', 'nickname': 'Lia', 'age': 6, 'evento': 'Festa da Lia'},
+  'linkedChild': {'id': 'c1', 'nome': 'Lia Souza', 'apelido': 'Lia', 'idade': 6, 'evento': 'Festa da Lia'},
 };
 
 Widget _wrap(Widget child) => MaterialApp(

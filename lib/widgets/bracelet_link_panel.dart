@@ -14,7 +14,7 @@ enum _Step { checking, unsupported, disabled, ready, reading, processing, linked
 /// [QrLinkPanel]. Funciona dentro da tela onde é colocado, sem diálogos.
 ///
 /// No Android a leitura começa sozinha ao abrir; no iPhone o sistema abre a própria janela
-/// de leitura. O vínculo nasce pendente: a recepção ainda precisa aprovar.
+/// de leitura. O vínculo já nasce aprovado: a recepção não precisa aprovar.
 class BraceletLinkPanel extends StatefulWidget {
   /// Chamado assim que a criança é vinculada.
   final ValueChanged<Child>? onLinked;

@@ -132,7 +132,7 @@ pulyn_app/
    - Já estão em `.gitignore`
 
 2. **SENHAS (guarde bem!):**
-   - Keystore: `pulyn2026`
+   - Keystore: `<SENHA_DO_KEYSTORE: ver cofre de senhas>`
    - Alias: `pulyn_key`
    - Armazene em local seguro (password manager)
 

@@ -155,7 +155,7 @@ class _EnvironmentSelectorScreenState
               _buildEnvironmentCard(
                 environment: ApiEnvironment.local,
                 title: '💻 Local',
-                description: 'Conectar com API em sua máquina',
+                descricao: 'Conectar com API em sua máquina',
                 url: ApiConfig.apiBaseUrlLocal,
                 isSelected: _selectedEnvironment == ApiEnvironment.local,
                 onTap: () => _selectEnvironment(ApiEnvironment.local),
@@ -166,7 +166,7 @@ class _EnvironmentSelectorScreenState
               _buildEnvironmentCard(
                 environment: ApiEnvironment.render,
                 title: '☁️ Render (Hospedado)',
-                description: 'Conectar com API hospedada no Render',
+                descricao: 'Conectar com API hospedada no Render',
                 url: ApiConfig.apiBaseUrlRender,
                 isSelected: _selectedEnvironment == ApiEnvironment.render,
                 onTap: () => _selectEnvironment(ApiEnvironment.render),
@@ -177,7 +177,7 @@ class _EnvironmentSelectorScreenState
               _buildEnvironmentCard(
                 environment: ApiEnvironment.production,
                 title: '🚀 Produção',
-                description: 'Conectar com API em produção',
+                descricao: 'Conectar com API em produção',
                 url: ApiConfig.apiBaseUrlProd,
                 isSelected: _selectedEnvironment == ApiEnvironment.production,
                 onTap: () => _selectEnvironment(ApiEnvironment.production),
@@ -332,7 +332,7 @@ class _EnvironmentSelectorScreenState
   Widget _buildEnvironmentCard({
     required ApiEnvironment environment,
     required String title,
-    required String description,
+    required String descricao,
     required String url,
     required bool isSelected,
     required VoidCallback onTap,
@@ -364,7 +364,7 @@ class _EnvironmentSelectorScreenState
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    description,
+                    descricao,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 8),

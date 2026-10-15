@@ -31,8 +31,8 @@ class WebSocketService {
           .replaceFirst('http://', 'ws://')
           .replaceFirst('/api', ''); // Remove /api path como no frontend
 
-      // ✅ Adiciona evento_id como query parameter (igual frontend web)
-      final fullWsUrl = '$wsUrl?evento_id=$eventoId';
+      // ✅ Adiciona eventoId como query parameter (igual frontend web)
+      final fullWsUrl = '$wsUrl?eventoId=$eventoId';
 
       log.i('[WebSocket] URL final: $fullWsUrl');
       
@@ -78,9 +78,9 @@ class WebSocketService {
   void _sendHeartbeat(String eventoId) {
     if (_isConnected) {
       send({
-        'type': 'HEARTBEAT',
+        'tipo': 'HEARTBEAT',
         'payload': {
-          'evento_id': eventoId,
+          'eventoId': eventoId,
           'timestamp': DateTime.now().toIso8601String(),
         },
       });
@@ -93,16 +93,16 @@ class WebSocketService {
     _isListening = true;
     
     _channel?.stream.listen(
-      (message) {
+      (mensagem) {
         try {
-          final data = jsonDecode(message as String) as Map<String, dynamic>;
-          final type = data['type'] as String?;
+          final data = jsonDecode(mensagem as String) as Map<String, dynamic>;
+          final tipo = data['tipo'] as String?;
           
           // ✅ Ignora heartbeat logs como no frontend
-          final isHeartbeat = type == 'HEARTBEAT' || type == 'PONG';
+          final isHeartbeat = tipo == 'HEARTBEAT' || tipo == 'PONG';
           
           if (!isHeartbeat) {
-            log.i('[WebSocket] 📨 Evento recebido: $type');
+            log.i('[WebSocket] 📨 Evento recebido: $tipo');
           }
 
           // Notifica listeners genéricos
@@ -111,13 +111,13 @@ class WebSocketService {
           }
 
           // Notifica handlers específicos por tipo
-          if (type != null && _eventHandlers.containsKey(type)) {
-            for (final handler in _eventHandlers[type]!) {
+          if (tipo != null && _eventHandlers.containsKey(tipo)) {
+            for (final handler in _eventHandlers[tipo]!) {
               handler(data);
             }
           }
         } catch (e) {
-          log.e('[WebSocket] ❌ Erro ao decodificar mensagem: $e');
+          log.e('[WebSocket] ❌ Erro ao decodificar message: $e');
         }
       },
       onError: (error) {
@@ -164,12 +164,12 @@ class WebSocketService {
     if (_isConnected) {
       try {
         _channel?.sink.add(jsonEncode(data));
-        final type = data['type'];
-        if (type != 'HEARTBEAT') {
-          log.i('[WebSocket] 📤 Mensagem enviada: $type');
+        final tipo = data['tipo'];
+        if (tipo != 'HEARTBEAT') {
+          log.i('[WebSocket] 📤 Mensagem enviada: $tipo');
         }
       } catch (e) {
-        log.e('[WebSocket] ❌ Erro ao enviar mensagem: $e');
+        log.e('[WebSocket] ❌ Erro ao enviar message: $e');
       }
     } else {
       log.w('[WebSocket] ⚠️ Não conectado, mensagem não enviada');

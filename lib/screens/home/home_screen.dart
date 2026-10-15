@@ -4,8 +4,12 @@ import 'package:go_router/go_router.dart';
 import '../../providers/index.dart';
 import '../../models/family_models.dart';
 import '../../config/theme.dart';
-import '../qr_scan/qr_scanner_screen.dart';
 import '../../widgets/event_map_widget.dart';
+import '../../widgets/link_child_hero.dart';
+import '../../widgets/modern_bottom_nav.dart';
+import '../../widgets/pulyn_logo.dart';
+import '../../widgets/qr_link_panel.dart';
+import '../profile/profile_tab.dart';
 import '../../utils/logger.dart';
 
 // ✅ Notifier para trigger manual de refresh
@@ -75,6 +79,12 @@ final childrenRankingProvider = StreamProvider.autoDispose<List<Child>>((ref) as
   }
 });
 
+/// Já carregou a lista de crianças e ela está vazia. Enquanto carrega pela primeira vez
+/// (ou se der erro sem dados) é falso, para o QR Code não piscar na tela por engano.
+@visibleForTesting
+bool hasNoChildren(AsyncValue<List<Child>> children) =>
+    children.hasValue && (children.value?.isEmpty ?? false);
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -85,6 +95,32 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
   late PageController _pageController;
+
+  // Verdadeiro enquanto o dedo está no mapa: trava a rolagem da tela e a troca de
+  // abas por deslize, para arrastar/dar zoom no mapa não rolar a página nem mudar de aba.
+  bool _mapInteracting = false;
+
+  // Leitor de QR Code aberto dentro da lista de crianças (quando já há crianças vinculadas).
+  bool _linkPanelOpen = false;
+
+  /// Uma criança acabou de ser vinculada: atualiza a lista. [announce] mostra um aviso, para
+  /// quando o cartão do leitor some (o primeiro vínculo troca o cartão pelo mapa e pela lista).
+  void _handleChildLinked(Child child, {bool announce = false}) {
+    ref.read(childrenRefreshProvider.notifier).refresh();
+    if (!announce || !mounted) return;
+    final nome = child.apelido.isNotEmpty ? child.apelido : child.nome;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$nome vinculado! Agora você acompanha a festa em tempo real.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _setMapInteracting(bool value) {
+    if (!mounted || _mapInteracting == value) return;
+    setState(() => _mapInteracting = value);
+  }
 
   @override
   void initState() {
@@ -130,6 +166,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
+        physics: _mapInteracting ? const NeverScrollableScrollPhysics() : null,
         onPageChanged: _onPageChanged,
         children: [
           // Página 0: Home
@@ -140,55 +177,94 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _buildProfileTab(context, ref),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: ModernBottomNav(
         currentIndex: _selectedIndex,
+        onTap: _onNavTap,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
+          ModernNavItem(
+            icon: Icons.home_outlined,
+            activeIcon: Icons.home_rounded,
             label: 'Início',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.trending_up_outlined),
+          ModernNavItem(
+            icon: Icons.emoji_events_outlined,
+            activeIcon: Icons.emoji_events_rounded,
             label: 'Ranking',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.star_outline),
+          ModernNavItem(
+            icon: Icons.person_outline_rounded,
+            activeIcon: Icons.person_rounded,
             label: 'Perfil',
           ),
         ],
-        onTap: _onNavTap,
       ),
     );
   }
 
   // ===== HOME TAB =====
   Widget _buildHomeTab(BuildContext context, WidgetRef ref) {
+    final noChildren = ref.watch(childrenProvider.select(hasNoChildren));
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        // Marca no lugar do texto "Dashboard" (o nome fica só para leitores de tela)
+        title: const PulynLogo(height: 34),
         leading: null,
         elevation: 0,
         actions: [
           // Removed notifications button - feature not implemented
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildWelcomeCard(context, ref),
-              const SizedBox(height: 16),
-              _buildEventMapSection(context, ref),
-              const SizedBox(height: 20),
-              _buildChildrenListFromAPI(context, ref),
-              const SizedBox(height: 20),
-            ],
+      body: RefreshIndicator(
+        onRefresh: () => _handleRefresh(ref),
+        child: SingleChildScrollView(
+          physics: _mapInteracting
+              ? const NeverScrollableScrollPhysics()
+              : const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildWelcomeCard(context, ref),
+                const SizedBox(height: 16),
+                if (noChildren)
+                  // Sem crianças, o mapa e a lista seriam só caixas vazias: o destaque leva ao QR Code
+                  LinkChildHero(
+                    onLinked: (child) => _handleChildLinked(child, announce: true),
+                  )
+                else ...[
+                  _buildEventMapSection(context, ref),
+                  const SizedBox(height: 20),
+                  _buildChildrenListFromAPI(context, ref),
+                ],
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  /// Puxar pra atualizar: força recarregar crianças, evento/jogo ativo,
+  /// zonas, planta e checkpoints (zonas e planta reagem a mapRefreshProvider;
+  /// checkpoints têm cache próprio, por isso são limpos/invalidados na mão).
+  Future<void> _handleRefresh(WidgetRef ref) async {
+    final eventoId = ref.read(activeEventProvider).value?['id'] as String?;
+
+    ref.read(childrenRefreshProvider.notifier).refresh();
+    ref.read(checkpointsCacheProvider.notifier).clearCache();
+    ref.invalidate(checkpointsByEventProvider);
+    ref.read(mapRefreshProvider.notifier).refresh();
+    ref.invalidate(activeEventProvider);
+    ref.invalidate(activeGameProvider);
+
+    await Future.wait([
+      ref.read(childrenProvider.future),
+      ref.read(zonesProvider.future),
+      if (eventoId != null) ref.read(checkpointsByEventProvider(eventoId).future),
+    ]);
   }
 
   // ===== RANKING TAB =====
@@ -197,6 +273,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: const Text('Ranking'),
         elevation: 0,
+        actions: const [PulynAppBarLogo()],
       ),
       body: _buildRankingContent(),
     );
@@ -240,26 +317,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return _buildEmptyState('Sem dados');
         }
         final sorted = [...children]..sort((a, b) => b.currentScore.compareTo(a.currentScore));
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: sorted.length,
-          itemBuilder: (context, index) {
-            final child = sorted[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildRankingCard(
-                position: index + 1,
-                name: child.nickname.isNotEmpty ? child.nickname : child.name,
-                score: child.currentScore,
-                teamColor: child.teamColor,
-                medal: _getMedalForPosition(index),
-                isTop: index < 3,
-              ),
-            );
-          },
+        return RefreshIndicator(
+          onRefresh: () => _handleRankingRefresh(ref),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: sorted.length,
+            itemBuilder: (context, index) {
+              final child = sorted[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildRankingCard(
+                  position: index + 1,
+                  nome: child.apelido.isNotEmpty ? child.apelido : child.nome,
+                  score: child.currentScore,
+                  teamColor: child.teamColor,
+                  medal: _getMedalForPosition(index),
+                  isTop: index < 3,
+                ),
+              );
+            },
+          ),
         );
       },
     );
+  }
+
+  /// Puxar pra atualizar no Ranking: mesmos gatilhos usados pelo WebSocket.
+  Future<void> _handleRankingRefresh(WidgetRef ref) async {
+    ref.read(childrenRefreshProvider.notifier).refresh();
+    await ref.read(childrenRankingProvider.future);
   }
 
   Widget _buildTeamsRankingTab() {
@@ -273,8 +359,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final teamsMap = <String, (String, int, String)>{};
         for (final child in children) {
           if (teamsMap.containsKey(child.teamName)) {
-            final (name, score, color) = teamsMap[child.teamName]!;
-            teamsMap[child.teamName] = (name, score + child.currentScore, color);
+            final (nome, score, color) = teamsMap[child.teamName]!;
+            teamsMap[child.teamName] = (nome, score + child.currentScore, color);
           } else {
             teamsMap[child.teamName] = (child.teamName, child.currentScore, child.teamColor);
           }
@@ -286,23 +372,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         final sorted = teamsMap.entries.toList()..sort((a, b) => b.value.$2.compareTo(a.value.$2));
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: sorted.length,
-          itemBuilder: (context, index) {
-            final (teamName, totalScore, teamColor) = sorted[index].value;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildTeamRankingCard(
-                position: index + 1,
-                name: teamName,
-                score: totalScore,
-                teamColor: teamColor,
-                medal: _getMedalForPosition(index),
-                isTop: index < 3,
-              ),
-            );
-          },
+        return RefreshIndicator(
+          onRefresh: () => _handleRankingRefresh(ref),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: sorted.length,
+            itemBuilder: (context, index) {
+              final (teamName, totalScore, teamColor) = sorted[index].value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildTeamRankingCard(
+                  position: index + 1,
+                  nome: teamName,
+                  score: totalScore,
+                  teamColor: teamColor,
+                  medal: _getMedalForPosition(index),
+                  isTop: index < 3,
+                ),
+              );
+            },
+          ),
         );
       },
     );
@@ -310,77 +399,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // ===== PROFILE TAB =====
   Widget _buildProfileTab(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-        elevation: 0,
-      ),
-      body: Center(
-        child: authState.when(
-          data: (user) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 60,
-                  backgroundColor: PulynColors.primary.withValues(alpha: 0.2),
-                  child: Text(
-                    user?.name[0].toUpperCase() ?? 'U',
-                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  user?.name ?? 'Usuário',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  user?.email ?? '',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: PulynColors.textMuted,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-                ElevatedButton.icon(
-                  onPressed: () => context.go('/manage-children'),
-                  icon: const Icon(Icons.people_outline),
-                  label: const Text('Gerenciar Crianças'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PulynColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () => ref.read(authProvider.notifier).logout(),
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Sair'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          loading: () => const CircularProgressIndicator(),
-          error: (_, _) => const Text('Erro ao carregar perfil'),
-        ),
-      ),
+    return ProfileTab(
+      auth: ref.watch(authProvider),
+      children: ref.watch(childrenProvider),
+      onLogout: () => ref.read(authProvider.notifier).logout(),
+      onRetry: () => ref.invalidate(authProvider),
+      onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh(),
     );
   }
 
@@ -412,7 +436,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             log.i('📍 [HOME_SCREEN] _buildEventMapSection - Crianças carregadas: ${children.length}');
             if (children.isNotEmpty) {
               for (var child in children) {
-                log.i('   - ${child.nickname}: evento_id=${child.evento_id}');
+                log.i('   - ${child.apelido}: eventoId=${child.eventoId}');
               }
             }
             
@@ -427,6 +451,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               childrenList: children,
               eventoId: activeEvent?['id'],
               activeGame: activeGame,
+              onInteractionChanged: _setMapInteracting,
             );
           },
         ),
@@ -525,7 +550,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Expanded(
             child: authState.when(
               data: (user) => Text(
-                'Olá, ${(user?.name ?? 'Usuário').split(' ').first}! 👋',
+                'Olá, ${(user?.nome ?? 'Usuário').split(' ').first}! 👋',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -651,26 +676,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) => SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.95,
-                    child: QRScannerScreen(
-                      apiUrl: 'http://localhost:3001',
-                      onChildLinked: (child) {
-                        Navigator.pop(context);
-                        Future.microtask(() {
-                          // ✅ Triggerupdates ao adicionar filho
-                          ref.read(childrenRefreshProvider.notifier).refresh();
-                        });
-                      },
-                    ),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.add_circle_outline, size: 20),
+              onPressed: () => setState(() => _linkPanelOpen = !_linkPanelOpen),
+              icon: Icon(_linkPanelOpen ? Icons.close_rounded : Icons.add_circle_outline, size: 20),
               label: const Text('Vincular'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: PulynColors.primary,
@@ -684,6 +691,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
         const SizedBox(height: 16),
+        if (_linkPanelOpen) ...[
+          QrLinkPanel(
+            onLinked: _handleChildLinked,
+            onClose: () => setState(() => _linkPanelOpen = false),
+          ),
+          const SizedBox(height: 16),
+        ],
         if (children.isEmpty)
           Container(
             decoration: BoxDecoration(
@@ -706,25 +720,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) => SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.95,
-                          child: QRScannerScreen(
-                            apiUrl: 'http://localhost:3001',
-                            onChildLinked: (child) {
-                              Navigator.pop(context);
-                              Future.microtask(() {
-                                // ✅ Triggerupdates ao adicionar filho
-                                ref.read(childrenRefreshProvider.notifier).refresh();
-                              });
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => setState(() => _linkPanelOpen = true),
                     icon: const Icon(Icons.qr_code_2),
                     label: const Text('Escanear QR Code'),
                     style: ElevatedButton.styleFrom(
@@ -804,7 +800,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               child: Center(
                 child: Text(
-                  child.nickname.isNotEmpty ? child.nickname[0].toUpperCase() : '?',
+                  child.apelido.isNotEmpty ? child.apelido[0].toUpperCase() : '?',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -822,7 +818,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    child.nickname.isNotEmpty ? child.nickname : child.name,
+                    child.apelido.isNotEmpty ? child.apelido : child.nome,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -833,7 +829,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${child.age} anos • ${child.teamName}',
+                    '${child.idade} anos • ${child.teamName}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: PulynColors.textMuted,
@@ -908,13 +904,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildRankingCard({
     required int position,
-    required String name,
+    required String nome,
     required int score,
     required String teamColor,
     required String medal,
     required bool isTop,
   }) {
-    final color = Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}'));
+    final cor = Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}'));
     
     return Container(
       decoration: BoxDecoration(
@@ -953,12 +949,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 54,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [color, color.withValues(alpha: 0.7)],
+                colors: [cor, cor.withValues(alpha: 0.7)],
               ),
               borderRadius: BorderRadius.circular(27),
               boxShadow: [
                 BoxShadow(
-                  color: color.withValues(alpha: 0.4),
+                  color: cor.withValues(alpha: 0.4),
                   blurRadius: 8,
                 )
               ],
@@ -976,7 +972,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  nome,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -1037,13 +1033,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildTeamRankingCard({
     required int position,
-    required String name,
+    required String nome,
     required int score,
     required String teamColor,
     required String medal,
     required bool isTop,
   }) {
-    final color = Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}'));
+    final cor = Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}'));
     
     return Container(
       decoration: BoxDecoration(
@@ -1082,12 +1078,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 54,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [color, color.withValues(alpha: 0.7)],
+                colors: [cor, cor.withValues(alpha: 0.7)],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: color.withValues(alpha: 0.4),
+                  color: cor.withValues(alpha: 0.4),
                   blurRadius: 8,
                 )
               ],
@@ -1105,7 +1101,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  nome,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -1167,27 +1163,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildErrorRanking(String message) {
+  Widget _buildErrorRanking(String mensagem) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.error_outline, size: 64, color: PulynColors.danger),
           const SizedBox(height: 16),
-          Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+          Text(mensagem, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState(String message) {
+  Widget _buildEmptyState(String mensagem) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
           const SizedBox(height: 16),
-          Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+          Text(mensagem, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
         ],
       ),
     );

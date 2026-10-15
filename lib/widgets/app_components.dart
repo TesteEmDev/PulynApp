@@ -131,7 +131,7 @@ class PulynCard extends StatelessWidget {
 /// Card com avatar circular (para crianças/usuários)
 class AvatarCard extends StatelessWidget {
   final String initials;
-  final String name;
+  final String nome;
   final String subtitle;
   final Color avatarColor;
   final int? badge;
@@ -140,7 +140,7 @@ class AvatarCard extends StatelessWidget {
   const AvatarCard({
     super.key,
     required this.initials,
-    required this.name,
+    required this.nome,
     required this.subtitle,
     required this.avatarColor,
     this.badge,
@@ -212,7 +212,7 @@ class AvatarCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  nome,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -245,7 +245,7 @@ class AvatarCard extends StatelessWidget {
 // 2️⃣ BUTTONS
 // ============================================================================
 
-/// Botão primário com loading state
+/// Botão primário com loading estado
 class PulynButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
@@ -444,7 +444,7 @@ class _PulynTextFieldState extends State<PulynTextField> {
 // 4️⃣ BADGES & STATUS INDICATORS
 // ============================================================================
 
-/// Badge para scores/pontos
+/// Badge para pontos/pontos
 class ScoreBadge extends StatelessWidget {
   final int score;
   final String? label;
@@ -606,12 +606,12 @@ class EmptyState extends StatelessWidget {
 
 /// Estado de erro
 class ErrorState extends StatelessWidget {
-  final String message;
+  final String mensagem;
   final VoidCallback? onRetry;
 
   const ErrorState({
     super.key,
-    required this.message,
+    required this.mensagem,
     this.onRetry,
   });
 
@@ -633,7 +633,7 @@ class ErrorState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            message,
+            mensagem,
             style: const TextStyle(color: PulynColors.textMuted),
             textAlign: TextAlign.center,
           ),
@@ -732,7 +732,7 @@ class SectionHeader extends StatelessWidget {
 /// Ranking card para posição com medal
 class RankingCard extends StatelessWidget {
   final int position;
-  final String name;
+  final String nome;
   final int score;
   final Color teamColor;
   final String medal;
@@ -742,7 +742,7 @@ class RankingCard extends StatelessWidget {
   const RankingCard({
     super.key,
     required this.position,
-    required this.name,
+    required this.nome,
     required this.score,
     required this.teamColor,
     required this.medal,
@@ -788,7 +788,7 @@ class RankingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    nome,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -818,7 +818,7 @@ class RankingCard extends StatelessWidget {
 /// Notification card com ações
 class NotificationCard extends StatelessWidget {
   final String title;
-  final String message;
+  final String mensagem;
   final String type;
   final bool isRead;
   final VoidCallback? onTap;
@@ -828,7 +828,7 @@ class NotificationCard extends StatelessWidget {
   const NotificationCard({
     super.key,
     required this.title,
-    required this.message,
+    required this.mensagem,
     required this.type,
     this.isRead = false,
     this.onTap,
@@ -884,7 +884,7 @@ class NotificationCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    message,
+                    mensagem,
                     style: const TextStyle(
                       fontSize: 12,
                       color: PulynColors.textMuted,

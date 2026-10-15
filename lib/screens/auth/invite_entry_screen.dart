@@ -20,20 +20,20 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
   }
 
   void _handleInviteCode() {
-    final code = _codeController.text.trim();
+    final codigo = _codeController.text.trim();
     
-    if (code.isEmpty) {
+    if (codigo.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cole o código do convite')),
+        const SnackBar(content: Text('Cole o link ou o código do convite')),
       );
       return;
     }
 
     // ✅ Se o usuário cola a URL completa, extrair apenas o token
-    String token = code;
-    if (code.contains('/family/invite/')) {
+    String token = codigo;
+    if (codigo.contains('/family/invite/')) {
       // Extrai a última parte após /family/invite/
-      token = code.split('/family/invite/').last;
+      token = codigo.split('/family/invite/').last;
       log.i('[InviteEntry] Token extraído de URL: $token');
     }
 
@@ -129,7 +129,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
               TextField(
                 controller: _codeController,
                 decoration: InputDecoration(
-                  labelText: 'Código de Convite',
+                  labelText: 'Link ou código do convite',
                   hintText: 'Cole aqui...',
                   prefixIcon: const Icon(Icons.vpn_key),
                   border: OutlineInputBorder(
@@ -148,8 +148,16 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                 icon: const Icon(Icons.arrow_forward),
                 label: const Text('Continuar'),
               ),
-              
-              const SizedBox(height: 48),
+
+              const SizedBox(height: 12),
+
+              // Quem já tem conta não precisa de convite
+              TextButton(
+                onPressed: () => context.go('/login'),
+                child: const Text('Já tenho conta'),
+              ),
+
+              const SizedBox(height: 36),
               
               // Help Text
               Container(

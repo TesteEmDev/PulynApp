@@ -25,22 +25,22 @@ class AppScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      // Nunca deixa o sistema fechar o app direto pelo botão voltar.
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
         // Se tem um callback customizado, executa
         if (onBackPressed != null) {
           onBackPressed!();
-          return false;
+          return;
         }
 
-        // Tenta voltar usando o router
+        // Tenta voltar usando o router; se não der, fica no app (não sai)
         if (context.canPop()) {
           context.pop();
-          return false;
         }
-
-        // Se não conseguir voltar, fica no app (não sai)
-        return false;
       },
       child: Scaffold(
         backgroundColor: backgroundColor,

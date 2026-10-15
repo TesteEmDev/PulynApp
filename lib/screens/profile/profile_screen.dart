@@ -29,7 +29,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final authState = ref.watch(authProvider);
     authState.whenData((user) {
       if (user != null) {
-        _nameController.text = user.name;
+        _nameController.text = user.nome;
         _emailController.text = user.email;
       }
     });
@@ -194,7 +194,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           child: Center(
             child: Text(
-              user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
+              user.nome.isNotEmpty ? user.nome[0].toUpperCase() : '?',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 48,
@@ -206,7 +206,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         const SizedBox(height: 16),
         // Name
         Text(
-          user.name,
+          user.nome,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             color: PulynColors.textPrimary,
             fontWeight: FontWeight.bold,
@@ -228,7 +228,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            user.role.toUpperCase(),
+            user.perfil.toUpperCase(),
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -253,7 +253,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _buildInfoCard(
           icon: Icons.person_outline,
           label: 'Nome Completo',
-          value: user.name,
+          value: user.nome,
         ),
         const SizedBox(height: 12),
         // Email Info
@@ -267,7 +267,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _buildInfoCard(
           icon: Icons.security_outlined,
           label: 'Tipo de Conta',
-          value: user.role.toUpperCase(),
+          value: user.perfil.toUpperCase(),
         ),
       ],
     );

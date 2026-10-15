@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/family_models.dart';
 import '../../services/api_service.dart';
 import '../../config/theme.dart';
@@ -40,7 +41,7 @@ class _ManageLinkedChildrenScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ ${child.nickname} desvinculada com sucesso'),
+            content: Text('✅ ${child.apelido} desvinculada com sucesso'),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -72,7 +73,9 @@ class _ManageLinkedChildrenScreenState
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          // Se a tela foi aberta com context.go() não há rota anterior para
+          // dar pop — nesse caso volta pra home em vez de não fazer nada.
+          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
         ),
       ),
       body: childrenAsyncValue.when(
@@ -135,8 +138,8 @@ class _ManageLinkedChildrenScreenState
                             ),
                             child: Center(
                               child: Text(
-                                child.nickname.isNotEmpty
-                                    ? child.nickname[0].toUpperCase()
+                                child.apelido.isNotEmpty
+                                    ? child.apelido[0].toUpperCase()
                                     : '?',
                                 style: const TextStyle(
                                   color: Colors.white,
@@ -152,16 +155,16 @@ class _ManageLinkedChildrenScreenState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  child.nickname.isNotEmpty
-                                      ? child.nickname
-                                      : child.name,
+                                  child.apelido.isNotEmpty
+                                      ? child.apelido
+                                      : child.nome,
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 Text(
-                                  '${child.age} anos • ${child.teamName}',
+                                  '${child.idade} anos • ${child.teamName}',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: PulynColors.textMuted,
@@ -225,7 +228,7 @@ class _ManageLinkedChildrenScreenState
                                 builder: (context) => AlertDialog(
                                   title: const Text('Desvincullar?'),
                                   content: Text(
-                                    'Deseja desvincullar ${child.nickname.isNotEmpty ? child.nickname : child.name}?',
+                                    'Deseja desvincullar ${child.apelido.isNotEmpty ? child.apelido : child.nome}?',
                                   ),
                                   actions: [
                                     TextButton(

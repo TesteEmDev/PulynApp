@@ -6,7 +6,7 @@ class ScoreEntry {
   final String childName;
   final String checkpointId;
   final String checkpointName;
-  final int points;
+  final int pontos;
   final DateTime timestamp;
   final String teamColor;
   final String gameType; // zone_conquest, treasure_hunt, monster_hunt
@@ -17,7 +17,7 @@ class ScoreEntry {
     required this.childName,
     required this.checkpointId,
     required this.checkpointName,
-    required this.points,
+    required this.pontos,
     required this.timestamp,
     required this.teamColor,
     required this.gameType,
@@ -28,12 +28,12 @@ class ScoreEntry {
       id: json['id'] as String? ?? '',
       childId: json['childId'] ?? json['child_id'] ?? '',
       childName: json['childName'] ?? json['child_name'] ?? 'Criança',
-      checkpointId: json['checkpointId'] ?? json['checkpoint_id'] ?? '',
+      checkpointId: json['checkpointId'] ?? json['checkpointId'] ?? '',
       checkpointName: json['checkpointName'] ?? json['checkpoint_name'] ?? 'Checkpoint',
-      points: (json['points'] as num?)?.toInt() ?? 0,
+      pontos: (json['pontos'] as num?)?.toInt() ?? 0,
       timestamp: json['timestamp'] != null ? DateTime.parse(json['timestamp']) : DateTime.now(),
       teamColor: json['teamColor'] ?? json['team_color'] ?? '#FFFFFF',
-      gameType: json['gameType'] ?? json['game_type'] ?? 'unknown',
+      gameType: json['gameType'] ?? json['tipoJogo'] ?? 'unknown',
     );
   }
 
@@ -44,7 +44,7 @@ class ScoreEntry {
       'childName': childName,
       'checkpointId': checkpointId,
       'checkpointName': checkpointName,
-      'points': points,
+      'pontos': pontos,
       'timestamp': timestamp.toIso8601String(),
       'teamColor': teamColor,
       'gameType': gameType,
@@ -71,7 +71,7 @@ class ChildCheckpointInfo {
 class AvatarTrackingData {
   final String childId;
   final String avatar;
-  final String nickname;
+  final String apelido;
   final double x;
   final double y;
   final String teamColor;
@@ -79,7 +79,7 @@ class AvatarTrackingData {
   AvatarTrackingData({
     required this.childId,
     required this.avatar,
-    required this.nickname,
+    required this.apelido,
     required this.x,
     required this.y,
     required this.teamColor,

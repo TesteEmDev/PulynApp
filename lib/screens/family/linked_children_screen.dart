@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import '../../utils/logger.dart';
 import '../../services/api_service.dart';
 import '../../models/family_models.dart';
-import '../qr_scan/qr_scanner_screen.dart';
+import '../qr_scan/open_qr_scanner.dart';
 import '../../screens/child/child_detail_screen.dart';
+import '../../widgets/pulyn_logo.dart';
 
 class LinkedChildrenScreen extends StatefulWidget {
   final String apiUrl;
@@ -59,20 +60,12 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
   }
 
   void _openQRScanner() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.95,
-        child: QRScannerScreen(
-          apiUrl: widget.apiUrl,
-          onChildLinked: (child) {
-            log.i('✅ Criança vinculada: ${child.nickname}');
-            Navigator.pop(context);
-            _loadChildren(); // Recarregar lista
-          },
-        ),
-      ),
+    openQrScanner(
+      context,
+      onChildLinked: () {
+        log.i('✅ Criança vinculada');
+        _loadChildren(); // Recarregar lista
+      },
     );
   }
 
@@ -128,6 +121,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
       appBar: AppBar(
         title: const Text('Minhas Crianças'),
         centerTitle: true,
+        actions: const [PulynAppBarLogo()],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -234,7 +228,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          (child.nickname.isNotEmpty ? child.nickname : child.name)
+                          (child.apelido.isNotEmpty ? child.apelido : child.nome)
                               .substring(0, 1)
                               .toUpperCase(),
                           style: const TextStyle(
@@ -251,7 +245,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            child.nickname.isNotEmpty ? child.nickname : child.name,
+                            child.apelido.isNotEmpty ? child.apelido : child.nome,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -259,7 +253,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${child.age} anos • ${child.teamName}',
+                            '${child.idade} anos • ${child.teamName}',
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],

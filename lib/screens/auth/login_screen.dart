@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/index.dart';
+import '../../services/validation_service.dart';
 import '../../utils/logger.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -17,6 +18,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  late ValidationService _validationService;
+
+  @override
+  void initState() {
+    super.initState();
+    _validationService = ValidationService(ref.read(apiServiceProvider));
+  }
 
   @override
   void dispose() {
@@ -25,22 +33,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  void _showError(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Dismiss keyboard
     FocusScope.of(context).unfocus();
 
     final email = _emailController.text.trim();
-    final password = _passwordController.text;
+    final senha = _passwordController.text;
 
     setState(() => _isLoading = true);
 
     try {
-      // ✅ Dispara login
-      await ref.read(authProvider.notifier).login(email, password);
+      log.i('[LOGIN] 🔐 Tentando fazer login com email: $email');
+
+      await ref.read(authProvider.notifier).login(email, senha);
 
       if (!mounted) return;
 
@@ -53,24 +72,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       String errorMessage = '❌ Erro ao fazer login';
 
       final errorStr = e.toString().toLowerCase();
-      if (errorStr.contains('not found') || errorStr.contains('not registered')) {
-        errorMessage = '❌ Email não encontrado';
-      } else if (errorStr.contains('invalid password') || errorStr.contains('wrong password')) {
-        errorMessage = '❌ Senha incorreta';
-      } else if (errorStr.contains('network') || errorStr.contains('connection')) {
-        errorMessage = '❌ Erro de conexão';
-      } else if (errorStr.contains('pending') || errorStr.contains('approval')) {
+      if (errorStr.contains('not found') ||
+          errorStr.contains('not registered') ||
+          errorStr.contains('404')) {
+        errorMessage = '❌ Email não registrado. Crie uma conta';
+      } else if (errorStr.contains('invalid senha') ||
+                 errorStr.contains('wrong senha') ||
+                 errorStr.contains('401') ||
+                 errorStr.contains('unauthorized')) {
+        errorMessage = '❌ Senha incorreta. Tente novamente';
+      } else if (errorStr.contains('network') ||
+                 errorStr.contains('connection') ||
+                 errorStr.contains('timeout')) {
+        errorMessage = '❌ Erro de conexão. Verifique sua internet';
+      } else if (errorStr.contains('pending') ||
+                 errorStr.contains('approval')) {
         errorMessage = '❌ Sua conta está pendente de aprovação';
+      } else if (errorStr.contains('disabled') ||
+                 errorStr.contains('inativo')) {
+        errorMessage = '❌ Sua conta foi desativada';
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-
+      _showError(errorMessage);
       setState(() => _isLoading = false);
     }
   }
@@ -79,10 +102,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (value == null || value.isEmpty) {
       return 'Email é obrigatório';
     }
-    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value)) {
-      return 'Email inválido';
-    }
-    return null;
+    final result = _validationService.validateEmail(value);
+    return result.valid ? null : result.mensagem;
   }
 
   String? _validatePassword(String? value) {

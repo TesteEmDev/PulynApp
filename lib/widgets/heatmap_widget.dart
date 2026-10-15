@@ -78,7 +78,7 @@ class CheckpointHeatmapWidget extends StatelessWidget {
             itemCount: mockCheckpoints.length,
             itemBuilder: (context, index) {
               final checkpoint = mockCheckpoints[index];
-              final isConquered = conqueredCheckpointNames.contains(checkpoint['name']);
+              final isConquered = conqueredCheckpointNames.contains(checkpoint['nome']);
               
               return _buildCheckpointCard(
                 checkpoint: checkpoint,
@@ -96,7 +96,7 @@ class CheckpointHeatmapWidget extends StatelessWidget {
     required Map<String, dynamic> checkpoint,
     required bool isConquered,
   }) {
-    final name = checkpoint['name'] as String;
+    final nome = checkpoint['nome'] as String;
     final emoji = checkpoint['emoji'] as String;
     
     return Container(
@@ -112,7 +112,7 @@ class CheckpointHeatmapWidget extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          log.i('[HEATMAP] Tap em checkpoint: $name (Conquistado: $isConquered)');
+          log.i('[HEATMAP] Tap em checkpoint: $nome (Conquistado: $isConquered)');
         },
         borderRadius: BorderRadius.circular(12),
         child: Column(
@@ -126,7 +126,7 @@ class CheckpointHeatmapWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                name,
+                nome,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 11,
@@ -146,15 +146,15 @@ class CheckpointHeatmapWidget extends StatelessWidget {
   /// Mock de checkpoints (em produção virá do backend)
   List<Map<String, dynamic>> _getMockCheckpoints() {
     return [
-      {'name': 'Torre', 'emoji': '🏰'},
-      {'name': 'Caverna', 'emoji': '🕳️'},
-      {'name': 'Jardim', 'emoji': '🌻'},
-      {'name': 'Castelo', 'emoji': '👑'},
-      {'name': 'Floresta', 'emoji': '🌲'},
-      {'name': 'Praia', 'emoji': '🏖️'},
-      {'name': 'Montanha', 'emoji': '⛰️'},
-      {'name': 'Rio', 'emoji': '💧'},
-      {'name': 'Ponte', 'emoji': '🌉'},
+      {'nome': 'Torre', 'emoji': '🏰'},
+      {'nome': 'Caverna', 'emoji': '🕳️'},
+      {'nome': 'Jardim', 'emoji': '🌻'},
+      {'nome': 'Castelo', 'emoji': '👑'},
+      {'nome': 'Floresta', 'emoji': '🌲'},
+      {'nome': 'Praia', 'emoji': '🏖️'},
+      {'nome': 'Montanha', 'emoji': '⛰️'},
+      {'nome': 'Rio', 'emoji': '💧'},
+      {'nome': 'Ponte', 'emoji': '🌉'},
     ];
   }
 }

@@ -13,7 +13,7 @@ export 'websocket_provider.dart' show webSocketConnectionProvider, webSocketServ
 export 'events_provider.dart' show currentEventProvider, upcomingEventsProvider, eventDetailsProvider, eventResultsProvider, certificateProvider;
 
 // ✅ Exporta providers locais
-export 'index.dart' show activeEventProvider, activeGameProvider, mapChildrenRealtimeProvider, checkpointsByEventProvider, zonesByEventProvider, checkpointsCacheProvider, mapRefreshProvider, scoreLogProvider, childLastCheckpointProvider;
+export 'index.dart' show activeEventProvider, activeGameProvider, mapChildrenRealtimeProvider, checkpointsByEventProvider, zonesProvider, checkpointsCacheProvider, mapRefreshProvider, scoreLogProvider, childLastCheckpointProvider;
 
 // ✅ Provider para evento ativo (StreamProvider com polling a cada 5 segundos)
 // MUDADO DE FutureProvider PARA StreamProvider para refetch automático!
@@ -24,7 +24,7 @@ final activeEventProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((r
   // Carrega INICIALMENTE
   try {
     final event = await apiService.getActiveEvent();
-    log.i('[EVENT] 📅 Evento ativo: ${event?['name'] ?? 'NENHUM'}');
+    log.i('[EVENT] 📅 Evento ativo: ${event?['nome'] ?? 'NENHUM'}');
     yield event;
   } catch (e) {
     log.w('[EVENT] ⚠️ Erro ao carregar evento: $e');
@@ -57,18 +57,18 @@ final activeGameProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((re
       log.i('[GAME] 🎮 Jogo ativo: NENHUM');
       yield null;
     } else {
-      // 🎯 Usar gameName (nome da brincadeira ativa), não name (nome do evento)
+      // 🎯 Usar gameName (nome da brincadeira ativa), não nome (nome do evento)
       final gameName = activeGame['gameName'] ?? 'Nenhum jogo em andamento';
       log.i('[GAME] 🎮 Jogo ativo: $gameName');
       yield {
         'id': activeGame['id'],
-        'name': activeGame['name'], // Nome do evento
+        'nome': activeGame['nome'], // Nome do evento
         'gameName': gameName, // Nome da brincadeira ativa
         'gameId': activeGame['gameId'],
-        'description': activeGame['gameDescription'] ?? 'Jogo em andamento',
-        'type': activeGame['gameType'] ?? 'standard',
+        'descricao': activeGame['gameDescription'] ?? 'Jogo em andamento',
+        'tipo': activeGame['gameType'] ?? 'standard',
         'duration': activeGame['duration'],
-        'default_points': activeGame['default_points'],
+        'pontosPadrao': activeGame['pontosPadrao'],
         'hasActiveGame': activeGame['hasActiveGame'] ?? false,
       };
     }
@@ -86,13 +86,13 @@ final activeGameProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((re
         final gameName = activeGame['gameName'] ?? 'Nenhum jogo em andamento';
         yield {
           'id': activeGame['id'],
-          'name': activeGame['name'],
+          'nome': activeGame['nome'],
           'gameName': gameName,
           'gameId': activeGame['gameId'],
-          'description': activeGame['gameDescription'] ?? 'Jogo em andamento',
-          'type': activeGame['gameType'] ?? 'standard',
+          'descricao': activeGame['gameDescription'] ?? 'Jogo em andamento',
+          'tipo': activeGame['gameType'] ?? 'standard',
           'duration': activeGame['duration'],
-          'default_points': activeGame['default_points'],
+          'pontosPadrao': activeGame['pontosPadrao'],
           'hasActiveGame': activeGame['hasActiveGame'] ?? false,
         };
       } else {
@@ -205,41 +205,21 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
 
   if (scoreLog.isNotEmpty) {
     // Mais recentes primeiro. O backend já devolve em ordem decrescente de
-    // created_at; inverter a lista (como era feito) fazia a criança voltar ao
+    // criadoEm; inverter a lista (como era feito) fazia a criança voltar ao
     // checkpoint MAIS ANTIGO ao reabrir o app. Ordena explicitamente.
     DateTime createdAt(Map<String, dynamic> e) =>
-        DateTime.tryParse('${e['created_at'] ?? e['createdAt'] ?? ''}') ??
+        DateTime.tryParse('${e['criadoEm'] ?? e['createdAt'] ?? ''}') ??
         DateTime.fromMillisecondsSinceEpoch(0);
     final sorted = [...scoreLog]..sort((a, b) => createdAt(b).compareTo(createdAt(a)));
 
     for (final entry in sorted) {
       try {
         // ✅ Tentar TODOS os possíveis nomes de campo
-        String? childId;
-        if (entry.containsKey('child_id')) {
-          childId = entry['child_id'] as String?;
-        } else if (entry.containsKey('childId')) {
-          childId = entry['childId'] as String?;
-        } else if (entry.containsKey('crianca_id')) {
-          childId = entry['crianca_id'] as String?;
-        }
-        
-        String? checkpointId;
-        if (entry.containsKey('checkpoint_id')) {
-          checkpointId = entry['checkpoint_id'] as String?;
-        } else if (entry.containsKey('checkpointId')) {
-          checkpointId = entry['checkpointId'] as String?;
-        } else if (entry.containsKey('checkpoint')) {
-          checkpointId = entry['checkpoint'] as String?;
-        }
-        
-        String? checkpointName;
-        if (entry.containsKey('checkpoint_name')) {
-          checkpointName = entry['checkpoint_name'] as String?;
-        } else if (entry.containsKey('checkpointName')) {
-          checkpointName = entry['checkpointName'] as String?;
-        }
-        
+        // Chaves do GET /leituras/evento/:id/historico (camelCase)
+        final childId = entry['childId'] as String?;
+        final checkpointId = entry['checkpointId'] as String?;
+        final checkpointName = entry['checkpointNome'] as String?;
+
         if (childId == null) {
           continue;
         }
@@ -253,8 +233,8 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
           lastCheckpointMap[childId] = {
             'checkpointId': checkpointId,
             'checkpointName': checkpointName,
-            'timestamp': entry['created_at'] ?? DateTime.now().toIso8601String(),
-            'points': entry['points'] ?? 0,
+            'timestamp': entry['criadoEm'] ?? DateTime.now().toIso8601String(),
+            'pontos': entry['pontos'] ?? 0,
           };
         }
       } catch (e) {
@@ -271,7 +251,7 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
       'checkpointId': reading.checkpointId,
       'checkpointName': reading.checkpointName,
       'timestamp': reading.timestamp.toIso8601String(),
-      'points': reading.points,
+      'pontos': reading.pontos,
     };
   });
 
@@ -323,32 +303,31 @@ final checkpointsByEventProvider = FutureProvider.family<List<Map<String, dynami
   return checkpoints;
 });
 
-/// Provider para buscar zonas (áreas) do evento do backend
-final zonesByEventProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, eventoId) async {
+/// Provider para buscar zonas (áreas) do buffet no backend.
+/// As zonas são do espaço físico do buffet, não do evento — por isso não
+/// variam por eventoId (diferente de checkpointsByEventProvider).
+final zonesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   try {
-    if (eventoId.isEmpty) {
-      log.w('[ZONES] ⚠️ eventoId vazio');
-      return [];
-    }
-    
+    // ✅ Mesmo gatilho de "puxar pra atualizar"/WebSocket do resto do mapa.
+    ref.watch(mapRefreshProvider);
+
     final apiService = ref.read(apiServiceProvider);
     await apiService.init();
-    
-    log.i('[ZONES] 🔄 Buscando zonas do backend para evento: $eventoId');
-    
+
+    log.i('[ZONES] 🔄 Buscando zonas do buffet no backend');
+
     try {
-      // Busca zonas usando o novo método getZonesByEvent
-      final zones = await apiService.getZonesByEvent(eventoId);
-      
+      final zones = await apiService.getZones();
+
       if (zones.isNotEmpty) {
         log.i('[ZONES] ✅ Zonas carregadas do backend: ${zones.length} áreas');
         // Atualizar cache
-        await _cacheZonesToStorage(apiService, eventoId, zones);
+        await _cacheZonesToStorage(apiService, zones);
         return zones;
       } else {
         log.i('[ZONES] 📝 Nenhuma zona no backend');
         // Tentar cache
-        final cached = await _loadZonesFromStorage(apiService, eventoId);
+        final cached = await _loadZonesFromStorage(apiService);
         if (cached.isNotEmpty) {
           log.i('[ZONES] ✅ Zonas carregadas do cache: ${cached.length} áreas');
           return cached;
@@ -358,7 +337,7 @@ final zonesByEventProvider = FutureProvider.family<List<Map<String, dynamic>>, S
     } catch (apiError) {
       log.w('[ZONES] ⚠️ Erro ao chamar API: $apiError');
       // Tentar cache quando API falha
-      final cached = await _loadZonesFromStorage(apiService, eventoId);
+      final cached = await _loadZonesFromStorage(apiService);
       if (cached.isNotEmpty) {
         log.i('[ZONES] ✅ Zonas carregadas do cache (fallback após erro): ${cached.length} áreas');
         return cached;
@@ -372,15 +351,13 @@ final zonesByEventProvider = FutureProvider.family<List<Map<String, dynamic>>, S
   }
 });
 
+const _zonesCacheKey = 'zones_company';
+
 /// Carrega zonas do cache (SharedPreferences)
-Future<List<Map<String, dynamic>>> _loadZonesFromStorage(
-  dynamic apiService,
-  String eventoId,
-) async {
+Future<List<Map<String, dynamic>>> _loadZonesFromStorage(dynamic apiService) async {
   try {
-    final key = 'zones_$eventoId';
-    final stored = apiService.prefs.getString(key);
-    
+    final stored = apiService.prefs.getString(_zonesCacheKey);
+
     if (stored != null) {
       final zones = (jsonDecode(stored) as List)
           .map((z) => Map<String, dynamic>.from(z as Map))
@@ -397,14 +374,12 @@ Future<List<Map<String, dynamic>>> _loadZonesFromStorage(
 /// Salva zonas no cache (SharedPreferences)
 Future<void> _cacheZonesToStorage(
   dynamic apiService,
-  String eventoId,
   List<Map<String, dynamic>> zones,
 ) async {
   try {
-    final key = 'zones_$eventoId';
     final zonesJson = jsonEncode(zones);
-    await apiService.prefs.setString(key, zonesJson);
-    log.i('[ZONES] � Zonas cacheadas com sucesso');
+    await apiService.prefs.setString(_zonesCacheKey, zonesJson);
+    log.i('[ZONES] 📦 Zonas cacheadas com sucesso');
   } catch (e) {
     log.w('[ZONES] ⚠️ Erro ao cachear zonas: $e');
   }
@@ -421,23 +396,23 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
     
     // Escuta evento SCORE_UPDATE quando criança lê uma pulseira
     webSocketService.on('SCORE_UPDATE', (data) {
-      // ✅ O WebSocketService entrega a mensagem inteira ({type, payload}),
+      // ✅ O WebSocketService entrega a mensagem inteira ({tipo, payload}),
       // não só o payload — os campos ficam dentro de data['payload'].
       final payload = (data['payload'] as Map?)?.cast<String, dynamic>() ?? data;
-      log.i('⚡ PULSEIRA LIDA - Criança: ${payload['child_name'] ?? payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpoint_name'] ?? payload['checkpointName'] ?? 'N/A'} | Pontos: ${payload['points'] ?? 0}');
+      log.i('⚡ PULSEIRA LIDA - Criança: ${payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpointName'] ?? 'N/A'} | Pontos: ${payload['pontos'] ?? 0}');
 
       try {
-        final childId = payload['criancaId'] ?? payload['crianca_id'] ?? payload['child_id'] ?? payload['childId'];
-        final checkpointId = payload['checkpointId'] ?? payload['checkpoint_id'] ?? payload['checkpoint'];
-        final checkpointName = payload['checkpointName'] ?? payload['checkpoint_name'] ?? '';
-        final points = payload['points'] ?? 0;
+        final childId = payload['criancaId'];
+        final checkpointId = payload['checkpointId'];
+        final checkpointName = payload['checkpointName'] ?? '';
+        final pontos = payload['pontos'] ?? 0;
 
         if (childId != null && checkpointId != null) {
           notifier.updateChildCheckpoint(
             childId.toString(),
             checkpointId.toString(),
             checkpointName.toString(),
-            points,
+            pontos,
           );
         }
       } catch (e) {
@@ -455,18 +430,18 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
       log.i('🏆 TERRITÓRIO CONQUISTADO - Criança: ${payload['criancaName'] ?? 'N/A'} | Checkpoint: ${payload['checkpointId'] ?? 'N/A'}');
 
       try {
-        final childId = payload['criancaId'] ?? payload['crianca_id'] ?? payload['child_id'] ?? payload['childId'];
-        final checkpointId = payload['checkpointId'] ?? payload['checkpoint_id'];
-        final checkpointName = payload['checkpointName'] ?? payload['checkpoint_name'] ?? '';
+        final childId = payload['criancaId'];
+        final checkpointId = payload['checkpointId'];
+        final checkpointName = payload['checkpointName'] ?? '';
         final teamColor = payload['teamColor'] ?? '#FFFFFF';
-        final points = payload['points'] ?? 10;
+        final pontos = payload['pontos'] ?? 10;
 
         if (childId != null && checkpointId != null) {
           notifier.updateChildCheckpoint(
             childId.toString(),
             checkpointId.toString(),
             checkpointName.toString(),
-            points is num ? points.toInt() : 10,
+            pontos is num ? pontos.toInt() : 10,
             teamColor: teamColor.toString(),
           );
         }
@@ -483,14 +458,14 @@ final realtimeCheckpointTrackingProvider = StateNotifierProvider<RealtimeTrackin
 class CheckpointReading {
   final String checkpointId;
   final String checkpointName;
-  final int points;
+  final int pontos;
   final DateTime timestamp;
   final String? teamColor;
   
   CheckpointReading({
     required this.checkpointId,
     required this.checkpointName,
-    required this.points,
+    required this.pontos,
     DateTime? timestamp,
     this.teamColor,
   }) : timestamp = timestamp ?? DateTime.now();
@@ -505,7 +480,7 @@ class RealtimeTrackingNotifier extends StateNotifier<Map<String, CheckpointReadi
     String childId,
     String checkpointId,
     String checkpointName,
-    int points, {
+    int pontos, {
     String? teamColor,
   }) {
     log.i('[TRACKING_NOTIFIER] 📍 Atualizando criança $childId → checkpoint $checkpointName');
@@ -515,7 +490,7 @@ class RealtimeTrackingNotifier extends StateNotifier<Map<String, CheckpointReadi
       childId: CheckpointReading(
         checkpointId: checkpointId,
         checkpointName: checkpointName,
-        points: points,
+        pontos: pontos,
         teamColor: teamColor,
       ),
     };

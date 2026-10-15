@@ -1,22 +1,11 @@
 name: pulyn_app
-description: "A new Flutter project."
+description: "Pulyn Family - Rastreamento de crianças em tempo real. Veja seus filhos participarem de eventos gamificados com mapas interativos, pontuação ao vivo e desafios emocionantes."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none'
 
 # The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-# In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.13.1
@@ -52,11 +41,9 @@ dependencies:
   logger: ^2.1.0
   intl: ^0.19.0
   
-  # Location
-  geolocator: ^10.1.0
-  
   # QR Code Scanner
   mobile_scanner: ^7.4.2
+  nfc_manager: ^4.2.1
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +55,24 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+
+  # Gera os ícones do app (Android/iOS) a partir de assets/icons/*.png.
+  # Rodar: dart run flutter_launcher_icons
+  flutter_launcher_icons: ^0.14.4
+
+  # JSON Serialization
+  build_runner: ^2.4.0
+  json_serializable: ^6.7.1
+
+# Configuração do ícone do app. Imagens geradas a partir de logo-pulyn.png
+# (só o nome "Pulyn", sem o slogan, centralizado num quadrado 1024x1024).
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 
 /// 🎯 FASE 1: ONBOARDING SCREEN
 /// Mostra quando: Primeira vez que abre o app (usuário não logado e sem evento)
-/// Objetivo: Explicar o que é Pulyn Family e levar para Login
+/// Objetivo: Explicar o que é Pulyn Family e levar para a tela do convite
+/// (colar o link recebido do buffet), de onde a família segue para o cadastro.
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -35,8 +36,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Ir para login
-      context.go('/login');
+      // Fim do onboarding: vai para a tela de colar o link/código do convite,
+      // que leva ao cadastro. Quem já tem conta usa "Já tenho conta" (login).
+      context.go('/invite');
     }
   }
 
@@ -56,12 +58,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 _OnboardingCard(
                   image: 'assets/images/onboarding_location.jpg',
                   title: 'Localize Seu Filho',
-                  description: 'Veja em tempo real onde seu filho está durante a festa.',
+                  descricao: 'Veja em tempo real onde seu filho está durante a festa.',
                 ),
                 _OnboardingCard(
                   image: 'assets/images/onboarding_leaderboard.jpg',
                   title: 'Acompanhe Pontuação',
-                  description: 'Confira a pontuação e ranking ao vivo enquanto se diverte.',
+                  descricao: 'Confira a pontuação e ranking ao vivo enquanto se diverte.',
                 ),
               ],
             ),
@@ -126,12 +128,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 class _OnboardingCard extends StatelessWidget {
   final String image;
   final String title;
-  final String description;
+  final String descricao;
 
   const _OnboardingCard({
     required this.image,
     required this.title,
-    required this.description,
+    required this.descricao,
   });
 
   @override
@@ -179,7 +181,7 @@ class _OnboardingCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Text(
-            description,
+            descricao,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Colors.grey[600],

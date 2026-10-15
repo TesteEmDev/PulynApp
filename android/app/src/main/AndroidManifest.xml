@@ -3,25 +3,20 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    
-    <!-- Para Android 12+ (API 31+): opção de bloqueio de permissões -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    
-    <!-- ✅ Features necessárias para câmera -->
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <!-- Ler a pulseira NFC da criança para vincular (alternativa ao QR Code). -->
+    <uses-permission android:name="android.permission.NFC" />
+
+    <!-- A câmera só é usada para ler QR Code vinculando a criança; o app funciona sem ela,
+         então não excluímos da Play Store aparelhos sem câmera. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <!-- O NFC é opcional (o QR Code continua funcionando): não exclui aparelhos sem NFC da Play Store. -->
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
     
     <application
         android:label="Pulyn Family"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
-        android:requestLegacyExternalStorage="true"
-        android:usesCleartextTraffic="true">
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -44,7 +39,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <!-- ✅ Deep Linking para convites de família -->
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -53,16 +48,18 @@
                     android:host="app.pulyn.com"
                     android:pathPrefix="/family/invite/" />
             </intent-filter>
+
+            <!-- ✅ NFC Intent Filter - Captura pulseiras NFC (impede Samsung app abrir) -->
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+                <action android:name="android.nfc.action.TECH_DISCOVERED" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="localhost"
-                    android:port="5173"
-                    android:pathPrefix="/family/invite/" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
+            <meta-data
+                android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

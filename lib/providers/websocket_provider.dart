@@ -134,9 +134,9 @@ class WebSocketNotifier extends StateNotifier<AsyncValue<bool>> {
     log.i('[WebSocket] Desconectado');
   }
 
-  void sendMessage(String type, Map<String, dynamic> payload) {
+  void sendMessage(String tipo, Map<String, dynamic> payload) {
     _webSocketService.send({
-      'type': type,
+      'tipo': tipo,
       ...payload,
     });
   }

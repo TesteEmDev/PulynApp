@@ -7,4 +7,7 @@
     
     <!-- ✅ Permissão de CÂMERA necessária para QR Scanner -->
     <uses-permission android:name="android.permission.CAMERA"/>
+
+    <!-- Só em debug: permite o ambiente "local" (http://192.168.x.x). O release usa apenas HTTPS. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>

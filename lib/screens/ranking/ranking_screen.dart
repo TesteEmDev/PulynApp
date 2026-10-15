@@ -29,9 +29,9 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
   }
 
   /// Detecta swipe da esquerda para direita
-  void _handleHorizontalDragEnd(DragEndDetails details) {
+  void _handleHorizontalDragEnd(DragEndDetails detalhes) {
     // Se o swipe foi da esquerda para direita (velocidade positiva no eixo X)
-    if (details.velocity.pixelsPerSecond.dx > 0) {
+    if (detalhes.velocity.pixelsPerSecond.dx > 0) {
       if (_startPosition.dx < 50) {
         // Só ativa swipe se começar perto da borda esquerda
         context.go('/home');
@@ -39,8 +39,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     }
   }
 
-  void _handleHorizontalDragStart(DragStartDetails details) {
-    _startPosition = details.globalPosition;
+  void _handleHorizontalDragStart(DragStartDetails detalhes) {
+    _startPosition = detalhes.globalPosition;
   }
 
   @override
@@ -96,7 +96,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             final medal = _getMedalForPosition(index);
             return _buildRankingCard(
               position: index + 1,
-              name: child.nickname.isNotEmpty ? child.nickname : child.name,
+              nome: child.apelido.isNotEmpty ? child.apelido : child.nome,
               score: child.currentScore,
               teamColor: child.teamColor,
               medal: medal,
@@ -119,8 +119,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
         final teamsMap = <String, (String, int, String)>{};
         for (final child in children) {
           if (teamsMap.containsKey(child.teamName)) {
-            final (name, score, color) = teamsMap[child.teamName]!;
-            teamsMap[child.teamName] = (name, score + child.currentScore, color);
+            final (nome, score, color) = teamsMap[child.teamName]!;
+            teamsMap[child.teamName] = (nome, score + child.currentScore, color);
           } else {
             teamsMap[child.teamName] = (child.teamName, child.currentScore, child.teamColor);
           }
@@ -142,7 +142,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             final medal = _getMedalForPosition(index);
             return _buildTeamRankingCard(
               position: index + 1,
-              name: teamName,
+              nome: teamName,
               score: totalScore,
               teamColor: teamColor,
               medal: medal,
@@ -169,7 +169,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
 
   Widget _buildRankingCard({
     required int position,
-    required String name,
+    required String nome,
     required int score,
     required String teamColor,
     required String medal,
@@ -214,7 +214,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  nome,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -257,7 +257,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
 
   Widget _buildTeamRankingCard({
     required int position,
-    required String name,
+    required String nome,
     required int score,
     required String teamColor,
     required String medal,
@@ -302,7 +302,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  nome,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -367,7 +367,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     );
   }
 
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(String mensagem) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -375,7 +375,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
           const Icon(Icons.error_outline, size: 64, color: PulynColors.danger),
           const SizedBox(height: 16),
           Text(
-            message,
+            mensagem,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -392,7 +392,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     );
   }
 
-  Widget _buildEmptyState(String message) {
+  Widget _buildEmptyState(String mensagem) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -400,7 +400,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
           const Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
           const SizedBox(height: 16),
           Text(
-            message,
+            mensagem,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -410,7 +410,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
   }
 }
 
-// Provider para carregar filhos com seus scores
+// Provider para carregar filhos com seus pontos
 final childrenProvider = FutureProvider.autoDispose((ref) async {
   final apiService = ref.watch(apiServiceProvider);
   await apiService.init();

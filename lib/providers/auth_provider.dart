@@ -145,13 +145,13 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     }
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String email, String senha) async {
     state = const AsyncValue.loading();
     try {
       await _ensureInitialized();
       final apiService = ref.read(apiServiceProvider);
       await apiService.init();
-      final loginResponse = await apiService.login(email, password);
+      final loginResponse = await apiService.login(email, senha);
       
       // ✅ Salva o usuário em cache
       _cachedUser = loginResponse.user;
@@ -168,12 +168,12 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     }
   }
 
-  Future<void> register(String email, String password, String name) async {
+  Future<void> register(String email, String senha, String nome) async {
     state = const AsyncValue.loading();
     try {
       log.i('[AUTH] 📝 INICIANDO REGISTRO');
       log.i('[AUTH] 📧 Email: $email');
-      log.i('[AUTH] 👤 Nome: $name');
+      log.i('[AUTH] 👤 Nome: $nome');
       
       await _ensureInitialized();
       log.i('[AUTH] ✅ SharedPreferences inicializado');
@@ -183,7 +183,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] ✅ ApiService inicializado');
       
       log.i('[AUTH] 🔄 Chamando /auth/register...');
-      final loginResponse = await apiService.register(email, password, name);
+      final loginResponse = await apiService.register(email, senha, nome);
       log.i('[AUTH] ✅ Resposta recebida do servidor');
       log.i('[AUTH] 🎫 Token recebido: ${loginResponse.token.substring(0, 20)}...');
       
@@ -197,7 +197,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] 🔐 Token salvo em SharedPreferences');
       
       log.i('[AUTH] ✅ REGISTRO CONCLUÍDO COM SUCESSO');
-      log.i('[AUTH] 👤 Usuário: ${loginResponse.user.email} (${loginResponse.user.name})');
+      log.i('[AUTH] 👤 Usuário: ${loginResponse.user.email} (${loginResponse.user.nome})');
       
       state = AsyncValue.data(loginResponse.user);
     } catch (e, st) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../widgets/pulyn_logo.dart';
+import '../qr_scan/open_qr_scanner.dart';
 
 /// 🎯 FASE 2: PRÉ-FESTA SCREEN
 /// Mostra quando: Evento tem status 'scheduled' (antes de iniciar)
@@ -76,14 +78,15 @@ class _PreEventScreenState extends State<PreEventScreen> {
   @override
   Widget build(BuildContext context) {
     final children = (event['children'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-    final eventName = event['name'] as String? ?? 'Evento';
-    final location = event['location'] as String? ?? 'Local desconhecido';
+    final eventName = event['nome'] as String? ?? 'Evento';
+    final localizacao = event['localizacao'] as String? ?? 'Local desconhecido';
     final userArrived = event['userArrived'] as bool? ?? false;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Festa'),
         elevation: 0,
+        actions: const [PulynAppBarLogo()],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -94,7 +97,7 @@ class _PreEventScreenState extends State<PreEventScreen> {
               // Card principal do evento
               _EventHeaderCard(
                 eventName: eventName,
-                location: location,
+                localizacao: localizacao,
                 timeUntilStart: _timeUntilStart ?? Duration.zero,
                 formatCountdown: _formatCountdown,
               ),
@@ -131,9 +134,19 @@ class _PreEventScreenState extends State<PreEventScreen> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    context.push('/qr-scan');
-                  },
+                  // Antes chamava context.push('/qr-scan'), uma rota que não existe no app
+                  onPressed: () => openQrScanner(
+                    context,
+                    onChildLinked: () {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Criança vinculada!'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                  ),
                   icon: const Icon(Icons.qr_code),
                   label: const Text('Vincular Mais Filhos'),
                 ),
@@ -146,8 +159,8 @@ class _PreEventScreenState extends State<PreEventScreen> {
                   height: 48,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      // Vai para Event Live Map (Fase 3)
-                      context.pushReplacement('/event-map');
+                      // O mapa ao vivo (Fase 3) fica na Home
+                      context.go('/home');
                     },
                     icon: const Icon(Icons.play_arrow),
                     label: const Text('Entrar na Festa'),
@@ -164,13 +177,13 @@ class _PreEventScreenState extends State<PreEventScreen> {
 /// Widget para header do evento
 class _EventHeaderCard extends StatelessWidget {
   final String eventName;
-  final String location;
+  final String localizacao;
   final Duration timeUntilStart;
   final String Function(Duration) formatCountdown;
 
   const _EventHeaderCard({
     required this.eventName,
-    required this.location,
+    required this.localizacao,
     required this.timeUntilStart,
     required this.formatCountdown,
   });
@@ -208,7 +221,7 @@ class _EventHeaderCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  location,
+                  localizacao,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -339,11 +352,11 @@ class _ChildCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = child['name'] as String? ?? 'Criança';
-    final age = child['age'] as int? ?? 0;
+    final nome = child['nome'] as String? ?? 'Criança';
+    final idade = child['idade'] as int? ?? 0;
     final team = child['team'] as Map<String, dynamic>? ?? {};
-    final teamName = team['name'] as String? ?? 'Sem time';
-    final teamColor = team['color'] as String?;
+    final teamName = team['nome'] as String? ?? 'Sem time';
+    final teamColor = team['cor'] as String?;
     final status = child['status'] as String? ?? 'unknown';
 
     final statusIcon = status == 'ready' ? '✅' : '⏳';
@@ -379,14 +392,14 @@ class _ChildCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  nome,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$age anos • Time $teamName',
+                  '$idade anos • Time $teamName',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -448,7 +461,7 @@ class _EmptyChildrenMessage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Escaneie o QR code da criança para vinculá-la',
+            'Escaneie o QR codigo da criança para vinculá-la',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.grey[600],

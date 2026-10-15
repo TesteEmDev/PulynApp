@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../widgets/pulyn_logo.dart';
 
 /// 🎯 FASE 4: EVENT RESULT SCREEN
 /// Mostra quando: Evento tem status 'completed' (após encerramento)
@@ -61,7 +62,7 @@ class _EventResultScreenState extends State<EventResultScreen> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final eventName = widget.event['name'] as String? ?? 'Festa';
+    final eventName = widget.event['nome'] as String? ?? 'Festa';
     final children = (widget.event['children'] as List?)?.cast<Map<String, dynamic>>() ?? [];
     final rankings = widget.event['rankings'] as Map<String, dynamic>? ?? {};
 
@@ -70,6 +71,7 @@ class _EventResultScreenState extends State<EventResultScreen> with TickerProvid
         title: const Text('Resultado Final'),
         elevation: 0,
         automaticallyImplyLeading: false,
+        actions: const [PulynAppBarLogo()],
       ),
       body: Stack(
         children: [
@@ -266,9 +268,9 @@ class _ChildResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = child['name'] as String? ?? 'Criança';
+    final nome = child['nome'] as String? ?? 'Criança';
     final team = child['team'] as Map<String, dynamic>? ?? {};
-    final teamName = team['name'] as String? ?? 'Sem time';
+    final teamName = team['nome'] as String? ?? 'Sem time';
     final score = child['finalScore'] as int? ?? 0;
     final rank = child['finalRank'] as int? ?? 0;
     final badges = (child['badges'] as List?)?.cast<String>() ?? [];
@@ -299,7 +301,7 @@ class _ChildResultCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      nome,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -435,7 +437,7 @@ class _ChildrenRankingList extends StatelessWidget {
       itemCount: children.take(10).length,
       itemBuilder: (context, index) {
         final child = children[index];
-        final name = child['name'] as String? ?? 'Criança';
+        final nome = child['nome'] as String? ?? 'Criança';
         final score = child['score'] as int? ?? 0;
         final rank = index + 1;
 
@@ -462,7 +464,7 @@ class _ChildrenRankingList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
+                        nome,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -500,8 +502,8 @@ class _TeamsRankingList extends StatelessWidget {
       itemCount: teams.length,
       itemBuilder: (context, index) {
         final team = teams[index];
-        final name = team['name'] as String? ?? 'Time';
-        final score = team['score'] as int? ?? team['points'] as int? ?? 0;
+        final nome = team['nome'] as String? ?? 'Time';
+        final score = team['score'] as int? ?? team['pontos'] as int? ?? 0;
         final rank = index + 1;
 
         final rankEmoji = {
@@ -527,7 +529,7 @@ class _TeamsRankingList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
+                        nome,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),

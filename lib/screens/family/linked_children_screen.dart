@@ -73,7 +73,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Desvinc ular Criança?'),
+        title: const Text('Desvincular Criança?'),
         content: const Text(
           'Esta ação removerá o acesso aos dados desta criança.',
         ),
@@ -84,7 +84,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Desvinc ular', style: TextStyle(color: Colors.red)),
+            child: const Text('Desvincular', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -278,7 +278,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                             children: [
                               Icon(Icons.delete, color: Colors.red),
                               SizedBox(width: 8),
-                              Text('Desvinc ular'),
+                              Text('Desvincular'),
                             ],
                           ),
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/family_models.dart';
@@ -41,13 +42,7 @@ class _ManageLinkedChildrenScreenState
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ ${child.apelido} desvinculada com sucesso'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        showSuccessSnackBar(context, '${child.apelido} desvinculada com sucesso');
       }
 
       // Atualizar lista
@@ -55,12 +50,7 @@ class _ManageLinkedChildrenScreenState
     } catch (e) {
       log.e('Erro ao desvincular: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erro ao desvincullar: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorSnackBar(context, 'Erro ao desvincular: $e');
       }
     }
   }

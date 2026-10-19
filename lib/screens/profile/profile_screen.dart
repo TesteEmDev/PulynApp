@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/theme.dart';
@@ -44,12 +45,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _handleSaveChanges() {
     // TODO: Implementar API call para atualizar perfil
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Perfil atualizado com sucesso!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    showSuccessSnackBar(context, 'Perfil atualizado com sucesso!');
     setState(() => _isEditing = false);
   }
 

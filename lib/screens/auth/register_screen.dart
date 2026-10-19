@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../config/theme.dart';
 import '../../providers/index.dart';
 import '../../services/validation_service.dart';
 import '../../widgets/auth_widgets.dart';
+import '../../widgets/consentimento_privacidade.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -20,6 +21,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
+  bool _aceitouPrivacidade = false;
   late ValidationService _validationService;
 
   @override
@@ -38,30 +40,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   void _showError(String mensagem) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: PulynColors.danger,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    showErrorSnackBar(context, mensagem);
   }
 
   void _showSuccess(String mensagem) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    showSuccessSnackBar(context, mensagem);
   }
 
   Future<void> _handleRegister() async {
     if (_isLoading) return;
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (!_aceitouPrivacidade) {
+      _showError('❌ Aceite a Política de Privacidade para criar a conta');
       return;
     }
 
@@ -242,7 +235,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
+                    ConsentimentoPrivacidade(
+                      value: _aceitouPrivacidade,
+                      enabled: !_isLoading,
+                      onChanged: (valor) => setState(() => _aceitouPrivacidade = valor),
+                    ),
+                    const SizedBox(height: 12),
                     AuthPrimaryButton(
                       label: 'Criar conta',
                       icon: Icons.arrow_forward_rounded,

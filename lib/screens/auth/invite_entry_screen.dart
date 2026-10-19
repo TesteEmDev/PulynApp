@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../utils/logger.dart';
@@ -23,9 +24,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
     final codigo = _codeController.text.trim();
     
     if (codigo.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cole o link ou o código do convite')),
-      );
+      showErrorSnackBar(context, 'Cole o link ou o código do convite');
       return;
     }
 

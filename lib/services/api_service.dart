@@ -18,6 +18,7 @@ class ApiService {
   // ✅ Expor SharedPreferences publicamente para uso em helpers
   SharedPreferences get prefs => _prefs;
 
+
   ApiService() {
     _baseUrl = ApiConfig.getApiBaseUrl();
     // ✅ Resolve localhost para emulador Android
@@ -316,6 +317,10 @@ class ApiService {
       
       // ✅ Pode ser array direto ou objeto com 'children'
       dynamic data = response.data;
+      // DEBUG: o que o servidor devolveu (status, formato, chaves e quantidade de crianças)
+      log.i('[API] GET /familias/children → status ${response.statusCode}, tipo ${data.runtimeType}, '
+          'chaves ${data is Map ? data.keys.toList() : '-'}, '
+          'crianças ${data is Map && data['children'] is List ? (data['children'] as List).length : '-'}');
       List<dynamic> childrenList;
       
       if (data is List) {
@@ -419,35 +424,53 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /familias/children - Busca filhos da família com eventoId
-  Future<Map<String, dynamic>?> getActiveEvent() async {
+  /// ✅ GET /familias/children - Eventos das crianças da família (um por evento), para o seletor
+  Future<List<Map<String, dynamic>>> getFamilyEvents() async {
+    final response = await _dio.get('/familias/children');
+    final data = response.data;
+    final children = data is Map ? (data['children'] as List? ?? const []) : (data is List ? data : const []);
+    final eventos = <String, Map<String, dynamic>>{};
+    for (final child in children) {
+      if (child is! Map) continue;
+      final id = child['eventoId'] as String?;
+      if (id == null || id.isEmpty || eventos.containsKey(id)) continue;
+      final nome = child['eventoNome'] as String?;
+      // Sem o nome (backend ainda sem eventoNome), numera para distinguir os eventos
+      eventos[id] = {'id': id, 'nome': (nome == null || nome.trim().isEmpty) ? 'Evento ${eventos.length + 1}' : nome.trim()};
+    }
+    return eventos.values.toList();
+  }
+
+  /// ✅ GET /familias/children - Evento ativo da família: o escolhido no seletor (se ainda for
+  /// de alguma criança da família) ou o da primeira criança.
+  Future<Map<String, dynamic>?> getActiveEvent({String? eventoId}) async {
     try {
       final response = await _dio.get('/familias/children');
-      
+
       // Backend retorna { success: true, children: [...] }
       final data = response.data as Map<String, dynamic>?;
       if (data == null) return null;
-      
-      final children = data['children'] as List?;
-      if (children == null || children.isEmpty) {
-        log.w('[API] ⚠️ Nenhuma criança encontrada para família');
+
+      final children = (data['children'] as List? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .where((c) => ((c['eventoId'] as String?) ?? '').isNotEmpty)
+          .toList();
+      if (children.isEmpty) {
+        log.w('[API] ⚠️ Nenhuma criança com evento encontrada para família');
         return null;
       }
-      
-      // Extrai eventoId da primeira criança
-      final firstChild = children.first;
-      if (firstChild is! Map<String, dynamic>) return null;
-      
-      final eventoId = firstChild['eventoId'] as String?;
-      if (eventoId == null || eventoId.isEmpty) {
-        log.w('[API] ⚠️ Criança sem eventoId');
-        return null;
-      }
-      
-      log.i('[API] ✅ eventoId extraído: $eventoId');
+
+      final escolhidas = eventoId == null
+          ? const <Map<String, dynamic>>[]
+          : children.where((c) => c['eventoId'] == eventoId).toList();
+      final alvo = escolhidas.isNotEmpty ? escolhidas.first : children.first;
+      final id = alvo['eventoId'] as String;
+      final nome = alvo['eventoNome'] as String?;
+
+      log.i('[API] ✅ evento ativo: $id');
       return {
-        'id': eventoId,
-        'nome': 'Evento Ativo',
+        'id': id,
+        'nome': (nome == null || nome.trim().isEmpty) ? 'Evento Ativo' : nome.trim(),
         'status': 'active',
       };
     } catch (e) {
@@ -457,9 +480,12 @@ class ApiService {
   }
 
   /// ✅ GET /familias/active-event - Jogo ativo (via evento ativo) 
-  Future<Map<String, dynamic>?> getActiveGame() async {
+  Future<Map<String, dynamic>?> getActiveGame({String? eventoId}) async {
     try {
-      final response = await _dio.get('/familias/active-event');
+      final response = await _dio.get(
+        '/familias/active-event',
+        queryParameters: eventoId == null ? null : {'eventoId': eventoId},
+      );
       
       if (response.data == null) {
         return null;
@@ -592,7 +618,7 @@ class ApiService {
       }
       
       final requestBody = {
-        'parentName': parentName,
+        'parentNome': parentName,
         'email': email,
         'senha': senha,
         'children': ?children,

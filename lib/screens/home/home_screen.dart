@@ -11,6 +11,7 @@ import '../../widgets/pulyn_logo.dart';
 import '../../widgets/qr_link_panel.dart';
 import '../profile/profile_tab.dart';
 import '../../utils/logger.dart';
+import '../../utils/top_snackbar.dart';
 
 // ✅ Notifier para trigger manual de refresh
 class ChildrenRefreshNotifier extends StateNotifier<int> {
@@ -33,14 +34,15 @@ final childrenProvider = StreamProvider.autoDispose<List<Child>>((ref) async* {
   // ✅ Watch o refresh notifier para refetch quando necessário
   ref.watch(childrenRefreshProvider);
   
-  // ✅ Carrega dados INICIALMENTE
+  // ✅ Carrega dados INICIALMENTE. Erro NÃO vira lista vazia: lista vazia faz a home mostrar
+  // "Vincule seu filho", como se a criança não existisse. Sem dados, a home só espera.
   try {
     final children = await apiService.getChildren();
     yield children;
   } catch (e) {
-    yield [];
+    log.w('[HOME] Erro ao carregar crianças: $e');
   }
-  
+
   // ✅ Polling automático a cada 10 segundos para verificar mudanças
   while (true) {
     await Future.delayed(const Duration(seconds: 10));
@@ -48,7 +50,7 @@ final childrenProvider = StreamProvider.autoDispose<List<Child>>((ref) async* {
       final children = await apiService.getChildren();
       yield children;
     } catch (e) {
-      // Silencioso
+      log.w('[HOME] Erro ao atualizar crianças: $e');
     }
   }
 });
@@ -107,14 +109,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// quando o cartão do leitor some (o primeiro vínculo troca o cartão pelo mapa e pela lista).
   void _handleChildLinked(Child child, {bool announce = false}) {
     ref.read(childrenRefreshProvider.notifier).refresh();
+    // Recarrega a lista já. Só o refresh não basta: o provider não reage a ele depois do
+    // primeiro carregamento, e a lista só atualizaria no próximo ciclo de 10 s. Enquanto
+    // isso o cartão "Vincule seu filho" voltava quando a pessoa tocava em "Concluir".
+    ref.invalidate(childrenProvider);
+    ref.invalidate(childrenRankingProvider);
+    ref.invalidate(familyEventsProvider);
     if (!announce || !mounted) return;
     final nome = child.apelido.isNotEmpty ? child.apelido : child.nome;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$nome vinculado! Agora você acompanha a festa em tempo real.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    showSuccessSnackBar(context, '$nome vinculado! Agora você acompanha a festa em tempo real.');
   }
 
   void _setMapInteracting(bool value) {
@@ -259,6 +262,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.read(mapRefreshProvider.notifier).refresh();
     ref.invalidate(activeEventProvider);
     ref.invalidate(activeGameProvider);
+    ref.invalidate(familyEventsProvider);
 
     await Future.wait([
       ref.read(childrenProvider.future),
@@ -425,6 +429,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         const SizedBox(height: 16),
         
+        _buildEventSelector(context, ref, activeEventAsync.value?['id'] as String?),
         childrenAsyncValue.when(
           // Sem isso, cada leitura trocava o mapa pelo spinner: o widget era
           // destruído e recriado (perdendo as posições animadas dos avatares).
@@ -448,7 +453,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final activeGame = activeGameAsync.value;
 
             return EventMapWidget(
-              childrenList: children,
+              childrenList: _filhosDoEvento(children, activeEventAsync.value?['id'] as String?),
               eventoId: activeEvent?['id'],
               activeGame: activeGame,
               onInteractionChanged: _setMapInteracting,
@@ -457,6 +462,99 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ],
     );
+  }
+
+  /// Seletor de evento: dropdown que aparece só quando a família tem crianças em mais de um evento.
+  Widget _buildEventSelector(BuildContext context, WidgetRef ref, String? eventoAtivo) {
+    final eventos = ref.watch(familyEventsProvider).value ?? const <Map<String, dynamic>>[];
+    if (eventos.length < 2) return const SizedBox.shrink();
+    final valorAtual = eventos.any((e) => e['id'] == eventoAtivo) ? eventoAtivo : null;
+
+    Widget linha(String nome, {bool destaque = false}) => Row(
+          children: [
+            Icon(Icons.event_rounded, size: 20, color: PulynColors.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                nome,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: destaque ? PulynColors.primary : Colors.white,
+                  fontSize: 15,
+                  fontWeight: destaque ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 6),
+          child: Text(
+            'EVENTO',
+            style: TextStyle(color: PulynColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2),
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: PulynColors.darkCard,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: PulynColors.primary.withValues(alpha: 0.4)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: valorAtual,
+              hint: Row(
+                children: [
+                  Icon(Icons.event_rounded, size: 20, color: PulynColors.textSecondary),
+                  const SizedBox(width: 10),
+                  const Text('Escolha o evento', style: TextStyle(color: PulynColors.textSecondary, fontSize: 15)),
+                ],
+              ),
+              icon: Icon(Icons.keyboard_arrow_down_rounded, color: PulynColors.primary),
+              iconSize: 26,
+              dropdownColor: PulynColors.darkCard,
+              borderRadius: BorderRadius.circular(16),
+              menuMaxHeight: 320,
+              elevation: 8,
+              selectedItemBuilder: (context) => [
+                for (final evento in eventos)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: linha(evento['nome'] as String, destaque: true),
+                  ),
+              ],
+              items: [
+                for (final evento in eventos)
+                  DropdownMenuItem<String>(
+                    value: evento['id'] as String,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: linha(evento['nome'] as String, destaque: evento['id'] == valorAtual),
+                    ),
+                  ),
+              ],
+              onChanged: (novo) {
+                if (novo != null) ref.read(selectedEventIdProvider.notifier).state = novo;
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// O mapa mostra só as crianças do evento ativo (a família pode ter crianças em outros eventos).
+  List<Child> _filhosDoEvento(List<Child> filhos, String? eventoAtivo) {
+    if (eventoAtivo == null) return filhos;
+    final doEvento = filhos.where((c) => c.eventoId == eventoAtivo).toList();
+    return doEvento.isEmpty ? filhos : doEvento;
   }
 
   Widget _buildMapLoadingState() {

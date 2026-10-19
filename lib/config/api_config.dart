@@ -28,7 +28,10 @@ class ApiConfig {
   static const String apiBaseUrlProd = 'https://api.pulyn.com.br';
   
   /// Ambiente padrão (RENDER para produção)
-  static ApiEnvironment currentEnvironment = ApiEnvironment.render;
+  /// Padrão é o Render. Para testar com o backend local, gere o build com
+  /// `--dart-define=PULYN_USE_LOCAL=true` (o padrão do código não muda).
+  static ApiEnvironment currentEnvironment =
+      const bool.fromEnvironment('PULYN_USE_LOCAL') ? ApiEnvironment.local : ApiEnvironment.render;
   
   /// ✅ URL base da API (dinâmica baseada no ambiente)
   static String get apiBaseUrl {

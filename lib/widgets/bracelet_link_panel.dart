@@ -28,6 +28,10 @@ class BraceletLinkPanel extends StatefulWidget {
   /// `true` desenha o painel como um cartão; `false` deixa sem moldura.
   final bool framed;
 
+  /// `true` começa a ler assim que o painel abre. Use só quando nenhuma câmera está
+  /// fechando ao mesmo tempo (vindo do leitor QR, a sessão NFC é derrubada pelo sistema).
+  final bool autoStart;
+
   // Pontos de substituição, para testar sem NFC e sem rede.
   final NfcReader? reader;
   final LinkBraceletRequest? linkChild;
@@ -37,6 +41,7 @@ class BraceletLinkPanel extends StatefulWidget {
     this.onClose,
     this.onUseQr,
     this.framed = true,
+    this.autoStart = false,
     this.reader,
     this.linkChild,
     super.key,
@@ -80,7 +85,10 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
         setState(() => _step = _Step.disabled);
       case NfcSupport.enabled:
         setState(() => _step = _Step.ready);
-        _startReading();
+        // Sem autoStart, a leitura começa no toque em "Ler pulseira". Vindo do leitor QR a
+        // câmera ainda está fechando e o sistema derruba a sessão NFC logo depois (no Samsung,
+        // cerca de 1 s), então o QR não usa autoStart.
+        if (widget.autoStart) _startReading();
     }
   }
 

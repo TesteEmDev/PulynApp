@@ -136,6 +136,7 @@ void main() {
 
       expect(find.text('Cole o link ou o código do convite'), findsOneWidget);
       expect(find.text('Bem-vindo!'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 6)); // deixa o aviso do topo sumir
     });
 
     testWidgets('"Já tenho conta" leva para o login', (tester) async {
@@ -275,6 +276,7 @@ void main() {
 
       expect(find.text('Email já registrado'), findsOneWidget);
       expect(find.text('Criar cadastro'), findsOneWidget); // botão voltou (não ficou carregando)
+      await tester.pump(const Duration(seconds: 6)); // deixa o aviso do topo sumir
     });
   });
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/pulyn_logo.dart';
 import '../qr_scan/open_qr_scanner.dart';
@@ -139,12 +140,7 @@ class _PreEventScreenState extends State<PreEventScreen> {
                     context,
                     onChildLinked: () {
                       if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Criança vinculada!'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
+                      showSuccessSnackBar(context, 'Criança vinculada!');
                     },
                   ),
                   icon: const Icon(Icons.qr_code),

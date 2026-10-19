@@ -1,7 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'dart:async';
+
 import 'package:pulyn_app/config/theme.dart';
+import 'package:pulyn_app/services/nfc_reader.dart';
 import 'package:pulyn_app/widgets/link_child_hero.dart';
+
+/// Leitor de NFC falso: sem aparelho, sem sessão do sistema.
+class _FakeNfc implements NfcReader {
+  final NfcSupport supportValue;
+  final List<Completer<String>> reads = [];
+
+  _FakeNfc(this.supportValue);
+
+  @override
+  Future<NfcSupport> support() async => supportValue;
+
+  @override
+  Future<String> readBraceletUid() {
+    final completer = Completer<String>();
+    reads.add(completer);
+    return completer.future;
+  }
+
+  @override
+  Future<void> cancel() async {}
+}
 
 void main() {
   Widget host(Widget hero) => MaterialApp(
@@ -51,5 +75,35 @@ void main() {
 
     expect(find.text('Vincule seu filho'), findsOneWidget);
     expect(find.text('fechar leitor'), findsNothing);
+  });
+
+  testWidgets('celular com NFC mostra "ou escaneie com NFC" e o botão embaixo do QR', (tester) async {
+    await tester.pumpWidget(host(LinkChildHero(nfcReader: _FakeNfc(NfcSupport.enabled))));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ou escaneie com NFC'), findsOneWidget);
+    expect(find.text('Escanear com NFC'), findsOneWidget);
+  });
+
+  testWidgets('celular sem NFC não mostra a opção de NFC', (tester) async {
+    await tester.pumpWidget(host(LinkChildHero(nfcReader: _FakeNfc(NfcSupport.unsupported))));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ou escaneie com NFC'), findsNothing);
+    expect(find.text('Escanear com NFC'), findsNothing);
+  });
+
+  testWidgets('"Escanear com NFC" abre a leitura da pulseira dentro do cartão e já começa a ler', (tester) async {
+    final reader = _FakeNfc(NfcSupport.enabled);
+    await tester.pumpWidget(host(LinkChildHero(nfcReader: reader)));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Escanear com NFC'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Vincular com a pulseira'), findsOneWidget);
+    expect(find.text('Encoste a pulseira atrás do celular...'), findsOneWidget);
+    expect(find.text('Vincule seu filho'), findsNothing);
+    expect(reader.reads, hasLength(1), reason: 'já começa a ler ao abrir, sem outro toque');
   });
 }

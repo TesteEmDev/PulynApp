@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Imagens da loja - Pulyn Family</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0D1B2A; }
+    body { font-family: "Segoe UI", system-ui, sans-serif; color: #fff; }
+
+    .cena {
+      position: relative; width: 1080px; height: 1920px; overflow: hidden;
+      background:
+        radial-gradient(900px 700px at 90% 8%, rgba(41,182,246,.35), transparent 60%),
+        radial-gradient(800px 800px at 0% 95%, rgba(245,166,35,.28), transparent 60%),
+        linear-gradient(165deg, #0D1B2A 0%, #132338 55%, #1A2F45 100%);
+    }
+
+    /* Formas de movimento */
+    .forma { position: absolute; border-radius: 50%; filter: blur(2px); opacity: .9; }
+    .f1 { width: 240px; height: 240px; background: #4CAF50; top: 420px; left: -70px; opacity: .25; }
+    .f2 { width: 160px; height: 160px; background: #E91E8C; top: 1240px; right: -40px; opacity: .22; }
+    .f3 { width: 90px; height: 90px; background: #F5A623; top: 760px; right: 40px; opacity: .35; }
+    .estrela { position: absolute; color: #F5A623; font-size: 64px; line-height: 1; }
+
+    .topo { position: absolute; left: 90px; right: 90px; top: 150px; }
+    .logo { height: 110px; display: block; margin-bottom: 56px; }
+    h1 { font-size: 110px; line-height: 1.02; font-weight: 800; letter-spacing: -1px; }
+    h1 .destaque { color: #F5A623; }
+    .sub { margin-top: 36px; font-size: 42px; line-height: 1.35; color: #B9D9EE; max-width: 860px; }
+
+    /* Celular */
+    .celular {
+      position: absolute; left: 50%; top: 760px; width: 700px; height: 1400px;
+      transform: translateX(-50%) rotate(-3deg);
+      background: #050B13; border-radius: 110px; padding: 24px;
+      box-shadow: 0 60px 140px rgba(0,0,0,.55), 0 0 0 4px #1E3A54 inset;
+    }
+    .tela { width: 100%; height: 100%; border-radius: 88px; overflow: hidden; background: #0D1B2A; }
+    .tela img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+
+    .chip {
+      position: absolute; padding: 18px 34px; border-radius: 999px; font-size: 40px; font-weight: 700;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+    .chip-verde { background: #4CAF50; color: #fff; }
+    .chip-azul { background: #1E9BD7; color: #fff; }
+    .chip-laranja { background: #F5A623; color: #0D1B2A; }
+    .chip-1 { top: 1020px; left: 60px; transform: rotate(-6deg); }
+    .chip-2 { top: 1340px; right: 60px; transform: rotate(5deg); }
+    .chip-3 { top: 640px; right: 90px; transform: rotate(4deg); }
+
+    /* Cores das telas */
+    .pagina { display: none; }
+    .pagina.ativa { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- Imagem 1: mapa -->
+  <section class="pagina" data-pagina="1">
+    <div class="cena">
+      <div class="forma f1"></div><div class="forma f2"></div><div class="forma f3"></div>
+      <span class="estrela" style="top:240px; left:860px;">✦</span>
+      <span class="estrela" style="top:1450px; left:110px; font-size:44px; color:#4CAF50;">✦</span>
+      <div class="topo">
+        <img class="logo" src="logo.png" alt="">
+        <h1>Acompanhe seu filho <span class="destaque">ao vivo</span></h1>
+        <p class="sub">Veja no mapa do evento as atividades das crianças, em tempo real.</p>
+      </div>
+      <div class="celular"><div class="tela"><img src="s1-mapa.jpeg" alt=""></div></div>
+      <div class="chip chip-verde chip-3">● Ao vivo</div>
+      <div class="chip chip-azul chip-1">Mapa do evento</div>
+    </div>
+  </section>
+
+  <!-- Imagem 2: vincular -->
+  <section class="pagina" data-pagina="2">
+    <div class="cena">
+      <div class="forma f1"></div><div class="forma f2"></div><div class="forma f3"></div>
+      <span class="estrela" style="top:240px; left:860px;">✦</span>
+      <span class="estrela" style="top:1450px; left:110px; font-size:44px; color:#4CAF50;">✦</span>
+      <div class="topo">
+        <img class="logo" src="logo.png" alt="">
+        <h1>Vincule em <span class="destaque">segundos</span></h1>
+        <p class="sub">Escaneie o QR Code da recepção ou encoste a pulseira NFC do seu filho.</p>
+      </div>
+      <div class="celular"><div class="tela"><img src="s2-vincular.jpeg" alt=""></div></div>
+      <div class="chip chip-laranja chip-3">QR Code ou NFC</div>
+      <div class="chip chip-azul chip-1">Sem complicação</div>
+    </div>
+  </section>
+
+  <!-- Imagem 3: pontuação -->
+  <section class="pagina" data-pagina="3">
+    <div class="cena">
+      <div class="forma f1"></div><div class="forma f2"></div><div class="forma f3"></div>
+      <span class="estrela" style="top:240px; left:860px;">✦</span>
+      <span class="estrela" style="top:1450px; left:110px; font-size:44px; color:#4CAF50;">✦</span>
+      <div class="topo">
+        <img class="logo" src="logo.png" alt="">
+        <h1>Pontuação <span class="destaque">na hora</span></h1>
+        <p class="sub">Confira os pontos e o ranking enquanto a festa acontece.</p>
+      </div>
+      <div class="celular"><div class="tela"><img src="s3-pontuacao.jpeg" alt=""></div></div>
+      <div class="chip chip-laranja chip-3">Ranking</div>
+      <div class="chip chip-verde chip-1">Atualizado ao vivo</div>
+    </div>
+  </section>
+
+  <script>
+    // A página mostra a arte indicada no endereço: index.html#1, #2 ou #3.
+    var n = (location.hash || '#1').replace('#', '');
+    document.querySelectorAll('.pagina').forEach(function (p) {
+      p.classList.toggle('ativa', p.dataset.pagina === n);
+    });
+  </script>
+</body>
+</html>

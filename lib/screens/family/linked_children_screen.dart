@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import '../../utils/logger.dart';
 import '../../services/api_service.dart';
 import '../../models/family_models.dart';
@@ -102,16 +103,12 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
       _loadChildren();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Criança desvinculada com sucesso')),
-        );
+        showSuccessSnackBar(context, 'Criança desvinculada com sucesso');
       }
     } catch (e) {
       log.e('❌ Erro: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao desvinc ular: $e')),
-        );
+        showErrorSnackBar(context, 'Erro ao desvincular: $e');
       }
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -307,13 +308,7 @@ class _GlobalBackButtonHandlerState extends State<_GlobalBackButtonHandler> {
       _lastBackPressTime = now;
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Clique novamente para sair do app'),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.orange,
-          ),
-        );
+        showInfoSnackBar(context, 'Clique novamente para sair do app', duration: const Duration(seconds: 2));
       }
       
       return false; // Não sai do app

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import '../../utils/logger.dart';
 import '../../services/api_service.dart';
 import '../../models/family_models.dart';
@@ -73,7 +74,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Desvinc ular Criança?'),
+        title: const Text('Desvincular Criança?'),
         content: const Text(
           'Esta ação removerá o acesso aos dados desta criança.',
         ),
@@ -84,7 +85,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Desvinc ular', style: TextStyle(color: Colors.red)),
+            child: const Text('Desvincular', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -102,16 +103,12 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
       _loadChildren();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Criança desvinculada com sucesso')),
-        );
+        showSuccessSnackBar(context, 'Criança desvinculada com sucesso');
       }
     } catch (e) {
       log.e('❌ Erro: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao desvinc ular: $e')),
-        );
+        showErrorSnackBar(context, 'Erro ao desvincular: $e');
       }
     }
   }
@@ -278,7 +275,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                             children: [
                               Icon(Icons.delete, color: Colors.red),
                               SizedBox(width: 8),
-                              Text('Desvinc ular'),
+                              Text('Desvincular'),
                             ],
                           ),
                         ),

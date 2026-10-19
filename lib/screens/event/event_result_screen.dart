@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/pulyn_logo.dart';
 
@@ -42,22 +43,12 @@ class _EventResultScreenState extends State<EventResultScreen> with TickerProvid
 
   void _shareResult() {
     // TODO: Implementar compartilhamento via share_plus
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Compartilhamento implementado em breve!'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    showInfoSnackBar(context, 'Compartilhamento implementado em breve!');
   }
 
   void _downloadCertificate() {
     // TODO: Implementar download de certificado (PDF ou imagem)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Certificado gerado em breve!'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    showInfoSnackBar(context, 'Certificado gerado em breve!');
   }
 
   @override

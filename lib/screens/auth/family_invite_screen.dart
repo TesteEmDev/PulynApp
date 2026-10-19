@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,7 @@ import '../../config/theme.dart';
 import '../../providers/index.dart';
 import '../../utils/logger.dart';
 import '../../widgets/auth_widgets.dart';
+import '../../widgets/consentimento_privacidade.dart';
 
 /// Cadastro da família a partir de um convite (a tela que abre depois de
 /// colar o link/código na tela de convite).
@@ -38,6 +40,7 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
   String? _outcomeMessage;
   Map<String, dynamic>? _inviteData;
   bool _hasLinkedChild = false;
+  bool _aceitouPrivacidade = false;
 
   @override
   void initState() {
@@ -98,19 +101,17 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
   }
 
   void _showError(String mensagem) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: PulynColors.danger,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    showErrorSnackBar(context, mensagem);
   }
 
   void _handleRegister() async {
     if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (!_aceitouPrivacidade) {
+      showErrorSnackBar(context, 'Aceite a Política de Privacidade para criar a conta');
       return;
     }
 
@@ -150,14 +151,7 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
         // Cenário 1: Tem criança específica - login automático
         log.i('[INVITE] ✅ Login automático após registro');
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Cadastro feito! Entrando...'),
-            backgroundColor: PulynColors.success,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        showSuccessSnackBar(context, 'Cadastro feito! Entrando...');
 
         Future.delayed(const Duration(milliseconds: 1500), () {
           if (mounted) context.go('/home');
@@ -385,7 +379,13 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
+            ConsentimentoPrivacidade(
+              value: _aceitouPrivacidade,
+              enabled: !_isSubmitting,
+              onChanged: (valor) => setState(() => _aceitouPrivacidade = valor),
+            ),
+            const SizedBox(height: 12),
 
             // Criança já vinculada pelo convite, ou aviso de que o vínculo é feito depois
             if (_hasLinkedChild && linkedChild != null)

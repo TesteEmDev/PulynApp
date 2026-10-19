@@ -17,13 +17,25 @@ export 'index.dart' show activeEventProvider, activeGameProvider, mapChildrenRea
 
 // ✅ Provider para evento ativo (StreamProvider com polling a cada 5 segundos)
 // MUDADO DE FutureProvider PARA StreamProvider para refetch automático!
+/// Evento escolhido no seletor da home. Null = o evento da primeira criança da família.
+final selectedEventIdProvider = StateProvider<String?>((ref) => null);
+
+/// Eventos das crianças da família, para o seletor da home. A home invalida quando as
+/// crianças mudam.
+final familyEventsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final apiService = ref.read(apiServiceProvider);
+  await apiService.init();
+  return apiService.getFamilyEvents();
+});
+
 final activeEventProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((ref) async* {
+  final selecionado = ref.watch(selectedEventIdProvider);
   final apiService = ref.read(apiServiceProvider);
   await apiService.init();
   
   // Carrega INICIALMENTE
   try {
-    final event = await apiService.getActiveEvent();
+    final event = await apiService.getActiveEvent(eventoId: selecionado);
     log.i('[EVENT] 📅 Evento ativo: ${event?['nome'] ?? 'NENHUM'}');
     yield event;
   } catch (e) {
@@ -35,7 +47,7 @@ final activeEventProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((r
   while (true) {
     await Future.delayed(const Duration(seconds: 5));
     try {
-      final event = await apiService.getActiveEvent();
+      final event = await apiService.getActiveEvent(eventoId: selecionado);
       yield event;
     } catch (e) {
       // silencioso no polling
@@ -46,12 +58,13 @@ final activeEventProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((r
 // ✅ Provider para jogo ativo do evento (StreamProvider com polling a cada 5 segundos)
 // MUDADO DE FutureProvider PARA StreamProvider para refetch automático!
 final activeGameProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((ref) async* {
+  final selecionado = ref.watch(selectedEventIdProvider);
   final apiService = ref.read(apiServiceProvider);
   await apiService.init();
   
   // Carrega INICIALMENTE
   try {
-    final activeGame = await apiService.getActiveGame();
+    final activeGame = await apiService.getActiveGame(eventoId: selecionado);
     
     if (activeGame == null) {
       log.i('[GAME] 🎮 Jogo ativo: NENHUM');
@@ -81,7 +94,7 @@ final activeGameProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((re
   while (true) {
     await Future.delayed(const Duration(seconds: 5));
     try {
-      final activeGame = await apiService.getActiveGame();
+      final activeGame = await apiService.getActiveGame(eventoId: selecionado);
       if (activeGame != null) {
         final gameName = activeGame['gameName'] ?? 'Nenhum jogo em andamento';
         yield {
@@ -153,6 +166,7 @@ final mapRefreshProvider = StateNotifierProvider((ref) {
 
 // ✅ Provider para scoreLog - rastreia conquistas em tempo real
 final scoreLogProvider = StreamProvider.autoDispose<List<Map<String, dynamic>>>((ref) async* {
+  final selecionado = ref.watch(selectedEventIdProvider);
   final apiService = ref.read(apiServiceProvider);
   await apiService.init();
   
@@ -161,7 +175,7 @@ final scoreLogProvider = StreamProvider.autoDispose<List<Map<String, dynamic>>>(
   
   // ✅ Carrega histórico INICIALMENTE
   try {
-    final activeEvent = await apiService.getActiveEvent();
+    final activeEvent = await apiService.getActiveEvent(eventoId: selecionado);
     if (activeEvent != null) {
       final history = await apiService.getScoreHistory(activeEvent['id']);
       yield history;
@@ -176,7 +190,7 @@ final scoreLogProvider = StreamProvider.autoDispose<List<Map<String, dynamic>>>(
   while (true) {
     await Future.delayed(const Duration(seconds: 10));
     try {
-      final activeEvent = await apiService.getActiveEvent();
+      final activeEvent = await apiService.getActiveEvent(eventoId: selecionado);
       if (activeEvent != null) {
         final history = await apiService.getScoreHistory(activeEvent['id']);
         yield history;

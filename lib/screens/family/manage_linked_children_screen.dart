@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/family_models.dart';
@@ -7,7 +8,9 @@ import '../../config/theme.dart';
 import '../../utils/logger.dart';
 import '../../providers/index.dart';
 
-final linkedChildrenProvider = FutureProvider<List<Child>>((ref) async {
+// autoDispose: a lista é buscada de novo sempre que a tela abre. Sem isso, o cache fica
+// vivo com a sessão e uma criança vinculada depois (pela Home) não aparece aqui.
+final linkedChildrenProvider = FutureProvider.autoDispose<List<Child>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   await apiService.init();
   return await apiService.getChildren();
@@ -39,26 +42,15 @@ class _ManageLinkedChildrenScreenState
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ ${child.apelido} desvinculada com sucesso'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        showSuccessSnackBar(context, '${child.apelido} desvinculada com sucesso');
       }
 
       // Atualizar lista
       ref.invalidate(linkedChildrenProvider);
     } catch (e) {
-      log.e('Erro ao desvincullar: $e');
+      log.e('Erro ao desvincular: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erro ao desvincullar: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorSnackBar(context, 'Erro ao desvincular: $e');
       }
     }
   }
@@ -226,9 +218,9 @@ class _ManageLinkedChildrenScreenState
                               showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  title: const Text('Desvincullar?'),
+                                  title: const Text('Desvincular?'),
                                   content: Text(
-                                    'Deseja desvincullar ${child.apelido.isNotEmpty ? child.apelido : child.nome}?',
+                                    'Deseja desvincular ${child.apelido.isNotEmpty ? child.apelido : child.nome}?',
                                   ),
                                   actions: [
                                     TextButton(
@@ -242,7 +234,7 @@ class _ManageLinkedChildrenScreenState
                                         _unlinkChild(child);
                                       },
                                       child: const Text(
-                                        'Desvincullar',
+                                        'Desvincular',
                                         style: TextStyle(color: Colors.red),
                                       ),
                                     ),

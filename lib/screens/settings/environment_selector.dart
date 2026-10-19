@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
@@ -42,14 +43,7 @@ class _EnvironmentSelectorScreenState
       apiService.setEnvironment(_selectedEnvironment);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                '✅ Ambiente salvo: ${_selectedEnvironment.toString().split('.').last.toUpperCase()}'),
-            backgroundColor: Colors.green.shade600,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        showSuccessSnackBar(context, 'Ambiente salvo: ${_selectedEnvironment.toString().split('.').last.toUpperCase()}');
 
         // Voltar para login
         Future.delayed(const Duration(milliseconds: 500), () {
@@ -58,12 +52,7 @@ class _EnvironmentSelectorScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erro ao salvar: $e'),
-            backgroundColor: Colors.red.shade600,
-          ),
-        );
+        showErrorSnackBar(context, 'Erro ao salvar: $e');
       }
     } finally {
       setState(() => _isSaving = false);

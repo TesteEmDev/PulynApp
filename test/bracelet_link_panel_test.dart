@@ -72,6 +72,9 @@ void main() {
       )));
       await tester.pump();
 
+      expect(reader.reads, isEmpty, reason: 'não lê sozinho ao abrir (a câmera do QR pode estar fechando)');
+      await tester.tap(find.text('Ler pulseira'));
+      await tester.pump();
       expect(find.text('Encoste a pulseira atrás do celular...'), findsOneWidget);
 
       reader.reads.single.complete('04E72C1A896880');
@@ -82,6 +85,16 @@ void main() {
       expect(find.text('Criança vinculada!'), findsOneWidget);
       expect(find.text('Lia · 6 anos · Festa da Lia'), findsOneWidget);
       expect(linkedChild?.id, 'c1');
+    });
+
+    testWidgets('com autoStart já começa a ler ao abrir, sem toque', (tester) async {
+      final reader = _FakeReader();
+
+      await tester.pumpWidget(_wrap(BraceletLinkPanel(reader: reader, autoStart: true)));
+      await tester.pump();
+
+      expect(reader.reads, hasLength(1));
+      expect(find.text('Encoste a pulseira atrás do celular...'), findsOneWidget);
     });
 
     testWidgets('erro do servidor aparece na tela e permite tentar de novo', (tester) async {
@@ -96,6 +109,8 @@ void main() {
           return _linked;
         },
       )));
+      await tester.pump();
+      await tester.tap(find.text('Ler pulseira'));
       await tester.pump();
 
       reader.reads.single.complete('04E72C1A896880');
@@ -143,6 +158,8 @@ void main() {
 
       await tester.pumpWidget(_wrap(BraceletLinkPanel(reader: reader)));
       await tester.pump();
+      await tester.tap(find.text('Ler pulseira'));
+      await tester.pump();
 
       reader.reads.single.completeError(const NfcReadException('Leitura cancelada.', cancelled: true));
       await tester.pump();
@@ -187,6 +204,8 @@ void main() {
       await tester.pump();
       await tester.pump();
       expect(find.text('Vincular com a pulseira'), findsOneWidget);
+      await tester.tap(find.text('Ler pulseira'));
+      await tester.pump();
 
       reader.reads.single.complete('04E72C1A896880');
       await tester.pump();

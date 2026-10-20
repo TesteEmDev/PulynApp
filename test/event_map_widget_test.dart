@@ -53,13 +53,14 @@ void main() {
           zonesProvider.overrideWith((ref) async => zones ?? <Map<String, dynamic>>[]),
           mapChildrenRealtimeProvider.overrideWith((ref) => Stream.value([child])),
           childLastCheckpointProvider.overrideWith((ref) => ref.watch(lastCheckpoint)),
-          // Calor da Lia: perto da Torre nos períodos; nenhuma leitura "agora".
+          // Calor da Lia: perto da Torre nos períodos, com o rastro; nenhuma leitura "agora".
           childHeatmapProvider.overrideWith((ref, chave) => Stream.value(chave.$2 != 'agora'
               ? const CalorDaCrianca(
                   celulas: [CelulaCalor(x: 90, y: 90, valor: 0.8), CelulaCalor(x: 95, y: 90, valor: 0.4)],
                   celulaUnidades: 5,
                   valorMax: 0.8,
                   acumulado: true,
+                  trajeto: [PontoTrajeto(Offset(150, 90)), PontoTrajeto(Offset(90, 90))],
                 )
               : const CalorDaCrianca(celulas: [], celulaUnidades: 5, valorMax: 0))),
         ],
@@ -522,10 +523,12 @@ void main() {
     expect(find.text('Pouco tempo'), findsOneWidget); // legenda do calor no lugar da dos checkpoints
     expect(find.text('Conquistado'), findsNothing);
     expect(find.textContaining('Nenhuma leitura'), findsNothing);
-    // Só a temperatura sobre a planta: sem checkpoints, zonas nem avatares
+    // Temperatura e o rastro de cada filho sobre a planta: sem checkpoints, zonas nem avatares
     expect(find.text('Torre Encantada'), findsNothing);
     expect(find.text('Caverna Misteriosa'), findsNothing);
-    expect(find.text('Lia'), findsNothing);
+    final rastro = tester.widget<CamadaTrajeto>(find.byType(CamadaTrajeto));
+    expect(rastro.cor, corDoFilho(0));
+    expect(find.text('Lia'), findsOneWidget); // só na legenda, com a cor do rastro
 
     await tester.tap(find.text('5 min'));
     await settle(tester);
@@ -534,6 +537,7 @@ void main() {
     await tester.tap(find.text('Agora'));
     await settle(tester);
     expect(find.text('Nenhuma leitura da pulseira agora'), findsOneWidget);
+    expect(find.byType(CamadaTrajeto), findsNothing);
 
     await tester.tap(find.byTooltip('Esconder mapa de calor'));
     await settle(tester);

@@ -1641,6 +1641,17 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                               child: CamadaCalor(calor: calor),
                             ),
 
+                          // 🔥 Rastro de cada filho por cima do calor, uma cor por criança (a mesma da legenda)
+                          for (var i = 0; i < caloresAsync.length; i++)
+                            if (caloresAsync[i].valueOrNull?.trajeto.isNotEmpty ?? false)
+                              Positioned(
+                                left: ox,
+                                top: oy,
+                                width: mapWidth,
+                                height: mapHeight,
+                                child: CamadaTrajeto(pontos: caloresAsync[i].value!.trajeto, cor: corDoFilho(i)),
+                              ),
+
                           // Checkpoints com animação e interatividade (escondidos no mapa de calor)
                           if (!_mostrarCalor) ...visibleCheckpoints.map((checkpoint) {
                             final pos = _getCheckpointPosition(checkpoint, checkpoints);
@@ -1996,7 +2007,14 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                     runSpacing: 6,
                     children: _mostrarCalor
                         ? [
-                            _buildLegendItem('Meus filhos', Colors.yellow),
+                            // Cor do rastro de cada filho
+                            for (var i = 0; i < childrenToDisplay.length; i++)
+                              _buildLegendItem(
+                                childrenToDisplay[i].apelido.isNotEmpty
+                                    ? childrenToDisplay[i].apelido
+                                    : childrenToDisplay[i].nome,
+                                corDoFilho(i),
+                              ),
                             const LegendaCalor(),
                           ]
                         : [

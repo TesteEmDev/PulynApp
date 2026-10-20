@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show Offset;
 
 /// Uma célula do mapa de calor, em coordenadas da planta (canvas 450x320).
@@ -8,6 +9,28 @@ class CelulaCalor {
 
   const CelulaCalor({required this.x, required this.y, required this.valor});
 }
+
+/// Um ponto do trajeto: onde a criança foi vista e até quando ficou ali.
+class PontoTrajeto {
+  final Offset posicao;
+  final DateTime? ate;
+
+  const PontoTrajeto(this.posicao, {this.ate});
+
+  @override
+  bool operator ==(Object other) => other is PontoTrajeto && other.posicao == posicao && other.ate == ate;
+
+  @override
+  int get hashCode => Object.hash(posicao, ate);
+
+  @override
+  String toString() => 'PontoTrajeto($posicao, ate: $ate)';
+}
+
+/// Peso do rastro pela idade, igual ao backend (utils/uhfMapa.js, pesoDaIdade): metade a cada 20 min, nunca abaixo
+/// de 10%. O que a criança fez há horas continua no mapa, com a cor fraca.
+double pesoDaIdade(Duration idade) =>
+    math.max(0.1, math.pow(0.5, math.max(0, idade.inMilliseconds) / (20 * 60000)).toDouble());
 
 double _numero(dynamic valor, [double padrao = 0]) =>
     valor is num ? valor.toDouble() : double.tryParse('${valor ?? ''}') ?? padrao;
@@ -23,6 +46,8 @@ class CalorDaCrianca {
   // true nos períodos (5 min, 30 min, evento todo): o valor é tempo somado, o mais antigo com menos peso, e um lugar
   // por onde a criança só passou continua no mapa
   final bool acumulado;
+  // Por onde a criança andou no período, do mais antigo para o mais novo (janelas seguidas no mesmo lugar já vêm juntas)
+  final List<PontoTrajeto> trajeto;
 
   const CalorDaCrianca({
     required this.celulas,
@@ -31,6 +56,7 @@ class CalorDaCrianca {
     this.posicao,
     this.balde,
     this.acumulado = false,
+    this.trajeto = const [],
   });
 
   bool get vazio => celulas.isEmpty || valorMax <= 0;
@@ -47,10 +73,18 @@ class CalorDaCrianca {
       posicao: posicao is Map ? Offset(_numero(posicao['x']), _numero(posicao['y'])) : null,
       balde: DateTime.tryParse('${json['balde'] ?? ''}'),
       acumulado: json['acumulado'] == true,
+      trajeto: (json['trajeto'] as List? ?? const [])
+          .whereType<Map>()
+          .map((p) => PontoTrajeto(
+                Offset(_numero(p['x']), _numero(p['y'])),
+                ate: DateTime.tryParse('${p['ate'] ?? p['balde'] ?? ''}'),
+              ))
+          .toList(),
     );
   }
 
   /// Junta o calor de vários filhos (soma célula a célula) para desenhar numa camada só.
+  /// Os trajetos não são juntados: cada filho tem o seu (CamadaTrajeto).
   static CalorDaCrianca juntar(Iterable<CalorDaCrianca> calores) {
     final lista = calores.where((c) => !c.vazio).toList();
     if (lista.isEmpty) return const CalorDaCrianca(celulas: [], celulaUnidades: 5, valorMax: 0);

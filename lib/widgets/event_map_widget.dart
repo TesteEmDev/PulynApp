@@ -1596,8 +1596,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                               ),
                             ),
 
-                          // Zonas background com animação
-                          ...convertedZones.map((zona) {
+                          // Zonas background com animação (o mapa de calor mostra só a temperatura sobre a planta)
+                          if (!_mostrarCalor) ...convertedZones.map((zona) {
                             log.i('🎨 [ZONES] Renderizando zona: ${zona.nome} @ (${zona.x}, ${zona.y})');
                             return AnimatedBuilder(
                               animation: _zoomAnimation,
@@ -1641,19 +1641,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                               child: CamadaCalor(calor: calor),
                             ),
 
-                          // 🔥 Trajeto de cada filho no período (por onde ele passou)
-                          for (final calorFilho in caloresAsync.map((a) => a.valueOrNull).whereType<CalorDaCrianca>())
-                            if (calorFilho.trajeto.isNotEmpty)
-                              Positioned(
-                                left: ox,
-                                top: oy,
-                                width: mapWidth,
-                                height: mapHeight,
-                                child: CamadaTrajeto(pontos: calorFilho.trajeto),
-                              ),
-
-                          // Checkpoints com animação e interatividade
-                          ...visibleCheckpoints.map((checkpoint) {
+                          // Checkpoints com animação e interatividade (escondidos no mapa de calor)
+                          if (!_mostrarCalor) ...visibleCheckpoints.map((checkpoint) {
                             final pos = _getCheckpointPosition(checkpoint, checkpoints);
                             final cor = _getCheckpointColor(checkpoint);
                             
@@ -1743,8 +1732,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             );
                           }),
 
-                          // 👶 Filhos no mapa
-                          ...childPositions.map((childPos) {
+                          // 👶 Filhos no mapa (nos checkpoints; escondidos no mapa de calor)
+                          if (!_mostrarCalor) ...childPositions.map((childPos) {
                             final childData = childPos['child'] as Child;
 
                             // Centro do avatar: posição animada, ou o alvo direto no
@@ -1928,7 +1917,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                 ),
                               ),
                             ),
-                          // Aviso de chegada ("Lucas chegou em Torre Encantada")
+                          // Aviso de chegada ("Lucas chegou em Torre Encantada"), só fora do mapa de calor
+                          if (!_mostrarCalor)
                           Positioned(
                             left: 12,
                             right: 12,

@@ -177,7 +177,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   Timer? _uhfTimer;
   VoidCallback? _pararAvisoUhf; // tira o listener do WebSocket no dispose
 
-  // O backend avisa quando uma janela de 20 s fecha; espera um pouco pelos lotes atrasados (igual ao web).
+  // O backend avisa quando uma janela de 5 s fecha; espera um pouco pelos lotes atrasados (igual ao web).
   void _onUhfMapaAtualizado(Map<String, dynamic> data) {
     _uhfTimer?.cancel();
     _uhfTimer = Timer(const Duration(milliseconds: 3500), () {

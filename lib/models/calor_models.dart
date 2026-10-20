@@ -42,7 +42,7 @@ class CalorDaCrianca {
   final double celulaUnidades; // lado da célula, na unidade da planta
   final double valorMax;
   final Offset? posicao; // onde a pulseira foi vista na última janela (null = não foi vista)
-  final DateTime? balde; // início da janela de 20 s mostrada
+  final DateTime? balde; // início da janela de 5 s mostrada
   // true nos períodos (5 min, 30 min, evento todo): o valor é tempo somado, o mais antigo com menos peso, e um lugar
   // por onde a criança só passou continua no mapa
   final bool acumulado;

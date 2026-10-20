@@ -165,11 +165,12 @@ final mapRefreshProvider = StateNotifierProvider((ref) {
   return MapRefreshNotifier();
 });
 
-/// Muda quando o backend avisa (WebSocket UHF_MAPA_ATUALIZADO) que uma janela de 20 s dos leitores UHF fechou.
+/// Muda quando o backend avisa (WebSocket UHF_MAPA_ATUALIZADO) que uma janela de 5 s dos leitores UHF fechou.
 final uhfMapaTickProvider = StateProvider<int>((ref) => 0);
 
-/// Mapa de calor UHF de um filho, chave (childId, modo 'agora' | '5min').
-/// Busca de novo a cada 20 s (tamanho da janela do backend) e quando uhfMapaTickProvider muda.
+/// Mapa de calor UHF de um filho, chave (childId, modo 'agora' | '5min' | '30min' | 'evento').
+/// Busca de novo a cada 5 s (tamanho da janela do backend) e quando uhfMapaTickProvider muda.
+const uhfMapaIntervalo = Duration(seconds: 5);
 final childHeatmapProvider =
     StreamProvider.autoDispose.family<CalorDaCrianca?, (String, String)>((ref, chave) async* {
   final (childId, modo) = chave;
@@ -179,7 +180,7 @@ final childHeatmapProvider =
 
   yield await apiService.getChildHeatmap(childId, modo: modo);
   while (true) {
-    await Future.delayed(const Duration(seconds: 20));
+    await Future.delayed(uhfMapaIntervalo);
     yield await apiService.getChildHeatmap(childId, modo: modo);
   }
 });

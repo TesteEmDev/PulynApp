@@ -172,7 +172,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
 
   // 🔥 Mapa de calor (leitores UHF): onde os filhos passaram mais tempo. Desligado até a pessoa tocar no botão.
   bool _mostrarCalor = false;
-  String _modoCalor = '5min'; // 'agora' (último minuto) | '5min'
+  String _modoCalor = '30min'; // 'agora' (último minuto) | '5min' | '30min' (tempo somado, com o trajeto)
   Timer? _uhfTimer;
   VoidCallback? _pararAvisoUhf; // tira o listener do WebSocket no dispose
 
@@ -1640,6 +1640,17 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                               child: CamadaCalor(calor: calor),
                             ),
 
+                          // 🔥 Trajeto de cada filho no período (por onde ele passou)
+                          for (final calorFilho in caloresAsync.map((a) => a.valueOrNull).whereType<CalorDaCrianca>())
+                            if (calorFilho.trajeto.isNotEmpty)
+                              Positioned(
+                                left: ox,
+                                top: oy,
+                                width: mapWidth,
+                                height: mapHeight,
+                                child: CamadaTrajeto(pontos: calorFilho.trajeto),
+                              ),
+
                           // Checkpoints com animação e interatividade
                           ...visibleCheckpoints.map((checkpoint) {
                             final pos = _getCheckpointPosition(checkpoint, checkpoints);
@@ -1903,9 +1914,11 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                       border: Border.all(color: PulynColors.darkBorder),
                                     ),
                                     child: Text(
-                                      _modoCalor == 'agora'
-                                          ? 'Nenhuma leitura da pulseira agora'
-                                          : 'Nenhuma leitura da pulseira nos últimos 5 minutos',
+                                      switch (_modoCalor) {
+                                        'agora' => 'Nenhuma leitura da pulseira agora',
+                                        '5min' => 'Nenhuma leitura da pulseira nos últimos 5 minutos',
+                                        _ => 'Nenhuma leitura da pulseira nos últimos 30 minutos',
+                                      },
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
                                     ),
@@ -2041,13 +2054,14 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         children: [
           const Expanded(
             child: Text(
-              'Onde seus filhos passaram mais tempo',
+              'Por onde seus filhos passaram',
               maxLines: 2,
               style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
             ),
           ),
           opcao('agora', 'Agora'),
-          opcao('5min', 'Últimos 5 min'),
+          opcao('5min', '5 min'),
+          opcao('30min', '30 min'),
         ],
       ),
     );

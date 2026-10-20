@@ -21,6 +21,27 @@ void main() {
     expect(calor.balde, DateTime.utc(2026, 10, 20, 18));
     expect(calor.vazio, isFalse);
     expect(CalorDaCrianca.fromJson({}).vazio, isTrue);
+    expect(calor.acumulado, isFalse);
+    expect(calor.trajeto, isEmpty);
+  });
+
+  test('lê o tempo somado e o trajeto do período', () {
+    final calor = CalorDaCrianca.fromJson({
+      'acumulado': true,
+      'trajeto': [
+        {'balde': '2026-10-20T18:00:00.000Z', 'x': 205, 'y': 134},
+        {'balde': '2026-10-20T18:00:20.000Z', 'x': '204', 'y': 81.5},
+      ],
+    });
+    expect(calor.acumulado, isTrue);
+    expect(calor.trajeto, const [Offset(205, 134), Offset(204, 81.5)]);
+  });
+
+  test('trajeto: janelas seguidas no mesmo lugar viram um ponto só', () {
+    expect(
+      semRepetidos(const [Offset(1, 1), Offset(1, 1), Offset(5, 1), Offset(5, 1), Offset(1, 1)]),
+      const [Offset(1, 1), Offset(5, 1), Offset(1, 1)],
+    );
   });
 
   test('junta o calor de dois filhos somando as células iguais', () {

@@ -48,7 +48,9 @@ class _CalorPainter extends CustomPainter {
     final lado = calor.celulaUnidades;
     final paint = Paint()..maskFilter = MaskFilter.blur(BlurStyle.normal, math.max(1.5, lado * 0.8));
     for (final c in calor.celulas) {
-      final t = c.valor / calor.valorMax;
+      // Tempo somado: escala pela raiz, para uma passagem rápida (o rastro) continuar visível ao lado de onde a
+      // criança ficou muito tempo. Mesma regra do painel web.
+      final t = calor.acumulado ? math.sqrt(c.valor / calor.valorMax) : c.valor / calor.valorMax;
       paint.color = corDoCalor(t).withValues(alpha: 0.25 + 0.5 * math.min(1.0, t));
       canvas.drawRect(Rect.fromCenter(center: Offset(c.x, c.y), width: lado, height: lado), paint);
     }
@@ -56,6 +58,70 @@ class _CalorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CalorPainter oldDelegate) => oldDelegate.calor != calor;
+}
+
+/// Trajeto de um filho sobre a planta (canvas 450x320): linha pelas posições do período, mais apagada no começo,
+/// com um ponto em cada lugar e um ponto maior onde ele foi visto por último.
+class CamadaTrajeto extends StatelessWidget {
+  final List<Offset> pontos;
+  final Color cor;
+
+  const CamadaTrajeto({required this.pontos, this.cor = Colors.yellow, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (pontos.isEmpty) return const SizedBox.shrink();
+    return IgnorePointer(child: CustomPaint(painter: _TrajetoPainter(pontos, cor)));
+  }
+}
+
+class _TrajetoPainter extends CustomPainter {
+  final List<Offset> pontos;
+  final Color cor;
+
+  _TrajetoPainter(List<Offset> pontos, this.cor) : pontos = semRepetidos(pontos);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final n = pontos.length;
+    final linha = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+    for (var i = 1; i < n; i++) {
+      linha.color = cor.withValues(alpha: 0.25 + 0.65 * i / (n - 1));
+      canvas.drawLine(pontos[i - 1], pontos[i], linha);
+    }
+    final ponto = Paint();
+    for (var i = 0; i < n - 1; i++) {
+      ponto.color = cor.withValues(alpha: 0.35 + 0.5 * (i + 1) / n);
+      canvas.drawCircle(pontos[i], 2.5, ponto);
+    }
+    canvas.drawCircle(pontos.last, 5, Paint()..color = cor);
+    canvas.drawCircle(
+      pontos.last,
+      5,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5
+        ..color = Colors.white,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_TrajetoPainter oldDelegate) =>
+      oldDelegate.cor != cor ||
+      oldDelegate.pontos.length != pontos.length ||
+      Iterable<int>.generate(pontos.length).any((i) => oldDelegate.pontos[i] != pontos[i]);
+}
+
+/// Várias janelas seguidas no mesmo lugar viram um ponto só no trajeto.
+List<Offset> semRepetidos(List<Offset> pontos) {
+  final lista = <Offset>[];
+  for (final p in pontos) {
+    if (lista.isEmpty || (lista.last - p).distance > 0.5) lista.add(p);
+  }
+  return lista;
 }
 
 /// Legenda: pouco tempo (azul) a muito tempo (vermelho) no lugar.

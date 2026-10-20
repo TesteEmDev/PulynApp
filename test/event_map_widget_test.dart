@@ -53,12 +53,14 @@ void main() {
           zonesProvider.overrideWith((ref) async => zones ?? <Map<String, dynamic>>[]),
           mapChildrenRealtimeProvider.overrideWith((ref) => Stream.value([child])),
           childLastCheckpointProvider.overrideWith((ref) => ref.watch(lastCheckpoint)),
-          // Calor da Lia: perto da Torre nos últimos 5 min; nenhuma leitura "agora".
-          childHeatmapProvider.overrideWith((ref, chave) => Stream.value(chave.$2 == '5min'
+          // Calor da Lia: perto da Torre nos períodos (com o trajeto); nenhuma leitura "agora".
+          childHeatmapProvider.overrideWith((ref, chave) => Stream.value(chave.$2 != 'agora'
               ? const CalorDaCrianca(
                   celulas: [CelulaCalor(x: 90, y: 90, valor: 0.8), CelulaCalor(x: 95, y: 90, valor: 0.4)],
                   celulaUnidades: 5,
                   valorMax: 0.8,
+                  acumulado: true,
+                  trajeto: [Offset(150, 90), Offset(90, 90)],
                 )
               : const CalorDaCrianca(celulas: [], celulaUnidades: 5, valorMax: 0))),
         ],
@@ -517,13 +519,19 @@ void main() {
     await tester.tap(find.byTooltip('Mapa de calor'));
     await settle(tester);
     expect(find.byType(CamadaCalor), findsOneWidget);
+    expect(find.byType(CamadaTrajeto), findsOneWidget); // por onde ela passou nos últimos 30 min (padrão)
     expect(find.text('Pouco tempo'), findsOneWidget); // legenda do calor no lugar da dos checkpoints
     expect(find.text('Conquistado'), findsNothing);
     expect(find.textContaining('Nenhuma leitura'), findsNothing);
 
+    await tester.tap(find.text('5 min'));
+    await settle(tester);
+    expect(find.byType(CamadaTrajeto), findsOneWidget);
+
     await tester.tap(find.text('Agora'));
     await settle(tester);
     expect(find.text('Nenhuma leitura da pulseira agora'), findsOneWidget);
+    expect(find.byType(CamadaTrajeto), findsNothing);
 
     await tester.tap(find.byTooltip('Esconder mapa de calor'));
     await settle(tester);

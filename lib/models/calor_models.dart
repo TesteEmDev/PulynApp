@@ -20,6 +20,11 @@ class CalorDaCrianca {
   final double valorMax;
   final Offset? posicao; // onde a pulseira foi vista na última janela (null = não foi vista)
   final DateTime? balde; // início da janela de 20 s mostrada
+  // true nos períodos (5 e 30 min): o valor é tempo somado, e um lugar por onde a criança só passou continua no mapa
+  final bool acumulado;
+  // Por onde a criança andou no período: uma posição por janela de 20 s em que a pulseira foi vista, da mais antiga
+  // para a mais nova
+  final List<Offset> trajeto;
 
   const CalorDaCrianca({
     required this.celulas,
@@ -27,6 +32,8 @@ class CalorDaCrianca {
     required this.valorMax,
     this.posicao,
     this.balde,
+    this.acumulado = false,
+    this.trajeto = const [],
   });
 
   bool get vazio => celulas.isEmpty || valorMax <= 0;
@@ -42,10 +49,16 @@ class CalorDaCrianca {
       valorMax: _numero(json['valorMax']),
       posicao: posicao is Map ? Offset(_numero(posicao['x']), _numero(posicao['y'])) : null,
       balde: DateTime.tryParse('${json['balde'] ?? ''}'),
+      acumulado: json['acumulado'] == true,
+      trajeto: (json['trajeto'] as List? ?? const [])
+          .whereType<Map>()
+          .map((p) => Offset(_numero(p['x']), _numero(p['y'])))
+          .toList(),
     );
   }
 
   /// Junta o calor de vários filhos (soma célula a célula) para desenhar numa camada só.
+  /// Os trajetos não são juntados: cada filho tem o seu (CamadaTrajeto).
   static CalorDaCrianca juntar(Iterable<CalorDaCrianca> calores) {
     final lista = calores.where((c) => !c.vazio).toList();
     if (lista.isEmpty) return const CalorDaCrianca(celulas: [], celulaUnidades: 5, valorMax: 0);
@@ -62,6 +75,7 @@ class CalorDaCrianca {
       celulas: celulas,
       celulaUnidades: lista.first.celulaUnidades,
       valorMax: celulas.fold<double>(0, (m, c) => c.valor > m ? c.valor : m),
+      acumulado: lista.first.acumulado,
     );
   }
 }

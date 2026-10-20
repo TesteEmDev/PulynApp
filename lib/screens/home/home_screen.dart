@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../providers/index.dart';
 import '../../models/family_models.dart';
 import '../../config/theme.dart';
@@ -16,7 +17,7 @@ import '../../utils/top_snackbar.dart';
 // ✅ Notifier para trigger manual de refresh
 class ChildrenRefreshNotifier extends StateNotifier<int> {
   ChildrenRefreshNotifier() : super(0);
-  
+
   void refresh() {
     state++;
   }
@@ -30,10 +31,10 @@ final childrenRefreshProvider = StateNotifierProvider((ref) {
 final childrenProvider = StreamProvider.autoDispose<List<Child>>((ref) async* {
   final apiService = ref.read(apiServiceProvider);
   await apiService.init();
-  
+
   // ✅ Watch o refresh notifier para refetch quando necessário
   ref.watch(childrenRefreshProvider);
-  
+
   // ✅ Carrega dados INICIALMENTE. Erro NÃO vira lista vazia: lista vazia faz a home mostrar
   // "Vincule seu filho", como se a criança não existisse. Sem dados, a home só espera.
   try {
@@ -56,19 +57,21 @@ final childrenProvider = StreamProvider.autoDispose<List<Child>>((ref) async* {
 });
 
 // ✅ StreamProvider para ranking
-final childrenRankingProvider = StreamProvider.autoDispose<List<Child>>((ref) async* {
+final childrenRankingProvider = StreamProvider.autoDispose<List<Child>>((
+  ref,
+) async* {
   final apiService = ref.watch(apiServiceProvider);
   await apiService.init();
-  
+
   ref.watch(childrenRefreshProvider);
-  
+
   try {
     final children = await apiService.getChildren();
     yield children;
   } catch (e) {
     yield [];
   }
-  
+
   // ✅ Polling automático para ranking
   while (true) {
     await Future.delayed(const Duration(seconds: 10));
@@ -117,7 +120,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.invalidate(familyEventsProvider);
     if (!announce || !mounted) return;
     final nome = child.apelido.isNotEmpty ? child.apelido : child.nome;
-    showSuccessSnackBar(context, '$nome vinculado! Agora você acompanha a festa em tempo real.');
+    showSuccessSnackBar(
+      context,
+      '$nome vinculado! Agora você acompanha a festa em tempo real.',
+    );
   }
 
   void _setMapInteracting(bool value) {
@@ -129,17 +135,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _pageController = PageController();
-    
+
     // ✅ Setup para trigger refresh quando WebSocket envia eventos
     Future.microtask(() {
       ref.read(webSocketServiceProvider).on('SCORE_UPDATE', (data) {
         ref.read(childrenRefreshProvider.notifier).refresh();
       });
-      
+
       ref.read(webSocketServiceProvider).on('TERRITORY_CONQUERED', (data) {
         ref.read(childrenRefreshProvider.notifier).refresh();
       });
-      
+
       ref.read(webSocketServiceProvider).on('RANKING_UPDATE', (data) {
         ref.read(childrenRefreshProvider.notifier).refresh();
       });
@@ -234,7 +240,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 if (noChildren)
                   // Sem crianças, o mapa e a lista seriam só caixas vazias: o destaque leva ao QR Code
                   LinkChildHero(
-                    onLinked: (child) => _handleChildLinked(child, announce: true),
+                    onLinked: (child) =>
+                        _handleChildLinked(child, announce: true),
                   )
                 else ...[
                   _buildEventMapSection(context, ref),
@@ -267,7 +274,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await Future.wait([
       ref.read(childrenProvider.future),
       ref.read(zonesProvider.future),
-      if (eventoId != null) ref.read(checkpointsByEventProvider(eventoId).future),
+      if (eventoId != null)
+        ref.read(checkpointsByEventProvider(eventoId).future),
     ]);
   }
 
@@ -296,10 +304,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           Expanded(
             child: TabBarView(
-              children: [
-                _buildChildrenRankingTab(),
-                _buildTeamsRankingTab(),
-              ],
+              children: [_buildChildrenRankingTab(), _buildTeamsRankingTab()],
             ),
           ),
         ],
@@ -320,7 +325,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (children.isEmpty) {
           return _buildEmptyState('Sem dados');
         }
-        final sorted = [...children]..sort((a, b) => b.currentScore.compareTo(a.currentScore));
+        final sorted = [...children]
+          ..sort((a, b) => b.currentScore.compareTo(a.currentScore));
         return RefreshIndicator(
           onRefresh: () => _handleRankingRefresh(ref),
           child: ListView.builder(
@@ -364,9 +370,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         for (final child in children) {
           if (teamsMap.containsKey(child.teamName)) {
             final (nome, score, color) = teamsMap[child.teamName]!;
-            teamsMap[child.teamName] = (nome, score + child.currentScore, color);
+            teamsMap[child.teamName] = (
+              nome,
+              score + child.currentScore,
+              color,
+            );
           } else {
-            teamsMap[child.teamName] = (child.teamName, child.currentScore, child.teamColor);
+            teamsMap[child.teamName] = (
+              child.teamName,
+              child.currentScore,
+              child.teamColor,
+            );
           }
         }
 
@@ -374,7 +388,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return _buildEmptyState('Sem times');
         }
 
-        final sorted = teamsMap.entries.toList()..sort((a, b) => b.value.$2.compareTo(a.value.$2));
+        final sorted = teamsMap.entries.toList()
+          ..sort((a, b) => b.value.$2.compareTo(a.value.$2));
 
         return RefreshIndicator(
           onRefresh: () => _handleRankingRefresh(ref),
@@ -423,13 +438,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Text(
           'Mapa do Buffet',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        
-        _buildEventSelector(context, ref, activeEventAsync.value?['id'] as String?),
+
+        _buildEventSelector(
+          context,
+          ref,
+          activeEventAsync.value?['id'] as String?,
+        ),
         childrenAsyncValue.when(
           // Sem isso, cada leitura trocava o mapa pelo spinner: o widget era
           // destruído e recriado (perdendo as posições animadas dos avatares).
@@ -438,13 +456,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           error: (error, _) => _buildMapErrorState(),
           data: (children) {
             // ✅ Log crítico: quantas crianças foram carregadas?
-            log.i('📍 [HOME_SCREEN] _buildEventMapSection - Crianças carregadas: ${children.length}');
+            log.i(
+              '📍 [HOME_SCREEN] _buildEventMapSection - Crianças carregadas: ${children.length}',
+            );
             if (children.isNotEmpty) {
               for (var child in children) {
                 log.i('   - ${child.apelido}: eventoId=${child.eventoId}');
               }
             }
-            
+
             if (children.isEmpty) {
               return _buildMapEmptyState();
             }
@@ -453,7 +473,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final activeGame = activeGameAsync.value;
 
             return EventMapWidget(
-              childrenList: _filhosDoEvento(children, activeEventAsync.value?['id'] as String?),
+              childrenList: _filhosDoEvento(
+                children,
+                activeEventAsync.value?['id'] as String?,
+              ),
               eventoId: activeEvent?['id'],
               activeGame: activeGame,
               onInteractionChanged: _setMapInteracting,
@@ -465,28 +488,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   /// Seletor de evento: dropdown que aparece só quando a família tem crianças em mais de um evento.
-  Widget _buildEventSelector(BuildContext context, WidgetRef ref, String? eventoAtivo) {
-    final eventos = ref.watch(familyEventsProvider).value ?? const <Map<String, dynamic>>[];
+  Widget _buildEventSelector(
+    BuildContext context,
+    WidgetRef ref,
+    String? eventoAtivo,
+  ) {
+    final eventos =
+        ref.watch(familyEventsProvider).value ?? const <Map<String, dynamic>>[];
     if (eventos.length < 2) return const SizedBox.shrink();
-    final valorAtual = eventos.any((e) => e['id'] == eventoAtivo) ? eventoAtivo : null;
+    final valorAtual = eventos.any((e) => e['id'] == eventoAtivo)
+        ? eventoAtivo
+        : null;
 
     Widget linha(String nome, {bool destaque = false}) => Row(
-          children: [
-            Icon(Icons.event_rounded, size: 20, color: PulynColors.primary),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                nome,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: destaque ? PulynColors.primary : Colors.white,
-                  fontSize: 15,
-                  fontWeight: destaque ? FontWeight.w800 : FontWeight.w600,
-                ),
-              ),
+      children: [
+        Icon(Icons.event_rounded, size: 20, color: PulynColors.primary),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            nome,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: destaque ? PulynColors.primary : Colors.white,
+              fontSize: 15,
+              fontWeight: destaque ? FontWeight.w800 : FontWeight.w600,
             ),
-          ],
-        );
+          ),
+        ),
+      ],
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -495,7 +525,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: EdgeInsets.only(left: 4, bottom: 6),
           child: Text(
             'EVENTO',
-            style: TextStyle(color: PulynColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2),
+            style: TextStyle(
+              color: PulynColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
+            ),
           ),
         ),
         Container(
@@ -504,7 +539,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           decoration: BoxDecoration(
             color: PulynColors.darkCard,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: PulynColors.primary.withValues(alpha: 0.4)),
+            border: Border.all(
+              color: PulynColors.primary.withValues(alpha: 0.4),
+            ),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -512,12 +549,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               value: valorAtual,
               hint: Row(
                 children: [
-                  Icon(Icons.event_rounded, size: 20, color: PulynColors.textSecondary),
+                  Icon(
+                    Icons.event_rounded,
+                    size: 20,
+                    color: PulynColors.textSecondary,
+                  ),
                   const SizedBox(width: 10),
-                  const Text('Escolha o evento', style: TextStyle(color: PulynColors.textSecondary, fontSize: 15)),
+                  const Text(
+                    'Escolha o evento',
+                    style: TextStyle(
+                      color: PulynColors.textSecondary,
+                      fontSize: 15,
+                    ),
+                  ),
                 ],
               ),
-              icon: Icon(Icons.keyboard_arrow_down_rounded, color: PulynColors.primary),
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: PulynColors.primary,
+              ),
               iconSize: 26,
               dropdownColor: PulynColors.darkCard,
               borderRadius: BorderRadius.circular(16),
@@ -536,12 +586,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     value: evento['id'] as String,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: linha(evento['nome'] as String, destaque: evento['id'] == valorAtual),
+                      child: linha(
+                        evento['nome'] as String,
+                        destaque: evento['id'] == valorAtual,
+                      ),
                     ),
                   ),
               ],
               onChanged: (novo) {
-                if (novo != null) ref.read(selectedEventIdProvider.notifier).state = novo;
+                if (novo != null) {
+                  ref.read(selectedEventIdProvider.notifier).state = novo;
+                }
               },
             ),
           ),
@@ -565,9 +620,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: PulynColors.darkBorder),
       ),
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -621,7 +674,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   // ===== HELPER WIDGETS =====
-  
+
   /// 📱 Welcome Card Compacto
   Widget _buildWelcomeCard(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
@@ -675,11 +728,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
           ),
-          const Icon(
-            Icons.family_restroom,
-            color: Colors.white70,
-            size: 24,
-          ),
+          const Icon(Icons.family_restroom, color: Colors.white70, size: 24),
         ],
       ),
     );
@@ -702,9 +751,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Text(
           'Seus Filhos',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         const Center(
@@ -723,9 +771,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Text(
           'Seus Filhos',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Container(
@@ -740,7 +787,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.error_outline, color: PulynColors.danger, size: 24),
+                  const Icon(
+                    Icons.error_outline,
+                    color: PulynColors.danger,
+                    size: 24,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -769,18 +820,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             Text(
               'Seus Filhos',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             ElevatedButton.icon(
               onPressed: () => setState(() => _linkPanelOpen = !_linkPanelOpen),
-              icon: Icon(_linkPanelOpen ? Icons.close_rounded : Icons.add_circle_outline, size: 20),
+              icon: Icon(
+                _linkPanelOpen ? Icons.close_rounded : Icons.add_circle_outline,
+                size: 20,
+              ),
               label: const Text('Vincular'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: PulynColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -807,13 +863,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Center(
               child: Column(
                 children: [
-                  const Icon(Icons.person_outline, size: 56, color: PulynColors.textMuted),
+                  const Icon(
+                    Icons.person_outline,
+                    size: 56,
+                    color: PulynColors.textMuted,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Nenhum filho vinculado',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: PulynColors.textMuted,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(color: PulynColors.textMuted),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
@@ -835,10 +894,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         else
           Column(
             children: children
-                .map((child) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: _buildChildCard(context, child),
-                    ))
+                .map(
+                  (child) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _buildChildCard(context, child),
+                  ),
+                )
                 .toList(),
           ),
       ],
@@ -847,8 +908,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// 🎨 Child Card Compacto
   Widget _buildChildCard(BuildContext context, Child child) {
-    final teamColor = Color(int.parse('0xFF${child.teamColor.replaceFirst('#', '')}'));
-    
+    final teamColor = Color(
+      int.parse('0xFF${child.teamColor.replaceFirst('#', '')}'),
+    );
+
     return GestureDetector(
       onTap: () => context.go('/child/${child.id}'),
       child: Container(
@@ -880,10 +943,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               height: 44,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    teamColor,
-                    teamColor.withValues(alpha: 0.7),
-                  ],
+                  colors: [teamColor, teamColor.withValues(alpha: 0.7)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -898,7 +958,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               child: Center(
                 child: Text(
-                  child.apelido.isNotEmpty ? child.apelido[0].toUpperCase() : '?',
+                  child.apelido.isNotEmpty
+                      ? child.apelido[0].toUpperCase()
+                      : '?',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -908,7 +970,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            
+
             /// Info Compacta
             Expanded(
               child: Column(
@@ -939,7 +1001,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            
+
             /// Score Badge Compacto
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -951,7 +1013,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: PulynColors.accent.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: PulynColors.accent.withValues(alpha: 0.4),
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -1009,7 +1073,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required bool isTop,
   }) {
     final cor = Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}'));
-    
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -1032,8 +1096,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: (isTop ? PulynColors.primary : Colors.black)
-                .withValues(alpha: 0.2),
+            color: (isTop ? PulynColors.primary : Colors.black).withValues(
+              alpha: 0.2,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -1051,16 +1116,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               borderRadius: BorderRadius.circular(27),
               boxShadow: [
-                BoxShadow(
-                  color: cor.withValues(alpha: 0.4),
-                  blurRadius: 8,
-                )
+                BoxShadow(color: cor.withValues(alpha: 0.4), blurRadius: 8),
               ],
             ),
             child: Center(
               child: Text(
                 medal,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -1116,10 +1181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 const Text(
                   'pts',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: PulynColors.textMuted,
-                  ),
+                  style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
                 ),
               ],
             ),
@@ -1138,7 +1200,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required bool isTop,
   }) {
     final cor = Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}'));
-    
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -1161,8 +1223,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: (isTop ? PulynColors.primary : Colors.black)
-                .withValues(alpha: 0.2),
+            color: (isTop ? PulynColors.primary : Colors.black).withValues(
+              alpha: 0.2,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -1180,16 +1243,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
-                BoxShadow(
-                  color: cor.withValues(alpha: 0.4),
-                  blurRadius: 8,
-                )
+                BoxShadow(color: cor.withValues(alpha: 0.4), blurRadius: 8),
               ],
             ),
             child: Center(
               child: Text(
                 medal,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -1210,10 +1273,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 const Text(
                   'Pontos totais',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: PulynColors.textMuted,
-                  ),
+                  style: TextStyle(fontSize: 12, color: PulynColors.textMuted),
                 ),
               ],
             ),
@@ -1231,10 +1291,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const Text(
                 'pontos',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: PulynColors.textMuted,
-                ),
+                style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
               ),
             ],
           ),
@@ -1268,7 +1325,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           const Icon(Icons.error_outline, size: 64, color: PulynColors.danger),
           const SizedBox(height: 16),
-          Text(mensagem, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            mensagem,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ],
       ),
     );
@@ -1279,9 +1340,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
+          const Icon(
+            Icons.inbox_outlined,
+            size: 64,
+            color: PulynColors.textMuted,
+          ),
           const SizedBox(height: 16),
-          Text(mensagem, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            mensagem,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ],
       ),
     );

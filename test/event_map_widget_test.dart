@@ -60,7 +60,7 @@ void main() {
                   celulaUnidades: 5,
                   valorMax: 0.8,
                   acumulado: true,
-                  trajeto: [Offset(150, 90), Offset(90, 90)],
+                  trajeto: [PontoTrajeto(Offset(150, 90)), PontoTrajeto(Offset(90, 90))],
                 )
               : const CalorDaCrianca(celulas: [], celulaUnidades: 5, valorMax: 0))),
         ],
@@ -519,7 +519,7 @@ void main() {
     await tester.tap(find.byTooltip('Mapa de calor'));
     await settle(tester);
     expect(find.byType(CamadaCalor), findsOneWidget);
-    expect(find.byType(CamadaTrajeto), findsOneWidget); // por onde ela passou nos últimos 30 min (padrão)
+    expect(find.byType(CamadaTrajeto), findsOneWidget); // por onde ela passou no evento todo (padrão)
     expect(find.text('Pouco tempo'), findsOneWidget); // legenda do calor no lugar da dos checkpoints
     expect(find.text('Conquistado'), findsNothing);
     expect(find.textContaining('Nenhuma leitura'), findsNothing);

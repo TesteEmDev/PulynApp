@@ -29,19 +29,37 @@ void main() {
     final calor = CalorDaCrianca.fromJson({
       'acumulado': true,
       'trajeto': [
-        {'balde': '2026-10-20T18:00:00.000Z', 'x': 205, 'y': 134},
-        {'balde': '2026-10-20T18:00:20.000Z', 'x': '204', 'y': 81.5},
+        {'balde': '2026-10-20T18:00:00.000Z', 'ate': '2026-10-20T18:05:00.000Z', 'x': 205, 'y': 134},
+        {'balde': '2026-10-20T18:05:20.000Z', 'x': '204', 'y': 81.5},
       ],
     });
     expect(calor.acumulado, isTrue);
-    expect(calor.trajeto, const [Offset(205, 134), Offset(204, 81.5)]);
+    expect(calor.trajeto, [
+      PontoTrajeto(const Offset(205, 134), ate: DateTime.utc(2026, 10, 20, 18, 5)),
+      PontoTrajeto(const Offset(204, 81.5), ate: DateTime.utc(2026, 10, 20, 18, 5, 20)),
+    ]);
   });
 
   test('trajeto: janelas seguidas no mesmo lugar viram um ponto só', () {
-    expect(
-      semRepetidos(const [Offset(1, 1), Offset(1, 1), Offset(5, 1), Offset(5, 1), Offset(1, 1)]),
-      const [Offset(1, 1), Offset(5, 1), Offset(1, 1)],
-    );
+    final t = DateTime.utc(2026, 10, 20, 18);
+    PontoTrajeto p(double x, int min) => PontoTrajeto(Offset(x, 1), ate: t.add(Duration(minutes: min)));
+    expect(semRepetidos([p(1, 0), p(1, 1), p(5, 2), p(5, 3), p(1, 4)]), [p(1, 1), p(5, 3), p(1, 4)]);
+  });
+
+  test('rastro: mais fraco quanto mais antigo, mas nunca some', () {
+    expect(pesoDaIdade(Duration.zero), 1);
+    expect(pesoDaIdade(const Duration(minutes: 20)), closeTo(0.5, 1e-9));
+    expect(pesoDaIdade(const Duration(hours: 1)), closeTo(0.125, 1e-9));
+    expect(pesoDaIdade(const Duration(hours: 3)), 0.1);
+    final t = DateTime.utc(2026, 10, 20, 18);
+    final alfas = alfasDoTrajeto([
+      PontoTrajeto(Offset.zero, ate: t.subtract(const Duration(hours: 3))),
+      PontoTrajeto(Offset.zero, ate: t.subtract(const Duration(minutes: 20))),
+      PontoTrajeto(Offset.zero, ate: t),
+    ]);
+    expect(alfas[0], closeTo(0.275, 1e-9));
+    expect(alfas[1], closeTo(0.575, 1e-9));
+    expect(alfas[2], closeTo(0.95, 1e-9));
   });
 
   test('junta o calor de dois filhos somando as células iguais', () {

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show Offset;
 
 /// Uma célula do mapa de calor, em coordenadas da planta (canvas 450x320).
@@ -8,6 +9,28 @@ class CelulaCalor {
 
   const CelulaCalor({required this.x, required this.y, required this.valor});
 }
+
+/// Um ponto do trajeto: onde a criança foi vista e até quando ficou ali.
+class PontoTrajeto {
+  final Offset posicao;
+  final DateTime? ate;
+
+  const PontoTrajeto(this.posicao, {this.ate});
+
+  @override
+  bool operator ==(Object other) => other is PontoTrajeto && other.posicao == posicao && other.ate == ate;
+
+  @override
+  int get hashCode => Object.hash(posicao, ate);
+
+  @override
+  String toString() => 'PontoTrajeto($posicao, ate: $ate)';
+}
+
+/// Peso do rastro pela idade, igual ao backend (utils/uhfMapa.js, pesoDaIdade): metade a cada 20 min, nunca abaixo
+/// de 10%. O que a criança fez há horas continua no mapa, com a cor fraca.
+double pesoDaIdade(Duration idade) =>
+    math.max(0.1, math.pow(0.5, math.max(0, idade.inMilliseconds) / (20 * 60000)).toDouble());
 
 double _numero(dynamic valor, [double padrao = 0]) =>
     valor is num ? valor.toDouble() : double.tryParse('${valor ?? ''}') ?? padrao;
@@ -20,11 +43,11 @@ class CalorDaCrianca {
   final double valorMax;
   final Offset? posicao; // onde a pulseira foi vista na última janela (null = não foi vista)
   final DateTime? balde; // início da janela de 20 s mostrada
-  // true nos períodos (5 e 30 min): o valor é tempo somado, e um lugar por onde a criança só passou continua no mapa
+  // true nos períodos (5 min, 30 min, evento todo): o valor é tempo somado, o mais antigo com menos peso, e um lugar
+  // por onde a criança só passou continua no mapa
   final bool acumulado;
-  // Por onde a criança andou no período: uma posição por janela de 20 s em que a pulseira foi vista, da mais antiga
-  // para a mais nova
-  final List<Offset> trajeto;
+  // Por onde a criança andou no período, do mais antigo para o mais novo (janelas seguidas no mesmo lugar já vêm juntas)
+  final List<PontoTrajeto> trajeto;
 
   const CalorDaCrianca({
     required this.celulas,
@@ -52,7 +75,10 @@ class CalorDaCrianca {
       acumulado: json['acumulado'] == true,
       trajeto: (json['trajeto'] as List? ?? const [])
           .whereType<Map>()
-          .map((p) => Offset(_numero(p['x']), _numero(p['y'])))
+          .map((p) => PontoTrajeto(
+                Offset(_numero(p['x']), _numero(p['y'])),
+                ate: DateTime.tryParse('${p['ate'] ?? p['balde'] ?? ''}'),
+              ))
           .toList(),
     );
   }

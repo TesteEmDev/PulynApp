@@ -172,7 +172,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
 
   // 🔥 Mapa de calor (leitores UHF): onde os filhos passaram mais tempo. Desligado até a pessoa tocar no botão.
   bool _mostrarCalor = false;
-  String _modoCalor = '30min'; // 'agora' (último minuto) | '5min' | '30min' (tempo somado, com o trajeto)
+  // 'agora' (último minuto) | '5min' | '30min' | 'evento' (tempo somado, o mais antigo mais fraco, com o trajeto)
+  String _modoCalor = 'evento';
   Timer? _uhfTimer;
   VoidCallback? _pararAvisoUhf; // tira o listener do WebSocket no dispose
 
@@ -1917,7 +1918,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                       switch (_modoCalor) {
                                         'agora' => 'Nenhuma leitura da pulseira agora',
                                         '5min' => 'Nenhuma leitura da pulseira nos últimos 5 minutos',
-                                        _ => 'Nenhuma leitura da pulseira nos últimos 30 minutos',
+                                        '30min' => 'Nenhuma leitura da pulseira nos últimos 30 minutos',
+                                        _ => 'Nenhuma leitura da pulseira neste evento',
                                       },
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
@@ -2024,44 +2026,50 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   Widget _buildBarraCalor() {
     Widget opcao(String modo, String rotulo) {
       final ativo = _modoCalor == modo;
-      return Padding(
-        padding: const EdgeInsets.only(left: 6),
-        child: ChoiceChip(
-          label: Text(rotulo),
-          selected: ativo,
-          onSelected: (_) => setState(() => _modoCalor = modo),
-          visualDensity: VisualDensity.compact,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          showCheckmark: false,
-          labelStyle: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: ativo ? Colors.white : PulynColors.textMuted,
-          ),
-          selectedColor: PulynColors.accent.withValues(alpha: 0.35),
-          backgroundColor: PulynColors.darkCard,
-          side: BorderSide(color: ativo ? PulynColors.accent : PulynColors.darkBorder),
+      return ChoiceChip(
+        label: Text(rotulo),
+        selected: ativo,
+        onSelected: (_) => setState(() => _modoCalor = modo),
+        visualDensity: VisualDensity.compact,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        showCheckmark: false,
+        labelStyle: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: ativo ? Colors.white : PulynColors.textMuted,
         ),
+        selectedColor: PulynColors.accent.withValues(alpha: 0.35),
+        backgroundColor: PulynColors.darkCard,
+        side: BorderSide(color: ativo ? PulynColors.accent : PulynColors.darkBorder),
       );
     }
 
+    // Texto em cima e os períodos embaixo (4 opções não cabem ao lado do texto num celular estreito)
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 6, 10, 6),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: PulynColors.darkBorder)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Expanded(
-            child: Text(
-              'Por onde seus filhos passaram',
-              maxLines: 2,
-              style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
-            ),
+          const Text(
+            'Por onde seus filhos passaram (mais fraco = faz mais tempo)',
+            maxLines: 2,
+            style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
           ),
-          opcao('agora', 'Agora'),
-          opcao('5min', '5 min'),
-          opcao('30min', '30 min'),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: [
+              opcao('agora', 'Agora'),
+              opcao('5min', '5 min'),
+              opcao('30min', '30 min'),
+              opcao('evento', 'Evento todo'),
+            ],
+          ),
         ],
       ),
     );

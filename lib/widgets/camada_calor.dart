@@ -60,10 +60,10 @@ class _CalorPainter extends CustomPainter {
   bool shouldRepaint(_CalorPainter oldDelegate) => oldDelegate.calor != calor;
 }
 
-/// Trajeto de um filho sobre a planta (canvas 450x320): linha pelas posições do período, mais apagada no começo,
-/// com um ponto em cada lugar e um ponto maior onde ele foi visto por último.
+/// Trajeto de um filho sobre a planta (canvas 450x320): linha pelas posições do período, mais apagada quanto mais
+/// antiga (mesmo peso do calor), com um ponto em cada lugar e um ponto maior onde ele foi visto por último.
 class CamadaTrajeto extends StatelessWidget {
-  final List<Offset> pontos;
+  final List<PontoTrajeto> pontos;
   final Color cor;
 
   const CamadaTrajeto({required this.pontos, this.cor = Colors.yellow, super.key});
@@ -76,30 +76,33 @@ class CamadaTrajeto extends StatelessWidget {
 }
 
 class _TrajetoPainter extends CustomPainter {
-  final List<Offset> pontos;
+  final List<PontoTrajeto> pontos;
   final Color cor;
 
-  _TrajetoPainter(List<Offset> pontos, this.cor) : pontos = semRepetidos(pontos);
+  _TrajetoPainter(List<PontoTrajeto> pontos, this.cor) : pontos = semRepetidos(pontos);
 
   @override
   void paint(Canvas canvas, Size size) {
     final n = pontos.length;
+    final alfas = alfasDoTrajeto(pontos);
     final linha = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5
       ..strokeCap = StrokeCap.round;
+    // O trecho de um lugar ao próximo foi feito quando a criança saiu do primeiro: usa a idade dele.
     for (var i = 1; i < n; i++) {
-      linha.color = cor.withValues(alpha: 0.25 + 0.65 * i / (n - 1));
-      canvas.drawLine(pontos[i - 1], pontos[i], linha);
+      linha.color = cor.withValues(alpha: alfas[i - 1]);
+      canvas.drawLine(pontos[i - 1].posicao, pontos[i].posicao, linha);
     }
     final ponto = Paint();
     for (var i = 0; i < n - 1; i++) {
-      ponto.color = cor.withValues(alpha: 0.35 + 0.5 * (i + 1) / n);
-      canvas.drawCircle(pontos[i], 2.5, ponto);
+      ponto.color = cor.withValues(alpha: alfas[i]);
+      canvas.drawCircle(pontos[i].posicao, 2.5, ponto);
     }
-    canvas.drawCircle(pontos.last, 5, Paint()..color = cor);
+    final ultimo = pontos.last.posicao;
+    canvas.drawCircle(ultimo, 5, Paint()..color = cor);
     canvas.drawCircle(
-      pontos.last,
+      ultimo,
       5,
       Paint()
         ..style = PaintingStyle.stroke
@@ -115,13 +118,27 @@ class _TrajetoPainter extends CustomPainter {
       Iterable<int>.generate(pontos.length).any((i) => oldDelegate.pontos[i] != pontos[i]);
 }
 
-/// Várias janelas seguidas no mesmo lugar viram um ponto só no trajeto.
-List<Offset> semRepetidos(List<Offset> pontos) {
-  final lista = <Offset>[];
+/// Várias janelas seguidas no mesmo lugar viram um ponto só no trajeto (fica o `ate` mais recente).
+List<PontoTrajeto> semRepetidos(List<PontoTrajeto> pontos) {
+  final lista = <PontoTrajeto>[];
   for (final p in pontos) {
-    if (lista.isEmpty || (lista.last - p).distance > 0.5) lista.add(p);
+    if (lista.isNotEmpty && (lista.last.posicao - p.posicao).distance <= 0.5) {
+      lista[lista.length - 1] = PontoTrajeto(p.posicao, ate: p.ate ?? lista.last.ate);
+    } else {
+      lista.add(p);
+    }
   }
   return lista;
+}
+
+/// Opacidade de cada ponto pela idade em relação ao ponto mais recente: 0,95 agora, 0,275 no piso (horas atrás).
+List<double> alfasDoTrajeto(List<PontoTrajeto> pontos) {
+  final datas = pontos.map((p) => p.ate).whereType<DateTime>();
+  final referencia = datas.isEmpty ? null : datas.reduce((a, b) => a.isAfter(b) ? a : b);
+  return [
+    for (final p in pontos)
+      0.2 + 0.75 * (referencia == null || p.ate == null ? 1.0 : pesoDaIdade(referencia.difference(p.ate!))),
+  ];
 }
 
 /// Legenda: pouco tempo (azul) a muito tempo (vermelho) no lugar.

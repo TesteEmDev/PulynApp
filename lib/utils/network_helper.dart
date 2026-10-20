@@ -14,8 +14,8 @@ class NetworkHelper {
     try {
       if (Platform.isAndroid) {
         // Para device físico, usar IP local
-        // ✅ IP configurado: 192.168.0.60
-        final resolvedUrl = url.replaceFirst('localhost', '192.168.0.60');
+        // ✅ IP configurado: 192.168.0.50
+        final resolvedUrl = url.replaceFirst('localhost', '192.168.0.50');
         log.i('🌐 URL resolvida para Android: $resolvedUrl');
         return resolvedUrl;
       } else if (Platform.isIOS) {

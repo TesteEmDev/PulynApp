@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pulyn_app/models/calor_models.dart';
 import 'package:pulyn_app/models/family_models.dart';
 import 'package:pulyn_app/providers/index.dart';
 import 'package:pulyn_app/services/api_service.dart';
+import 'package:pulyn_app/widgets/camada_calor.dart';
 import 'package:pulyn_app/widgets/event_map_widget.dart';
 
 /// Testa o mapa com dados falsos (sem rede): encaixe na tela, avatar em cima
@@ -51,6 +53,14 @@ void main() {
           zonesProvider.overrideWith((ref) async => zones ?? <Map<String, dynamic>>[]),
           mapChildrenRealtimeProvider.overrideWith((ref) => Stream.value([child])),
           childLastCheckpointProvider.overrideWith((ref) => ref.watch(lastCheckpoint)),
+          // Calor da Lia: perto da Torre nos últimos 5 min; nenhuma leitura "agora".
+          childHeatmapProvider.overrideWith((ref, chave) => Stream.value(chave.$2 == '5min'
+              ? const CalorDaCrianca(
+                  celulas: [CelulaCalor(x: 90, y: 90, valor: 0.8), CelulaCalor(x: 95, y: 90, valor: 0.4)],
+                  celulaUnidades: 5,
+                  valorMax: 0.8,
+                )
+              : const CalorDaCrianca(celulas: [], celulaUnidades: 5, valorMax: 0))),
         ],
         child: MaterialApp(
           home: Scaffold(
@@ -491,6 +501,34 @@ void main() {
 
     expect(find.text('Lia'), findsOneWidget); // o avatar não some
     expect(find.text('Sem Sinal'), findsNothing); // mas o marcador offline continua escondido
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('botão de mapa de calor mostra o calor do filho, troca o período e esconde', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(app());
+    await settle(tester, 500);
+    expect(find.byType(CamadaCalor), findsNothing); // desligado por padrão
+    expect(find.text('Conquistado'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Mapa de calor'));
+    await settle(tester);
+    expect(find.byType(CamadaCalor), findsOneWidget);
+    expect(find.text('Pouco tempo'), findsOneWidget); // legenda do calor no lugar da dos checkpoints
+    expect(find.text('Conquistado'), findsNothing);
+    expect(find.textContaining('Nenhuma leitura'), findsNothing);
+
+    await tester.tap(find.text('Agora'));
+    await settle(tester);
+    expect(find.text('Nenhuma leitura da pulseira agora'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Esconder mapa de calor'));
+    await settle(tester);
+    expect(find.byType(CamadaCalor), findsNothing);
+    expect(find.text('Conquistado'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/family_models.dart';
+import '../models/calor_models.dart';
 import '../config/theme.dart';
 import '../providers/index.dart';
 import '../utils/logger.dart';
 import '../utils/text_sanitizer.dart';
+import 'camada_calor.dart';
 
 /// Zone configuration para o mapa do buffet
 class ZoneConfig {
@@ -168,6 +170,21 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   // "puxar pra atualizar"/WebSocket pede uma releitura.
   int? _lastMapRefreshTick;
 
+  // 🔥 Mapa de calor (leitores UHF): onde os filhos passaram mais tempo. Desligado até a pessoa tocar no botão.
+  bool _mostrarCalor = false;
+  // 'agora' (último minuto) | '5min' | '30min' | 'evento' (tempo somado, o mais antigo mais fraco, com o trajeto)
+  String _modoCalor = 'evento';
+  Timer? _uhfTimer;
+  VoidCallback? _pararAvisoUhf; // tira o listener do WebSocket no dispose
+
+  // O backend avisa quando uma janela de 5 s fecha; espera um pouco pelos lotes atrasados (igual ao web).
+  void _onUhfMapaAtualizado(Map<String, dynamic> data) {
+    _uhfTimer?.cancel();
+    _uhfTimer = Timer(const Duration(milliseconds: 3500), () {
+      if (mounted) ref.read(uhfMapaTickProvider.notifier).state++;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -231,6 +248,10 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       ref.read(webSocketServiceProvider).on('RANKING_UPDATE', (data) {
         ref.read(mapRefreshProvider.notifier).refresh();
       });
+
+      final ws = ref.read(webSocketServiceProvider);
+      ws.on('UHF_MAPA_ATUALIZADO', _onUhfMapaAtualizado);
+      _pararAvisoUhf = () => ws.off('UHF_MAPA_ATUALIZADO', _onUhfMapaAtualizado);
     });
 
 
@@ -249,6 +270,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     }
     _messageTimer?.cancel();
     _doubleTapTimer?.cancel();
+    _uhfTimer?.cancel();
+    _pararAvisoUhf?.call();
     // Se o mapa sair da tela com o dedo em cima, destrava a rolagem da tela pai.
     final onInteractionChanged = widget.onInteractionChanged;
     if (_activePointers > 0 && onInteractionChanged != null) {
@@ -607,7 +630,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     if (_activePointers == 0) widget.onInteractionChanged?.call(false);
   }
 
-  Widget _buildHeaderButton(IconData icon, String tooltip, VoidCallback onPressed) {
+  Widget _buildHeaderButton(IconData icon, String tooltip, VoidCallback onPressed, {Color? color}) {
     return IconButton(
       onPressed: () {
         HapticFeedback.selectionClick();
@@ -615,7 +638,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       },
       icon: Icon(icon),
       iconSize: 20,
-      color: PulynColors.textMuted,
+      color: color ?? PulynColors.textMuted,
       tooltip: tooltip,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(width: 36, height: 36),
@@ -1383,6 +1406,15 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     final avatarTargets = _computeAvatarTargets(childPositions);
     _syncAvatarTargets(childPositions, avatarTargets);
 
+    // 🔥 Calor de cada filho (o backend só manda a pulseira do próprio filho), somado numa camada só
+    final caloresAsync = _mostrarCalor
+        ? childrenToDisplay.map((c) => ref.watch(childHeatmapProvider((c.id, _modoCalor)))).toList()
+        : <AsyncValue<CalorDaCrianca?>>[];
+    final calor = _mostrarCalor
+        ? CalorDaCrianca.juntar(caloresAsync.map((a) => a.valueOrNull).whereType<CalorDaCrianca>())
+        : null;
+    final carregandoCalor = caloresAsync.any((a) => a.isLoading && !a.hasValue);
+
     return ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: Container(
@@ -1469,6 +1501,13 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             ),
                           ),
                         ),
+                      // Liga/desliga o mapa de calor (onde os filhos passaram mais tempo)
+                      _buildHeaderButton(
+                        _mostrarCalor ? Icons.whatshot : Icons.whatshot_outlined,
+                        _mostrarCalor ? 'Esconder mapa de calor' : 'Mapa de calor',
+                        () => setState(() => _mostrarCalor = !_mostrarCalor),
+                        color: _mostrarCalor ? PulynColors.accent : null,
+                      ),
                       // Zoom e "mapa inteiro" no cabeçalho: sobre o mapa eles cobriam
                       // e bloqueavam o toque em checkpoints do canto.
                       _buildHeaderButton(Icons.remove, 'Afastar', () => _zoomBy(1 / 1.6)),
@@ -1477,6 +1516,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                     ],
                   ),
                 ),
+
+                if (_mostrarCalor) _buildBarraCalor(),
 
                 // Mapa interativo
                 AspectRatio(
@@ -1555,8 +1596,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                               ),
                             ),
 
-                          // Zonas background com animação
-                          ...convertedZones.map((zona) {
+                          // Zonas background com animação (o mapa de calor mostra só a temperatura sobre a planta)
+                          if (!_mostrarCalor) ...convertedZones.map((zona) {
                             log.i('🎨 [ZONES] Renderizando zona: ${zona.nome} @ (${zona.x}, ${zona.y})');
                             return AnimatedBuilder(
                               animation: _zoomAnimation,
@@ -1590,8 +1631,29 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             );
                           }),
 
-                          // Checkpoints com animação e interatividade
-                          ...visibleCheckpoints.map((checkpoint) {
+                          // 🔥 Mapa de calor: mesmo canvas 450x320 dos checkpoints
+                          if (calor != null)
+                            Positioned(
+                              left: ox,
+                              top: oy,
+                              width: mapWidth,
+                              height: mapHeight,
+                              child: CamadaCalor(calor: calor),
+                            ),
+
+                          // 🔥 Rastro de cada filho por cima do calor, uma cor por criança (a mesma da legenda)
+                          for (var i = 0; i < caloresAsync.length; i++)
+                            if (caloresAsync[i].valueOrNull?.trajeto.isNotEmpty ?? false)
+                              Positioned(
+                                left: ox,
+                                top: oy,
+                                width: mapWidth,
+                                height: mapHeight,
+                                child: CamadaTrajeto(pontos: caloresAsync[i].value!.trajeto, cor: corDoFilho(i)),
+                              ),
+
+                          // Checkpoints com animação e interatividade (escondidos no mapa de calor)
+                          if (!_mostrarCalor) ...visibleCheckpoints.map((checkpoint) {
                             final pos = _getCheckpointPosition(checkpoint, checkpoints);
                             final cor = _getCheckpointColor(checkpoint);
                             
@@ -1681,8 +1743,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             );
                           }),
 
-                          // 👶 Filhos no mapa
-                          ...childPositions.map((childPos) {
+                          // 👶 Filhos no mapa (nos checkpoints; escondidos no mapa de calor)
+                          if (!_mostrarCalor) ...childPositions.map((childPos) {
                             final childData = childPos['child'] as Child;
 
                             // Centro do avatar: posição animada, ou o alvo direto no
@@ -1837,7 +1899,37 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             ),
                             ),
                           ),
-                          // Aviso de chegada ("Lucas chegou em Torre Encantada")
+                          // Calor ligado mas sem nenhuma leitura de pulseira no período
+                          if (calor != null && calor.vazio && !carregandoCalor)
+                            Positioned(
+                              left: 12,
+                              right: 12,
+                              bottom: 12,
+                              child: IgnorePointer(
+                                child: Center(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: PulynColors.darkCard.withValues(alpha: 0.92),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: PulynColors.darkBorder),
+                                    ),
+                                    child: Text(
+                                      switch (_modoCalor) {
+                                        'agora' => 'Nenhuma leitura da pulseira agora',
+                                        '5min' => 'Nenhuma leitura da pulseira nos últimos 5 minutos',
+                                        '30min' => 'Nenhuma leitura da pulseira nos últimos 30 minutos',
+                                        _ => 'Nenhuma leitura da pulseira neste evento',
+                                      },
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          // Aviso de chegada ("Lucas chegou em Torre Encantada"), só fora do mapa de calor
+                          if (!_mostrarCalor)
                           Positioned(
                             left: 12,
                             right: 12,
@@ -1913,17 +2005,82 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                     alignment: WrapAlignment.center,
                     spacing: 16,
                     runSpacing: 6,
-                    children: [
-                      _buildLegendItem('Meus filhos', Colors.yellow),
-                      _buildLegendItem('Conquistado', PulynColors.success),
-                      _buildLegendItem('Disponível', PulynColors.primary),
-                    ],
+                    children: _mostrarCalor
+                        ? [
+                            // Cor do rastro de cada filho
+                            for (var i = 0; i < childrenToDisplay.length; i++)
+                              _buildLegendItem(
+                                childrenToDisplay[i].apelido.isNotEmpty
+                                    ? childrenToDisplay[i].apelido
+                                    : childrenToDisplay[i].nome,
+                                corDoFilho(i),
+                              ),
+                            const LegendaCalor(),
+                          ]
+                        : [
+                            _buildLegendItem('Meus filhos', Colors.yellow),
+                            _buildLegendItem('Conquistado', PulynColors.success),
+                            _buildLegendItem('Disponível', PulynColors.primary),
+                          ],
                   ),
                 ),
               ],
             ),
           ),
         );
+  }
+
+  /// Faixa abaixo do cabeçalho com o período do mapa de calor.
+  Widget _buildBarraCalor() {
+    Widget opcao(String modo, String rotulo) {
+      final ativo = _modoCalor == modo;
+      return ChoiceChip(
+        label: Text(rotulo),
+        selected: ativo,
+        onSelected: (_) => setState(() => _modoCalor = modo),
+        visualDensity: VisualDensity.compact,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        showCheckmark: false,
+        labelStyle: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: ativo ? Colors.white : PulynColors.textMuted,
+        ),
+        selectedColor: PulynColors.accent.withValues(alpha: 0.35),
+        backgroundColor: PulynColors.darkCard,
+        side: BorderSide(color: ativo ? PulynColors.accent : PulynColors.darkBorder),
+      );
+    }
+
+    // Texto em cima e os períodos embaixo (4 opções não cabem ao lado do texto num celular estreito)
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 6, 10, 6),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: PulynColors.darkBorder)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Por onde seus filhos passaram (mais fraco = faz mais tempo)',
+            maxLines: 2,
+            style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: [
+              opcao('agora', 'Agora'),
+              opcao('5min', '5 min'),
+              opcao('30min', '30 min'),
+              opcao('evento', 'Evento todo'),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildLegendItem(String label, Color color) {

@@ -20,7 +20,7 @@ class ApiConfig {
   ///   flutter run --dart-define=PULYN_LOCAL_API=http://SEU_IP:3001
   static const String apiBaseUrlLocal = String.fromEnvironment(
     'PULYN_LOCAL_API',
-    defaultValue: 'http://192.168.0.60:3001',
+    defaultValue: 'http://192.168.0.50:3001',
   );
   static const String apiBaseUrlLocalIP = 'http://10.0.2.2:3001'; // Emulador Android
   static const String apiBaseUrlLocalLAN = apiBaseUrlLocal; // Seu IP local

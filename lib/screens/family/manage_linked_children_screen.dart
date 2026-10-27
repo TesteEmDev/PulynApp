@@ -289,7 +289,13 @@ class _PreRegisteredSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final perfis = ref.watch(preRegisteredChildrenProvider).value ?? const [];
+    // `.value` relança o erro do provider (ex.: 404 de rota ainda não publicada) e derrubaria a tela.
+    // Com `when`, erro ou carregamento simplesmente escondem a seção.
+    final perfis = ref.watch(preRegisteredChildrenProvider).when(
+          data: (lista) => lista,
+          loading: () => const <Map<String, dynamic>>[],
+          error: (_, _) => const <Map<String, dynamic>>[],
+        );
     if (perfis.isEmpty) return const SizedBox.shrink();
 
     return Padding(

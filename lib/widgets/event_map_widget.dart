@@ -4,9 +4,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../models/family_models.dart';
 import '../config/theme.dart';
 import '../providers/index.dart';
+import '../utils/avatar_utils.dart';
 import '../utils/logger.dart';
 import '../utils/text_sanitizer.dart';
 
@@ -1766,20 +1768,36 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                         ),
                                         child: childData.profileImage != null && childData.profileImage!.isNotEmpty
                                             ? ClipOval(
-                                                child: Image.network(
-                                                  childData.profileImage!,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (context, error, stackTrace) => Center(
-                                                    child: Text(
-                                                      initial,
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 14,
+                                                child: isValidAvatarId(childData.profileImage)
+                                                    // Avatar do catálogo: o banco guarda só o ID, então montamos a URL do SVG
+                                                    ? SvgPicture.network(
+                                                        getAvatarUrl(childData.profileImage),
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder: (context, error, stackTrace) => Center(
+                                                          child: Text(
+                                                            initial,
+                                                            style: const TextStyle(
+                                                              color: Colors.white,
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 14,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : Image.network(
+                                                        childData.profileImage!,
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder: (context, error, stackTrace) => Center(
+                                                          child: Text(
+                                                            initial,
+                                                            style: const TextStyle(
+                                                              color: Colors.white,
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 14,
+                                                            ),
+                                                          ),
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ),
-                                                ),
                                               )
                                             : Center(
                                                 child: Text(

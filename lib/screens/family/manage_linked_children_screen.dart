@@ -16,6 +16,13 @@ final linkedChildrenProvider = FutureProvider.autoDispose<List<Child>>((ref) asy
   return await apiService.getChildren();
 });
 
+// Pré-cadastro: crianças que o responsável cadastrou e que ainda não entraram em nenhum evento.
+final preRegisteredChildrenProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final apiService = ref.read(apiServiceProvider);
+  await apiService.init();
+  return await apiService.getPreRegisteredChildren();
+});
+
 class ManageLinkedChildrenScreen extends ConsumerStatefulWidget {
   const ManageLinkedChildrenScreen({super.key});
 
@@ -70,7 +77,11 @@ class _ManageLinkedChildrenScreenState
           onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
         ),
       ),
-      body: childrenAsyncValue.when(
+      body: Column(
+        children: [
+          const _PreRegisteredSection(),
+          Expanded(
+            child: childrenAsyncValue.when(
         loading: () => const Center(
           child: CircularProgressIndicator(),
         ),
@@ -253,6 +264,64 @@ class _ManageLinkedChildrenScreenState
             },
           );
         },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.green,
+        icon: const Icon(Icons.add),
+        label: const Text('Cadastrar criança'),
+        onPressed: () async {
+          final cadastrou = await context.push<bool>('/pre-register-child');
+          if (cadastrou == true) {
+            ref.invalidate(preRegisteredChildrenProvider);
+          }
+        },
+      ),
+    );
+  }
+}
+
+/// Crianças pré-cadastradas pelo responsável que ainda não têm pulseira (não entraram no buffet).
+class _PreRegisteredSection extends ConsumerWidget {
+  const _PreRegisteredSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final perfis = ref.watch(preRegisteredChildrenProvider).value ?? const [];
+    if (perfis.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Aguardando o buffet',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Cadastradas, mas ainda sem pulseira. Leve a criança à recepção do buffet.',
+                style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              for (final perfil in perfis)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.hourglass_empty, color: PulynColors.textMuted),
+                  title: Text((perfil['apelido'] as String?)?.isNotEmpty == true
+                      ? perfil['apelido'] as String
+                      : perfil['nome'] as String),
+                  subtitle: Text(perfil['buffetNome'] as String? ?? ''),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

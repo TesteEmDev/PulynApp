@@ -231,11 +231,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 _buildWelcomeCard(context, ref),
                 const SizedBox(height: 16),
-                if (noChildren)
+                if (noChildren) ...[
                   // Sem crianças, o mapa e a lista seriam só caixas vazias: o destaque leva ao QR Code
                   LinkChildHero(
                     onLinked: (child) => _handleChildLinked(child, announce: true),
-                  )
+                  ),
+                  const SizedBox(height: 12),
+                  // Cadastro feito pelo próprio responsável, antes de ir ao buffet
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/pre-register-child'),
+                    icon: const Icon(Icons.child_care),
+                    label: const Text('Cadastrar criança'),
+                  ),
+                ]
                 else ...[
                   _buildEventMapSection(context, ref),
                   const SizedBox(height: 20),
@@ -421,14 +429,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Mapa do Buffet',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        _buildEventHeader(context, activeEventAsync.value),
         const SizedBox(height: 16),
-        
+
         _buildEventSelector(context, ref, activeEventAsync.value?['id'] as String?),
         childrenAsyncValue.when(
           // Sem isso, cada leitura trocava o mapa pelo spinner: o widget era
@@ -459,6 +462,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onInteractionChanged: _setMapInteracting,
             );
           },
+        ),
+      ],
+    );
+  }
+
+  /// Cabeçalho do mapa: o nome da festa em destaque, para a família saber onde está.
+  Widget _buildEventHeader(BuildContext context, Map<String, dynamic>? evento) {
+    final nome = evento?['nome'] as String?;
+    if (nome == null || nome.isEmpty) {
+      return Text(
+        'Mapa do Buffet',
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'MAPA DO BUFFET',
+          style: TextStyle(color: PulynColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          nome,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: PulynColors.primary,
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            height: 1.1,
+          ),
         ),
       ],
     );

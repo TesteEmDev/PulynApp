@@ -373,6 +373,38 @@ class ApiService {
     }
   }
 
+  /// ✅ GET /familias/eventos-abertos - Eventos abertos (de qualquer buffet) para o pré-cadastro
+  Future<List<Map<String, dynamic>>> getOpenEvents() async {
+    final response = await _dio.get('/familias/eventos-abertos');
+    final data = _validateResponseData(response.data);
+    final eventos = data['eventos'] as List<dynamic>? ?? [];
+    return eventos.map((evento) => evento as Map<String, dynamic>).toList();
+  }
+
+  /// ✅ GET /familias/perfis - Crianças pré-cadastradas que ainda não entraram em evento
+  Future<List<Map<String, dynamic>>> getPreRegisteredChildren() async {
+    final response = await _dio.get('/familias/perfis');
+    final data = _validateResponseData(response.data);
+    final perfis = data['perfis'] as List<dynamic>? ?? [];
+    return perfis.map((perfil) => perfil as Map<String, dynamic>).toList();
+  }
+
+  /// ✅ POST /familias/perfis - Pré-cadastra a criança no buffet do evento escolhido
+  Future<Map<String, dynamic>> createPreRegisteredChild({
+    required String eventoId,
+    required String nome,
+    String? apelido,
+    required int idade,
+  }) async {
+    final response = await _dio.post('/familias/perfis', data: {
+      'eventoId': eventoId,
+      'nome': nome,
+      'apelido': apelido,
+      'idade': idade,
+    });
+    return _validateResponseData(response.data);
+  }
+
   /// ✅ GET /familias/children/:id/achievements - Com validação
   Future<List<Achievement>> getChildAchievements(String childId) async {
     try {

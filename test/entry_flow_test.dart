@@ -150,11 +150,20 @@ void main() {
   });
 
   group('cadastro pelo convite', () {
-    Future<void> fillForm(WidgetTester tester, {String confirm = 'segredo123'}) async {
+    Future<void> fillForm(
+      WidgetTester tester, {
+      String confirm = 'segredo123',
+      bool aceitarPrivacidade = true,
+    }) async {
       await tester.enterText(find.widgetWithText(TextFormField, 'Nome completo'), 'Ana Souza');
       await tester.enterText(find.widgetWithText(TextFormField, 'Email'), 'ana@email.com');
       await tester.enterText(find.widgetWithText(TextFormField, 'Senha'), 'segredo123');
       await tester.enterText(find.widgetWithText(TextFormField, 'Confirmar senha'), confirm);
+      // Sem o aceite da Política de Privacidade a conta não é criada
+      if (aceitarPrivacidade) {
+        await tester.tap(find.byType(Checkbox));
+        await tester.pump();
+      }
     }
 
     testWidgets('convite inválido mostra o erro e leva de volta ao código', (tester) async {
@@ -230,6 +239,22 @@ void main() {
       await tester.tap(find.text('Ir para o login'));
       await tester.pumpAndSettle();
       expect(find.text('TELA DE LOGIN'), findsOneWidget);
+    });
+
+    testWidgets('sem aceitar a Política de Privacidade: avisa e não envia nada', (tester) async {
+      final api = _FakeInviteApi(invite: _invite);
+      await pumpApp(tester, initial: '/family/invite/ok', api: api);
+
+      await fillForm(tester, aceitarPrivacidade: false);
+      await tester.tap(find.text('Criar cadastro'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Aceite a Política de Privacidade para criar a conta'), findsOneWidget);
+      expect(api.registerCalls, 0);
+
+      // O aviso some sozinho depois de alguns segundos
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('senhas diferentes: mostra o erro no campo e não envia nada', (tester) async {

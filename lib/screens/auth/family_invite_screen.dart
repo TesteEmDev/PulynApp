@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,9 +94,13 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
       log.e('[INVITE] ❌ Erro ao validar convite: $e');
 
       if (!mounted) return;
+      // 429: o servidor barrou quem errou códigos demais (o código tem só 8 dígitos)
+      final muitasTentativas = e is DioException && e.response?.statusCode == 429;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Convite inválido ou expirado';
+        _errorMessage = muitasTentativas
+            ? 'Muitas tentativas com códigos inválidos. Tente de novo em alguns minutos.'
+            : 'Convite inválido ou expirado';
       });
     }
   }

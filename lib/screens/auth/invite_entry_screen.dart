@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../utils/invite_code.dart';
 import '../../utils/logger.dart';
 
 class InviteEntryScreen extends ConsumerStatefulWidget {
@@ -21,22 +22,20 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
   }
 
   void _handleInviteCode() {
-    final codigo = _codeController.text.trim();
-    
-    if (codigo.isEmpty) {
-      showErrorSnackBar(context, 'Cole o link ou o código do convite');
+    // Aceita o código (8 dígitos hexadecimais, como A3F09C12) ou o link do convite
+    final token = extractInviteToken(_codeController.text);
+
+    if (token.isEmpty) {
+      showErrorSnackBar(context, 'Digite o código do convite');
       return;
     }
-
-    // ✅ Se o usuário cola a URL completa, extrair apenas o token
-    String token = codigo;
-    if (codigo.contains('/family/invite/')) {
-      // Extrai a última parte após /family/invite/
-      token = codigo.split('/family/invite/').last;
-      log.i('[InviteEntry] Token extraído de URL: $token');
+    if (!isValidInviteCode(token)) {
+      showErrorSnackBar(context, mensagemCodigoInvalido);
+      return;
     }
+    log.i('[InviteEntry] Código do convite: $token');
 
-    // Navega para a tela de convite com o token
+    // Navega para a tela de convite com o código
     context.go('/family/invite/$token');
   }
 
@@ -111,7 +110,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'O código foi enviado por email ou WhatsApp',
+                      'O código de 8 caracteres foi enviado por email ou WhatsApp',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
@@ -127,16 +126,19 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
               // Input Field
               TextField(
                 controller: _codeController,
+                textCapitalization: TextCapitalization.characters,
+                autocorrect: false,
                 decoration: InputDecoration(
-                  labelText: 'Link ou código do convite',
-                  hintText: 'Cole aqui...',
+                  labelText: 'Código do convite',
+                  hintText: 'Ex.: A3F09C12',
                   prefixIcon: const Icon(Icons.vpn_key),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                maxLines: 3,
+                maxLines: 1,
                 textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _handleInviteCode(),
               ),
               
               const SizedBox(height: 24),

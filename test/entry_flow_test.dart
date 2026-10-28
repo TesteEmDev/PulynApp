@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +21,9 @@ class _FakeInviteApi extends ApiService {
   int registerCalls = 0;
   List<Map<String, dynamic>>? lastChildren;
 
-  _FakeInviteApi({this.invite, this.onRegister});
+  final Object? erroAoValidar; // lançado no lugar da resposta (ex.: 429 de quem errou códigos demais)
+
+  _FakeInviteApi({this.invite, this.onRegister, this.erroAoValidar});
 
   @override
   Future<void> init() async {}
@@ -28,6 +31,8 @@ class _FakeInviteApi extends ApiService {
   @override
   Future<Map<String, dynamic>> getFamilyInvite(String token) async {
     validatedTokens.add(token);
+    final erro = erroAoValidar;
+    if (erro != null) throw erro;
     final data = invite;
     if (data == null) throw Exception('410 convite inválido');
     return data;
@@ -97,7 +102,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Bem-vindo!'), findsOneWidget);
-      expect(find.text('Link ou código do convite'), findsOneWidget);
+      expect(find.text('Código do convite'), findsOneWidget);
       expect(find.text('TELA DE LOGIN'), findsNothing);
     });
 
@@ -114,18 +119,44 @@ void main() {
   });
 
   group('tela do convite', () {
-    testWidgets('colar o link completo extrai o token e abre o cadastro do convite', (tester) async {
+    testWidgets('digitar o código de 8 dígitos abre o cadastro do convite', (tester) async {
       final api = _FakeInviteApi(invite: _invite);
       await pumpApp(tester, initial: '/invite', api: api);
 
-      await tester.enterText(find.byType(TextField), 'https://app.pulyn.com/family/invite/tok123');
+      await tester.enterText(find.byType(TextField), 'a3f0 9c12');
       await tester.tap(find.text('Continuar'));
       await tester.pumpAndSettle();
 
-      expect(api.validatedTokens, ['tok123']);
+      expect(api.validatedTokens, ['A3F09C12'], reason: 'sem espaço e em maiúsculas');
       expect(find.text('Cadastro da família'), findsOneWidget);
       expect(find.text('Festa da Lia'), findsOneWidget);
       expect(find.text('Data: 05/10/2026'), findsOneWidget); // data legível, não o texto cru da API
+    });
+
+    testWidgets('colar o link completo extrai o código e abre o cadastro do convite', (tester) async {
+      final api = _FakeInviteApi(invite: _invite);
+      await pumpApp(tester, initial: '/invite', api: api);
+
+      await tester.enterText(find.byType(TextField), 'https://app.pulyn.com/family/invite/A3F09C12');
+      await tester.tap(find.text('Continuar'));
+      await tester.pumpAndSettle();
+
+      expect(api.validatedTokens, ['A3F09C12']);
+      expect(find.text('Cadastro da família'), findsOneWidget);
+    });
+
+    testWidgets('texto que não é um código avisa sem ir ao servidor', (tester) async {
+      final api = _FakeInviteApi(invite: _invite);
+      await pumpApp(tester, initial: '/invite', api: api);
+
+      await tester.enterText(find.byType(TextField), 'A3F09C1'); // 7 caracteres
+      await tester.tap(find.text('Continuar'));
+      await tester.pump();
+
+      expect(find.text('O código tem 8 caracteres: números de 0 a 9 e letras de A a F'), findsOneWidget);
+      expect(api.validatedTokens, isEmpty);
+      expect(find.text('Bem-vindo!'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 6));
     });
 
     testWidgets('sem código não navega e avisa', (tester) async {
@@ -134,7 +165,7 @@ void main() {
       await tester.tap(find.text('Continuar'));
       await tester.pump();
 
-      expect(find.text('Cole o link ou o código do convite'), findsOneWidget);
+      expect(find.text('Digite o código do convite'), findsOneWidget);
       expect(find.text('Bem-vindo!'), findsOneWidget);
       await tester.pump(const Duration(seconds: 6)); // deixa o aviso do topo sumir
     });
@@ -174,6 +205,17 @@ void main() {
       await tester.tap(find.text('Digitar outro código'));
       await tester.pumpAndSettle();
       expect(find.text('Bem-vindo!'), findsOneWidget);
+    });
+
+    testWidgets('quem errou códigos demais (429) vê o aviso de tentar mais tarde, não "convite inválido"', (tester) async {
+      final pedido = RequestOptions(path: '/familias/invites/A3F09C12');
+      final api = _FakeInviteApi(
+        erroAoValidar: DioException(requestOptions: pedido, response: Response(requestOptions: pedido, statusCode: 429)),
+      );
+      await pumpApp(tester, initial: '/family/invite/A3F09C12', api: api);
+
+      expect(find.text('Muitas tentativas com códigos inválidos. Tente de novo em alguns minutos.'), findsOneWidget);
+      expect(find.text('Convite inválido ou expirado'), findsNothing);
     });
 
     testWidgets('não pede nem envia dados de crianças: só os dados do responsável', (tester) async {

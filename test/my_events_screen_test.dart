@@ -175,6 +175,34 @@ void main() {
   });
 
   group('adicionar evento com código', () {
+    testWidgets('código digitado em minúsculas e com espaço vai limpo e em maiúsculas', (tester) async {
+      final api = _FakeApi();
+      await pumpTela(tester, api);
+
+      await tester.tap(find.byKey(const Key('adicionar-evento')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('codigo-convite')), 'a3f0 9c12');
+      await tester.tap(find.byKey(const Key('confirmar-adicionar-evento')));
+      await tester.pumpAndSettle();
+
+      expect(api.codigosEnviados, ['A3F09C12']);
+      await esperarAvisoSumir(tester);
+    });
+
+    testWidgets('texto que não é um código avisa no campo e não chama o servidor', (tester) async {
+      final api = _FakeApi();
+      await pumpTela(tester, api);
+
+      await tester.tap(find.byKey(const Key('adicionar-evento')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('codigo-convite')), 'abc123');
+      await tester.tap(find.byKey(const Key('confirmar-adicionar-evento')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('O código tem 8 caracteres: números de 0 a 9 e letras de A a F'), findsOneWidget);
+      expect(api.codigosEnviados, isEmpty);
+    });
+
     testWidgets('campo vazio pede o código e não chama o servidor', (tester) async {
       final api = _FakeApi();
       await pumpTela(tester, api);
@@ -184,7 +212,7 @@ void main() {
       await tester.tap(find.byKey(const Key('confirmar-adicionar-evento')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Cole o link ou o código do convite'), findsOneWidget);
+      expect(find.text('Digite o código do convite'), findsOneWidget);
       expect(api.codigosEnviados, isEmpty);
     });
 
@@ -197,11 +225,11 @@ void main() {
 
       await tester.tap(find.byKey(const Key('adicionar-evento')));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const Key('codigo-convite')), ' https://app.pulyn.com.br/family/invite/abc123def456/ ');
+      await tester.enterText(find.byKey(const Key('codigo-convite')), ' https://app.pulyn.com.br/family/invite/a3f09c12/ ');
       await tester.tap(find.byKey(const Key('confirmar-adicionar-evento')));
       await tester.pumpAndSettle();
 
-      expect(api.codigosEnviados, ['abc123def456']);
+      expect(api.codigosEnviados, ['A3F09C12']);
       expect(find.byKey(const Key('codigo-convite')), findsNothing, reason: 'a folha fecha');
       expect(find.text('Festa Nova adicionado à sua conta'), findsOneWidget);
       expect(find.text('Festa Nova'), findsOneWidget, reason: 'a lista foi recarregada');
@@ -220,7 +248,7 @@ void main() {
 
       await tester.tap(find.byKey(const Key('adicionar-evento')));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const Key('codigo-convite')), 'codigo-da-lia');
+      await tester.enterText(find.byKey(const Key('codigo-convite')), 'A3F09C12');
       await tester.tap(find.byKey(const Key('confirmar-adicionar-evento')));
       await tester.pumpAndSettle();
 
@@ -239,7 +267,7 @@ void main() {
 
       await tester.tap(find.byKey(const Key('adicionar-evento')));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const Key('codigo-convite')), 'repetido');
+      await tester.enterText(find.byKey(const Key('codigo-convite')), 'A3F09C12');
       await tester.tap(find.byKey(const Key('confirmar-adicionar-evento')));
       await tester.pumpAndSettle();
 
@@ -253,7 +281,7 @@ void main() {
 
       await tester.tap(find.byKey(const Key('adicionar-evento')));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const Key('codigo-convite')), 'usado');
+      await tester.enterText(find.byKey(const Key('codigo-convite')), 'A3F09C12');
       await tester.tap(find.byKey(const Key('confirmar-adicionar-evento')));
       await tester.pumpAndSettle();
 

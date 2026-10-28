@@ -115,7 +115,7 @@ class MyEventsScreen extends ConsumerWidget {
                   return const _Aviso(
                     icone: Icons.event_busy_outlined,
                     titulo: 'Você ainda não tem eventos',
-                    texto: 'Toque em "Adicionar evento com código" e digite o código do convite que o buffet enviou.',
+                    texto: 'Toque em "Adicionar evento com código" e digite o código de 8 caracteres que o buffet enviou.',
                   );
                 }
                 return Column(
@@ -333,7 +333,11 @@ class _AdicionarEventoSheetState extends ConsumerState<_AdicionarEventoSheet> {
     if (_enviando) return;
     final codigo = extractInviteToken(_controller.text);
     if (codigo.isEmpty) {
-      setState(() => _erro = 'Cole o link ou o código do convite');
+      setState(() => _erro = 'Digite o código do convite');
+      return;
+    }
+    if (!isValidInviteCode(codigo)) {
+      setState(() => _erro = mensagemCodigoInvalido);
       return;
     }
     setState(() {
@@ -365,7 +369,7 @@ class _AdicionarEventoSheetState extends ConsumerState<_AdicionarEventoSheet> {
           const Text('Adicionar evento', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
           const SizedBox(height: 6),
           const Text(
-            'Cole o código ou o link do convite que o buffet enviou.',
+            'Digite o código de 8 caracteres do convite que o buffet enviou.',
             style: TextStyle(fontSize: 13, color: PulynColors.textSecondary),
           ),
           const SizedBox(height: 14),
@@ -375,10 +379,12 @@ class _AdicionarEventoSheetState extends ConsumerState<_AdicionarEventoSheet> {
             enabled: !_enviando,
             autofocus: true,
             autocorrect: false,
+            textCapitalization: TextCapitalization.characters,
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _enviar(),
             decoration: InputDecoration(
-              labelText: 'Código ou link do convite',
+              labelText: 'Código do convite',
+              hintText: 'Ex.: A3F09C12',
               errorText: _erro,
               errorMaxLines: 3,
             ),

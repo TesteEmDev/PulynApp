@@ -29,6 +29,14 @@ final familyEventsProvider = FutureProvider.autoDispose<List<Map<String, dynamic
   return apiService.getFamilyEvents();
 });
 
+/// Eventos da conta (adicionados pelo código e das crianças), com as crianças e os pontos de cada um,
+/// para a tela "Meus eventos". Buscado de novo toda vez que a tela abre.
+final myEventsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final apiService = ref.read(apiServiceProvider);
+  await apiService.init();
+  return apiService.getMyEvents();
+});
+
 final activeEventProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((ref) async* {
   final selecionado = ref.watch(selectedEventIdProvider);
   final apiService = ref.read(apiServiceProvider);

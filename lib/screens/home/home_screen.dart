@@ -242,6 +242,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _buildWelcomeCard(context, ref),
                 const SizedBox(height: 16),
                 _buildPreRegisteredSection(ref),
+                _buildMyEventsLink(context),
                 if (noChildren) ...[
                   // Sem crianças, o mapa e a lista seriam só caixas vazias: o destaque leva ao QR Code
                   LinkChildHero(
@@ -569,6 +570,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// Crianças cadastradas pelo responsável que ainda não entraram no buffet (sem pulseira).
   /// Erro ou carregamento escondem a seção, sem derrubar a home.
+  /// Atalho para "Meus eventos": navegar entre os eventos da conta e adicionar um com o código do convite.
+  Widget _buildMyEventsLink(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: PulynColors.darkCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PulynColors.darkBorder),
+      ),
+      child: ListTile(
+        key: const Key('abrir-meus-eventos'),
+        leading: const Icon(Icons.event_note_outlined, color: PulynColors.primary),
+        title: const Text(
+          'Meus eventos',
+          style: TextStyle(fontWeight: FontWeight.bold, color: PulynColors.textPrimary),
+        ),
+        subtitle: const Text(
+          'Veja os eventos que você já foi e adicione um novo com o código',
+          style: TextStyle(fontSize: 12, color: PulynColors.textSecondary),
+        ),
+        trailing: const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+        onTap: () => context.push('/my-events'),
+      ),
+    );
+  }
+
   Widget _buildPreRegisteredSection(WidgetRef ref) {
     final perfis = ref.watch(preRegisteredChildrenProvider).when(
           data: (lista) => lista,

@@ -141,6 +141,13 @@ class ProfileTab extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               _MenuTile(
+                icon: Icons.event_note_outlined,
+                title: 'Meus eventos',
+                subtitle: 'Ver os eventos e adicionar um com o código',
+                onTap: () => context.push('/my-events'),
+              ),
+              const SizedBox(height: 10),
+              _MenuTile(
                 icon: Icons.info_outline_rounded,
                 title: 'Sobre o app',
                 subtitle: 'Pulyn Family · versão $_appVersion',

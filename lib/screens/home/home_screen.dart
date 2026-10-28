@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/index.dart';
 import '../../utils/avatar_utils.dart';
 import '../family/pre_register_child_screen.dart';
+import '../../widgets/brincadeira_selo.dart';
 import '../../models/family_models.dart';
 import '../../config/theme.dart';
 import '../../widgets/event_map_widget.dart';
@@ -455,11 +456,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final activeEvent = activeEventAsync.value;
             final activeGame = activeGameAsync.value;
 
-            return EventMapWidget(
-              childrenList: _filhosDoEvento(children, activeEventAsync.value?['id'] as String?),
-              eventoId: activeEvent?['id'],
-              activeGame: activeGame,
-              onInteractionChanged: _setMapInteracting,
+            // O selo da brincadeira fica fora do cartão do mapa, acima dele
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (activeGame != null) ...[
+                  BrincadeiraSelo(jogo: activeGame),
+                  const SizedBox(height: 12),
+                ],
+                EventMapWidget(
+                  childrenList: _filhosDoEvento(children, activeEventAsync.value?['id'] as String?),
+                  eventoId: activeEvent?['id'],
+                  onInteractionChanged: _setMapInteracting,
+                ),
+              ],
             );
           },
         ),

@@ -83,7 +83,6 @@ Rect floorPlanRect(double aspect) {
 class EventMapWidget extends ConsumerStatefulWidget {
   final List<Child>? childrenList; // Lista de filhos vinculados no app (todos são "meus filhos")
   final String? eventoId; // ID do evento para carregar floor plano
-  final Map<String, dynamic>? activeGame; // Jogo ativo para exibição
 
   /// Avisa quando o dedo entra/sai do mapa. A tela que hospeda o mapa usa isso
   /// para travar a própria rolagem (vertical e troca de abas) enquanto o mapa é
@@ -93,7 +92,6 @@ class EventMapWidget extends ConsumerStatefulWidget {
   const EventMapWidget({
     required this.childrenList,
     this.eventoId,
-    this.activeGame,
     this.onInteractionChanged,
     super.key,
   });
@@ -1430,47 +1428,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                           ],
                         ),
                       ),
-                      // Jogo em andamento: um único selo (antes o nome aparecia duas vezes)
-                      if (widget.activeGame != null)
-                        Flexible(
-                          flex: 2,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: PulynColors.success.withValues(alpha: 0.16),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: PulynColors.success.withValues(alpha: 0.5),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: PulynColors.success,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Flexible(
-                                  child: Text(
-                                    '${widget.activeGame!['gameName'] ?? widget.activeGame!['nome'] ?? 'Jogo ativo'}',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: PulynColors.success,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       // Zoom e "mapa inteiro" no cabeçalho: sobre o mapa eles cobriam
                       // e bloqueavam o toque em checkpoints do canto.
                       _buildHeaderButton(Icons.remove, 'Afastar', () => _zoomBy(1 / 1.6)),
@@ -1479,6 +1436,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                     ],
                   ),
                 ),
+
 
                 // Mapa interativo
                 AspectRatio(

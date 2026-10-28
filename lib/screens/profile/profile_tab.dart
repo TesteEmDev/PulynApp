@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/theme.dart';
 import '../../models/family_models.dart';
+import '../../widgets/child_avatar.dart';
 import '../../widgets/pulyn_logo.dart';
 import '../qr_scan/open_qr_scanner.dart';
 
@@ -438,26 +439,10 @@ class _ChildTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [cor, cor.withValues(alpha: 0.7)],
-                  ),
-                ),
-                child: Text(
-                  initial,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
+              ChildAvatar(
+                avatarId: child.profileImage,
+                inicial: initial,
+                cor: cor,
               ),
               const SizedBox(width: 12),
               Expanded(

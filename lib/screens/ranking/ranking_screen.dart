@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/theme.dart';
 import '../../providers/index.dart';
+import '../../widgets/child_avatar.dart';
 
 class RankingScreen extends ConsumerStatefulWidget {
   const RankingScreen({super.key});
@@ -99,6 +100,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
               nome: child.apelido.isNotEmpty ? child.apelido : child.nome,
               score: child.currentScore,
               teamColor: child.teamColor,
+              avatarId: child.profileImage,
               medal: medal,
               isTop: index < 3,
             );
@@ -174,7 +176,10 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     required String teamColor,
     required String medal,
     required bool isTop,
+    String? avatarId,
   }) {
+    final cor = Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}'));
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -207,6 +212,15 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             ),
           ),
           const SizedBox(width: 16),
+
+          // Avatar da criança (o nome completo fica ao lado)
+          ChildAvatar(
+            avatarId: avatarId,
+            inicial: nome.isNotEmpty ? nome[0].toUpperCase() : '?',
+            cor: cor,
+            tamanho: 44,
+          ),
+          const SizedBox(width: 12),
 
           // Name
           Expanded(

@@ -5,7 +5,7 @@ description: "Pulyn Family - Rastreamento de crianças em tempo real. Veja seus 
 publish_to: 'none'
 
 # The following defines the version and build number for your application.
-version: 1.0.0+4
+version: 1.0.0+5
 
 environment:
   sdk: ^3.13.1

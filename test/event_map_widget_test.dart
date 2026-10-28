@@ -70,7 +70,6 @@ void main() {
               child: EventMapWidget(
                 childrenList: [child],
                 eventoId: eventoId,
-                activeGame: const {'gameName': 'Caça ao Tesouro'},
                 onInteractionChanged: onInteraction,
               ),
             ),
@@ -101,7 +100,6 @@ void main() {
     expect(scale, greaterThan(0.5));
 
     expect(find.text('Lia'), findsOneWidget); // nome acima do avatar
-    expect(find.text('Caça ao Tesouro'), findsOneWidget); // selo único (não repete no subtítulo)
     expect(find.text('Mapa do Evento'), findsOneWidget);
     expect(find.text('Torre Encantada'), findsOneWidget);
     expect(tester.takeException(), isNull);

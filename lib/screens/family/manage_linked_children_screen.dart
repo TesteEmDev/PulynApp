@@ -7,6 +7,7 @@ import '../../services/api_service.dart';
 import '../../config/theme.dart';
 import '../../utils/logger.dart';
 import '../../providers/index.dart';
+import 'pre_register_child_screen.dart';
 
 // autoDispose: a lista é buscada de novo sempre que a tela abre. Sem isso, o cache fica
 // vivo com a sessão e uma criança vinculada depois (pela Home) não aparece aqui.
@@ -70,7 +71,11 @@ class _ManageLinkedChildrenScreenState
           onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
         ),
       ),
-      body: childrenAsyncValue.when(
+      body: Column(
+        children: [
+          const _PreRegisteredSection(),
+          Expanded(
+            child: childrenAsyncValue.when(
         loading: () => const Center(
           child: CircularProgressIndicator(),
         ),
@@ -253,6 +258,70 @@ class _ManageLinkedChildrenScreenState
             },
           );
         },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.green,
+        icon: const Icon(Icons.add),
+        label: const Text('Cadastrar criança'),
+        onPressed: () async {
+          final cadastrou = await context.push<bool>('/pre-register-child');
+          if (cadastrou == true) {
+            ref.invalidate(preRegisteredChildrenProvider);
+          }
+        },
+      ),
+    );
+  }
+}
+
+/// Crianças pré-cadastradas pelo responsável que ainda não têm pulseira (não entraram no buffet).
+class _PreRegisteredSection extends ConsumerWidget {
+  const _PreRegisteredSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // `.value` relança o erro do provider (ex.: 404 de rota ainda não publicada) e derrubaria a tela.
+    // Com `when`, erro ou carregamento simplesmente escondem a seção.
+    final perfis = ref.watch(preRegisteredChildrenProvider).when(
+          data: (lista) => lista,
+          loading: () => const <Map<String, dynamic>>[],
+          error: (_, _) => const <Map<String, dynamic>>[],
+        );
+    if (perfis.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Aguardando o buffet',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Cadastradas, mas ainda sem pulseira. Leve a criança à recepção do buffet.',
+                style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              for (final perfil in perfis)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.hourglass_empty, color: PulynColors.textMuted),
+                  title: Text((perfil['apelido'] as String?)?.isNotEmpty == true
+                      ? perfil['apelido'] as String
+                      : perfil['nome'] as String),
+                  subtitle: Text(perfil['buffetNome'] as String? ?? ''),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

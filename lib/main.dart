@@ -18,6 +18,7 @@ import 'screens/ranking/ranking_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/family/linked_children_screen.dart';
 import 'screens/family/manage_linked_children_screen.dart';
+import 'screens/family/pre_register_child_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/event/pre_event_screen.dart';
 import 'screens/event/event_result_screen.dart';
@@ -190,6 +191,10 @@ class MyApp extends ConsumerWidget {
             builder: (context, state) {
               return const ManageLinkedChildrenScreen();
             },
+          ),
+          GoRoute(
+            path: '/pre-register-child',
+            builder: (context, state) => const PreRegisterChildScreen(),
           ),
           GoRoute(
             path: '/pre-event',

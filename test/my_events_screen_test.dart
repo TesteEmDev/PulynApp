@@ -120,7 +120,7 @@ void main() {
     expect(find.text('Aniversário da Bia'), findsOneWidget);
     expect(find.text('Encerrado'), findsOneWidget);
     expect(find.text('Adicionado por código'), findsOneWidget);
-    expect(find.text('Nenhuma criança vinculada neste evento'), findsOneWidget);
+    expect(find.text('Nenhuma criança vinculada neste evento. Toque para vincular.'), findsOneWidget);
   });
 
   testWidgets('sem eventos explica como adicionar o primeiro', (tester) async {
@@ -159,19 +159,14 @@ void main() {
     expect(find.text('TELA HOME'), findsOneWidget);
   });
 
-  testWidgets('evento sem criança explica como vincular e não troca o evento da home', (tester) async {
+  testWidgets('evento sem criança também pode ser escolhido: é nele que se vincula a criança', (tester) async {
     await pumpTela(tester, _FakeApi(eventos: [_evento('e1', 'Aniversário da Bia', porConvite: true)]));
 
     await tester.tap(find.text('Aniversário da Bia'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Você ainda não tem criança neste evento'), findsOneWidget);
-    expect(container.read(selectedEventIdProvider), isNull);
-    expect(find.text('TELA HOME'), findsNothing);
-
-    await tester.tap(find.text('Entendi'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Você ainda não tem criança neste evento'), findsNothing);
+    expect(container.read(selectedEventIdProvider), 'e1');
+    expect(find.text('TELA HOME'), findsOneWidget);
   });
 
   group('adicionar evento com código', () {

@@ -29,6 +29,15 @@ final familyEventsProvider = FutureProvider.autoDispose<List<Map<String, dynamic
   return apiService.getFamilyEvents();
 });
 
+/// Evento em que a criança vai ser vinculada (QR/pulseira): o escolhido em "Meus eventos"; sem escolha,
+/// o único evento da conta. Null = não dá para saber (o back usa então o buffet em que a conta foi criada).
+final linkEventIdProvider = Provider.autoDispose<String?>((ref) {
+  final escolhido = ref.watch(selectedEventIdProvider);
+  if (escolhido != null) return escolhido;
+  final eventos = ref.watch(familyEventsProvider).value;
+  return (eventos != null && eventos.length == 1) ? eventos.first['id'] as String? : null;
+});
+
 /// Eventos da conta (adicionados pelo código e das crianças), com as crianças e os pontos de cada um,
 /// para a tela "Meus eventos". Buscado de novo toda vez que a tela abre.
 final myEventsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {

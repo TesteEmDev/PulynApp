@@ -44,20 +44,9 @@ class MyEventsScreen extends ConsumerWidget {
     }
   }
 
+  /// Escolhe o evento e volta para a home. Evento sem criança também vale: é nele que a pessoa vincula a
+  /// criança (QR Code ou pulseira), e a home mostra o vínculo para esse evento.
   void _abrir(BuildContext context, WidgetRef ref, Map<String, dynamic> evento) {
-    final criancas = (evento['criancas'] as List?) ?? const [];
-    if (criancas.isEmpty) {
-      // Sem criança neste evento a home não tem o que mostrar: explica como vincular
-      showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: PulynColors.darkCard,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (_) => _SemCriancaSheet(nome: evento['nome'] as String? ?? 'Evento'),
-      );
-      return;
-    }
     ref.read(selectedEventIdProvider.notifier).state = evento['id'] as String?;
     ref.invalidate(activeEventProvider);
     ref.invalidate(activeGameProvider);
@@ -198,7 +187,7 @@ class _CartaoEvento extends StatelessWidget {
               const SizedBox(height: 10),
               if (criancas.isEmpty)
                 const Text(
-                  'Nenhuma criança vinculada neste evento',
+                  'Nenhuma criança vinculada neste evento. Toque para vincular.',
                   style: TextStyle(fontSize: 13, color: PulynColors.textMuted),
                 )
               else
@@ -276,35 +265,6 @@ class _Aviso extends StatelessWidget {
           const SizedBox(height: 6),
           Text(texto, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: PulynColors.textSecondary)),
           ?acao,
-        ],
-      ),
-    );
-  }
-}
-
-class _SemCriancaSheet extends StatelessWidget {
-  final String nome;
-  const _SemCriancaSheet({required this.nome});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(nome, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
-          const SizedBox(height: 8),
-          const Text(
-            'Você ainda não tem criança neste evento. Peça à recepção o QR Code da criança e leia na tela inicial do app para acompanhar a festa.',
-            style: TextStyle(fontSize: 14, color: PulynColors.textSecondary, height: 1.4),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Entendi')),
-          ),
         ],
       ),
     );

@@ -10,11 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _AdaptadorFalso implements HttpClientAdapter {
   final Map<String, (int, Object)> respostas;
   final List<String> pedidos = [];
+  final List<Object?> corpos = [];
   _AdaptadorFalso(this.respostas);
 
   @override
   Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
     pedidos.add('${options.method} ${options.path}');
+    corpos.add(options.data);
     final resposta = respostas[options.path] ?? (404, {'error': 'não existe'});
     return ResponseBody.fromString(
       jsonEncode(resposta.$2),
@@ -117,6 +119,30 @@ void main() {
       final evento = await api.getActiveEvent(eventoId: 'estranho');
 
       expect(evento?['id'], 'e1');
+    });
+  });
+
+  group('linkChildWithBracelet', () {
+    const resposta = {
+      'success': true,
+      'linkedChild': {'id': 'c1', 'nome': 'Lia'},
+    };
+
+    test('manda o evento escolhido junto com a pulseira', () async {
+      final (api, adaptador) = await _api({'/family/bracelet/validate': (200, resposta)});
+
+      await api.linkChildWithBracelet('04E72C1A896880', eventoId: 'e2');
+
+      expect(adaptador.pedidos, ['POST /family/bracelet/validate']);
+      expect(adaptador.corpos.single, {'uid': '04E72C1A896880', 'eventoId': 'e2'});
+    });
+
+    test('sem evento, manda só a pulseira (como antes)', () async {
+      final (api, adaptador) = await _api({'/family/bracelet/validate': (200, resposta)});
+
+      await api.linkChildWithBracelet('04E72C1A896880');
+
+      expect(adaptador.corpos.single, {'uid': '04E72C1A896880'});
     });
   });
 

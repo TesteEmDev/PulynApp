@@ -847,11 +847,16 @@ class ApiService {
   /// POST /family/bracelet/validate - Vincular criança lendo a pulseira NFC.
   /// [uid] é o UID da pulseira em hexadecimal (veja `uidToHex`). Devolve o mesmo formato do QR
   /// (`success` + `linkedChild`); o vínculo fica pendente até a recepção aprovar.
-  Future<Map<String, dynamic>> linkChildWithBracelet(String uid) async {
+  /// [eventoId] é o evento escolhido no app: o back procura a pulseira no buffet desse evento
+  /// (sem ele, só no buffet em que a conta foi criada).
+  Future<Map<String, dynamic>> linkChildWithBracelet(String uid, {String? eventoId}) async {
     try {
       if (!_initialized) await init();
 
-      final response = await _dio.post('/family/bracelet/validate', data: {'uid': uid});
+      final response = await _dio.post(
+        '/family/bracelet/validate',
+        data: {'uid': uid, if (eventoId != null && eventoId.isNotEmpty) 'eventoId': eventoId},
+      );
       final data = _validateResponseData(response.data);
 
       if (data['success'] != true || data['linkedChild'] == null) {

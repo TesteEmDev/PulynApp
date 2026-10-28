@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'auth_provider.dart';
 import 'websocket_provider.dart';
 import '../models/family_models.dart';
+import '../models/calor_models.dart';
 import '../utils/logger.dart';
 
 // ✅ Exporta providers externos
@@ -162,6 +163,26 @@ class MapRefreshNotifier extends StateNotifier<int> {
 
 final mapRefreshProvider = StateNotifierProvider((ref) {
   return MapRefreshNotifier();
+});
+
+/// Muda quando o backend avisa (WebSocket UHF_MAPA_ATUALIZADO) que uma janela de 5 s dos leitores UHF fechou.
+final uhfMapaTickProvider = StateProvider<int>((ref) => 0);
+
+/// Mapa de calor UHF de um filho, chave (childId, modo 'agora' | '5min' | '30min' | 'evento').
+/// Busca de novo a cada 5 s (tamanho da janela do backend) e quando uhfMapaTickProvider muda.
+const uhfMapaIntervalo = Duration(seconds: 5);
+final childHeatmapProvider =
+    StreamProvider.autoDispose.family<CalorDaCrianca?, (String, String)>((ref, chave) async* {
+  final (childId, modo) = chave;
+  final apiService = ref.read(apiServiceProvider);
+  await apiService.init();
+  ref.watch(uhfMapaTickProvider);
+
+  yield await apiService.getChildHeatmap(childId, modo: modo);
+  while (true) {
+    await Future.delayed(uhfMapaIntervalo);
+    yield await apiService.getChildHeatmap(childId, modo: modo);
+  }
 });
 
 // ✅ Provider para scoreLog - rastreia conquistas em tempo real

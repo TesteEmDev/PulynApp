@@ -288,7 +288,7 @@ ApiConfig.setEnvironment(ApiEnvironment.localhost);
 ### LAN (Servidor Local)
 ```dart
 ApiConfig.setEnvironment(ApiEnvironment.lan);
-// http://192.168.0.60:3001/api (configurável)
+// http://192.168.0.50:3001/api (configurável)
 ```
 
 ### Production

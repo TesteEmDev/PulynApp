@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/family_models.dart';
+import '../models/calor_models.dart';
 import '../config/api_config.dart';
 import '../utils/network_helper.dart';
 import '../utils/logger.dart';
@@ -516,6 +517,18 @@ class ApiService {
     } catch (e) {
       // Floor plano é opcional - silent fail
       log.w('[API] ⚠️ Erro ao carregar floor plano: $e');
+      return null;
+    }
+  }
+
+  /// ✅ GET /uhf/familia/crianca/{id}?modo=agora|5min - Mapa de calor só da pulseira do filho (leitores UHF)
+  /// null = sem acesso (criança fora do evento) ou buffet sem leitores UHF.
+  Future<CalorDaCrianca?> getChildHeatmap(String childId, {String modo = '5min'}) async {
+    try {
+      final response = await _dio.get('/uhf/familia/crianca/$childId', queryParameters: {'modo': modo});
+      return CalorDaCrianca.fromJson(_validateResponseData(response.data));
+    } catch (e) {
+      log.w('[API] ⚠️ Mapa de calor indisponível para $childId: $e');
       return null;
     }
   }

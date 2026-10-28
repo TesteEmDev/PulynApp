@@ -1460,6 +1460,13 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                           ],
                         ),
                       ),
+                      // Liga/desliga o mapa de calor (onde os filhos passaram mais tempo)
+                      _buildHeaderButton(
+                        _mostrarCalor ? Icons.whatshot : Icons.whatshot_outlined,
+                        _mostrarCalor ? 'Esconder mapa de calor' : 'Mapa de calor',
+                        () => setState(() => _mostrarCalor = !_mostrarCalor),
+                        color: _mostrarCalor ? PulynColors.accent : null,
+                      ),
                       // Zoom e "mapa inteiro" no cabeçalho: sobre o mapa eles cobriam
                       // e bloqueavam o toque em checkpoints do canto.
                       _buildHeaderButton(Icons.remove, 'Afastar', () => _zoomBy(1 / 1.6)),
@@ -1469,6 +1476,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   ),
                 ),
 
+                if (_mostrarCalor) _buildBarraCalor(),
 
                 // Mapa interativo
                 AspectRatio(

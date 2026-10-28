@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/index.dart';
+import '../../utils/avatar_utils.dart';
+import '../family/pre_register_child_screen.dart';
 import '../../models/family_models.dart';
 import '../../config/theme.dart';
 import '../../widgets/event_map_widget.dart';
@@ -231,6 +234,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 _buildWelcomeCard(context, ref),
                 const SizedBox(height: 16),
+                _buildPreRegisteredSection(ref),
                 if (noChildren) ...[
                   // Sem crianças, o mapa e a lista seriam só caixas vazias: o destaque leva ao QR Code
                   LinkChildHero(
@@ -238,11 +242,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 12),
                   // Cadastro feito pelo próprio responsável, antes de ir ao buffet
-                  OutlinedButton.icon(
-                    onPressed: () => context.push('/pre-register-child'),
-                    icon: const Icon(Icons.child_care),
-                    label: const Text('Cadastrar criança'),
-                  ),
+                  _buildCadastroCard(),
                 ]
                 else ...[
                   _buildEventMapSection(context, ref),
@@ -464,6 +464,138 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           },
         ),
       ],
+    );
+  }
+
+  /// Abre o cadastro e, ao voltar com sucesso, atualiza a seção "Aguardando o buffet".
+  /// Ação secundária, abaixo do cartão de vincular: cadastrar a criança antes da festa.
+  /// Visual de cartão (como o resto da home), com ícone, texto de apoio e seta.
+  Widget _buildCadastroCard() {
+    return Material(
+      color: PulynColors.darkCard,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: _abrirCadastroDeCrianca,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: PulynColors.darkBorder),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: PulynColors.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.child_care_rounded,
+                  color: PulynColors.primary,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Cadastrar criança',
+                      style: TextStyle(
+                        color: PulynColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Cadastre antes da festa e leve a criança ao buffet para pegar a pulseira.',
+                      style: TextStyle(
+                        color: PulynColors.textSecondary,
+                        fontSize: 13,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: PulynColors.textMuted,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _abrirCadastroDeCrianca() async {
+    final cadastrou = await context.push<bool>('/pre-register-child');
+    if (cadastrou == true) {
+      ref.invalidate(preRegisteredChildrenProvider);
+    }
+  }
+
+  /// Crianças cadastradas pelo responsável que ainda não entraram no buffet (sem pulseira).
+  /// Erro ou carregamento escondem a seção, sem derrubar a home.
+  Widget _buildPreRegisteredSection(WidgetRef ref) {
+    final perfis = ref.watch(preRegisteredChildrenProvider).when(
+          data: (lista) => lista,
+          loading: () => const <Map<String, dynamic>>[],
+          error: (_, _) => const <Map<String, dynamic>>[],
+        );
+    if (perfis.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: PulynColors.darkCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PulynColors.darkBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Aguardando o buffet',
+            style: TextStyle(fontWeight: FontWeight.bold, color: PulynColors.textPrimary),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Cadastradas, mas ainda sem pulseira. Leve a criança à recepção.',
+            style: TextStyle(fontSize: 12, color: PulynColors.textSecondary),
+          ),
+          const SizedBox(height: 8),
+          for (final perfil in perfis)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  const Icon(Icons.hourglass_empty_rounded, size: 18, color: PulynColors.textMuted),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      (perfil['apelido'] as String?)?.isNotEmpty == true
+                          ? perfil['apelido'] as String
+                          : perfil['nome'] as String,
+                      style: const TextStyle(color: PulynColors.textPrimary),
+                    ),
+                  ),
+                  Text(
+                    perfil['buffetNome'] as String? ?? '',
+                    style: const TextStyle(fontSize: 12, color: PulynColors.textMuted),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -884,6 +1016,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   /// 🎨 Child Card Compacto
+  Widget _inicialDoApelido(Child child) {
+    return Text(
+      child.apelido.isNotEmpty ? child.apelido[0].toUpperCase() : '?',
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
   Widget _buildChildCard(BuildContext context, Child child) {
     final teamColor = Color(int.parse('0xFF${child.teamColor.replaceFirst('#', '')}'));
     
@@ -935,14 +1078,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               ),
               child: Center(
-                child: Text(
-                  child.apelido.isNotEmpty ? child.apelido[0].toUpperCase() : '?',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                // Avatar do catálogo (SVG); sem avatar válido, mostra a inicial como antes
+                child: isValidAvatarId(child.profileImage)
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: SvgPicture.network(
+                          getAvatarUrl(child.profileImage),
+                          width: 44,
+                          height: 44,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => _inicialDoApelido(child),
+                        ),
+                      )
+                    : _inicialDoApelido(child),
               ),
             ),
             const SizedBox(width: 12),

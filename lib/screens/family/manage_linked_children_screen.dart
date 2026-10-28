@@ -7,6 +7,7 @@ import '../../services/api_service.dart';
 import '../../config/theme.dart';
 import '../../utils/logger.dart';
 import '../../providers/index.dart';
+import 'pre_register_child_screen.dart';
 
 // autoDispose: a lista é buscada de novo sempre que a tela abre. Sem isso, o cache fica
 // vivo com a sessão e uma criança vinculada depois (pela Home) não aparece aqui.
@@ -14,13 +15,6 @@ final linkedChildrenProvider = FutureProvider.autoDispose<List<Child>>((ref) asy
   final apiService = ref.read(apiServiceProvider);
   await apiService.init();
   return await apiService.getChildren();
-});
-
-// Pré-cadastro: crianças que o responsável cadastrou e que ainda não entraram em nenhum evento.
-final preRegisteredChildrenProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
-  await apiService.init();
-  return await apiService.getPreRegisteredChildren();
 });
 
 class ManageLinkedChildrenScreen extends ConsumerStatefulWidget {

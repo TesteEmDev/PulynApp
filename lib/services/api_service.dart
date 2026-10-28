@@ -600,10 +600,14 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /company-map/floor-plan - Planta baixa do buffet (imagem base64, vale para todos os eventos)
-  Future<String?> getFloorPlan() async {
+  /// ✅ GET /company-map/floor-plan - Planta baixa do buffet (imagem base64, vale para todos os eventos).
+  /// [eventoId] diz de qual evento é o mapa: o back usa o buffet desse evento (sem ele, o das crianças vinculadas).
+  Future<String?> getFloorPlan({String? eventoId}) async {
     try {
-      final response = await _dio.get('/company-map/floor-plan');
+      final response = await _dio.get(
+        '/company-map/floor-plan',
+        queryParameters: {if (eventoId != null && eventoId.isNotEmpty) 'eventoId': eventoId},
+      );
       final data = _validateResponseData(response.data);
       
       // Backend retorna { floorPlan: { dataUrl, nome, tipo } }
@@ -644,10 +648,14 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /company-map/zones - Zonas do buffet (vale para todos os eventos)
-  Future<List<Map<String, dynamic>>> getZones() async {
+  /// ✅ GET /company-map/zones - Zonas do buffet (vale para todos os eventos).
+  /// [eventoId] diz de qual evento é o mapa: o back usa o buffet desse evento (sem ele, o das crianças vinculadas).
+  Future<List<Map<String, dynamic>>> getZones({String? eventoId}) async {
     try {
-      final response = await _dio.get('/company-map/zones');
+      final response = await _dio.get(
+        '/company-map/zones',
+        queryParameters: {if (eventoId != null && eventoId.isNotEmpty) 'eventoId': eventoId},
+      );
 
       final data = _validateResponseList(response.data);
       return data.map((item) => item as Map<String, dynamic>).toList();

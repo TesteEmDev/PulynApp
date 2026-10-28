@@ -200,5 +200,5 @@ class _PageState extends State<_Page> {
 
 class _FakeApi extends ApiService {
   @override
-  Future<String?> getFloorPlan() async => null;
+  Future<String?> getFloorPlan({String? eventoId}) async => null;
 }

@@ -11,12 +11,14 @@ class _AdaptadorFalso implements HttpClientAdapter {
   final Map<String, (int, Object)> respostas;
   final List<String> pedidos = [];
   final List<Object?> corpos = [];
+  final List<Map<String, dynamic>> consultas = [];
   _AdaptadorFalso(this.respostas);
 
   @override
   Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
     pedidos.add('${options.method} ${options.path}');
     corpos.add(options.data);
+    consultas.add(Map<String, dynamic>.from(options.queryParameters));
     final resposta = respostas[options.path] ?? (404, {'error': 'não existe'});
     return ResponseBody.fromString(
       jsonEncode(resposta.$2),
@@ -119,6 +121,42 @@ void main() {
       final evento = await api.getActiveEvent(eventoId: 'estranho');
 
       expect(evento?['id'], 'e1');
+    });
+  });
+
+  group('planta e zonas do evento', () {
+    test('a planta é pedida com o evento em exibição', () async {
+      final (api, adaptador) = await _api({
+        '/company-map/floor-plan': (200, {'floorPlan': {'dataUrl': 'data:image/png;base64,AAAA'}}),
+      });
+
+      final planta = await api.getFloorPlan(eventoId: 'e2');
+
+      expect(planta, 'data:image/png;base64,AAAA');
+      expect(adaptador.consultas.single, {'eventoId': 'e2'});
+    });
+
+    test('as zonas são pedidas com o evento em exibição', () async {
+      final (api, adaptador) = await _api({
+        '/company-map/zones': (200, [{'nome': 'Entrada', 'x': 0, 'y': 0}]),
+      });
+
+      final zonas = await api.getZones(eventoId: 'e2');
+
+      expect(zonas.single['nome'], 'Entrada');
+      expect(adaptador.consultas.single, {'eventoId': 'e2'});
+    });
+
+    test('sem evento, nada é acrescentado à consulta (comportamento antigo)', () async {
+      final (api, adaptador) = await _api({
+        '/company-map/floor-plan': (200, {'floorPlan': null}),
+        '/company-map/zones': (200, <Object>[]),
+      });
+
+      await api.getFloorPlan();
+      await api.getZones();
+
+      expect(adaptador.consultas, [<String, dynamic>{}, <String, dynamic>{}]);
     });
   });
 

@@ -362,6 +362,9 @@ final zonesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   try {
     // ✅ Mesmo gatilho de "puxar pra atualizar"/WebSocket do resto do mapa.
     ref.watch(mapRefreshProvider);
+    // As zonas são do buffet do evento em exibição: trocar de evento busca as do outro buffet.
+    // (select: o evento ativo é reemitido a cada 5 s e só a troca do id deve recarregar as zonas)
+    final eventoId = ref.watch(activeEventProvider.select((evento) => evento.value?['id'] as String?));
 
     final apiService = ref.read(apiServiceProvider);
     await apiService.init();
@@ -369,7 +372,7 @@ final zonesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
     log.i('[ZONES] 🔄 Buscando zonas do buffet no backend');
 
     try {
-      final zones = await apiService.getZones();
+      final zones = await apiService.getZones(eventoId: eventoId);
 
       if (zones.isNotEmpty) {
         log.i('[ZONES] ✅ Zonas carregadas do backend: ${zones.length} áreas');

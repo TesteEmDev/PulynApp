@@ -1,0 +1,4 @@
+{
+  "PULYN_USE_LOCAL": "true",
+  "PULYN_LOCAL_API": "http://192.168.0.50:3001"
+}

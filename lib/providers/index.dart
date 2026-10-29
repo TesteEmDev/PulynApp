@@ -29,6 +29,23 @@ final familyEventsProvider = FutureProvider.autoDispose<List<Map<String, dynamic
   return apiService.getFamilyEvents();
 });
 
+/// Evento em que a criança vai ser vinculada (QR/pulseira): o escolhido em "Meus eventos"; sem escolha,
+/// o único evento da conta. Null = não dá para saber (o back usa então o buffet em que a conta foi criada).
+final linkEventIdProvider = Provider.autoDispose<String?>((ref) {
+  final escolhido = ref.watch(selectedEventIdProvider);
+  if (escolhido != null) return escolhido;
+  final eventos = ref.watch(familyEventsProvider).value;
+  return (eventos != null && eventos.length == 1) ? eventos.first['id'] as String? : null;
+});
+
+/// Eventos da conta (adicionados pelo código e das crianças), com as crianças e os pontos de cada um,
+/// para a tela "Meus eventos". Buscado de novo toda vez que a tela abre.
+final myEventsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final apiService = ref.read(apiServiceProvider);
+  await apiService.init();
+  return apiService.getMyEvents();
+});
+
 final activeEventProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((ref) async* {
   final selecionado = ref.watch(selectedEventIdProvider);
   final apiService = ref.read(apiServiceProvider);
@@ -345,6 +362,9 @@ final zonesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   try {
     // ✅ Mesmo gatilho de "puxar pra atualizar"/WebSocket do resto do mapa.
     ref.watch(mapRefreshProvider);
+    // As zonas são do buffet do evento em exibição: trocar de evento busca as do outro buffet.
+    // (select: o evento ativo é reemitido a cada 5 s e só a troca do id deve recarregar as zonas)
+    final eventoId = ref.watch(activeEventProvider.select((evento) => evento.value?['id'] as String?));
 
     final apiService = ref.read(apiServiceProvider);
     await apiService.init();
@@ -352,7 +372,7 @@ final zonesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
     log.i('[ZONES] 🔄 Buscando zonas do buffet no backend');
 
     try {
-      final zones = await apiService.getZones();
+      final zones = await apiService.getZones(eventoId: eventoId);
 
       if (zones.isNotEmpty) {
         log.i('[ZONES] ✅ Zonas carregadas do backend: ${zones.length} áreas');

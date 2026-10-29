@@ -151,6 +151,51 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('checkpoint no formato da API (checkpointId, sem id): a leitura leva o avatar até ele', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    // Como o back manda: `checkpointId` em texto e o número do buffet em numCheck/codigo, sem campo `id`.
+    // O número (3) não pode ser confundido com o checkpointId ('67').
+    const daApi = {
+      'checkpointId': '67',
+      'numCheck': 3,
+      'codigo': 3,
+      'nome': 'Ponte Real',
+      'zona': 'Entrada',
+      'status': 'online',
+      'mapaX': 200,
+      'mapaY': 150,
+    };
+    await tester.pumpWidget(app(extraCheckpoints: [daApi]));
+    await settle(tester, 500);
+    final before = tester.getCenter(find.text('Lia'));
+
+    final container = ProviderScope.containerOf(tester.element(find.byType(EventMapWidget)));
+    container.read(lastCheckpoint.notifier).state = {
+      'c1': {'checkpointId': '67', 'checkpointName': 'Ponte Real'},
+    };
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 900));
+
+    final after = tester.getCenter(find.text('Lia'));
+    expect((after - before).distance, greaterThan(20), reason: 'o avatar saiu de onde estava');
+    expect((after.dx - tester.getCenter(find.text('Ponte Real')).dx).abs(), lessThan(1.0), reason: 'e parou em cima do checkpoint lido');
+    await tester.pump(const Duration(seconds: 5));
+    expect(tester.takeException(), isNull);
+  });
+
+  test('checkpointKeyOf: usa o checkpointId; id só como alternativa; o número do buffet nunca', () {
+    expect(checkpointKeyOf({'checkpointId': '67', 'id': 10, 'codigo': 3}), '67');
+    expect(checkpointKeyOf({'checkpointId': 67}), '67');
+    expect(checkpointKeyOf({'id': 'cp1'}), 'cp1');
+    expect(checkpointKeyOf({'codigo': 3, 'numCheck': 3}), isNull);
+    expect(checkpointKeyOf({'checkpointId': '  '}), isNull);
+    expect(checkpointKeyOf({}), isNull);
+  });
+
   testWidgets('toque no rótulo do checkpoint continua funcionando com o avatar em cima', (tester) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1.0;
@@ -579,5 +624,5 @@ class _FakeApi extends ApiService {
   _FakeApi(this.floorPlan);
 
   @override
-  Future<String?> getFloorPlan() async => floorPlan;
+  Future<String?> getFloorPlan({String? eventoId}) async => floorPlan;
 }

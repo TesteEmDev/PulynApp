@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/theme.dart';
 import '../models/family_models.dart';
+import '../providers/index.dart';
 import '../services/api_service.dart';
 import '../services/nfc_reader.dart';
 import '../utils/logger.dart';
@@ -32,6 +34,9 @@ class BraceletLinkPanel extends StatefulWidget {
   /// fechando ao mesmo tempo (vindo do leitor QR, a sessão NFC é derrubada pelo sistema).
   final bool autoStart;
 
+  /// Evento em que vincular. Sem informar, vale o escolhido no app (ou o único evento da conta).
+  final String? eventoId;
+
   // Pontos de substituição, para testar sem NFC e sem rede.
   final NfcReader? reader;
   final LinkBraceletRequest? linkChild;
@@ -42,6 +47,7 @@ class BraceletLinkPanel extends StatefulWidget {
     this.onUseQr,
     this.framed = true,
     this.autoStart = false,
+    this.eventoId,
     this.reader,
     this.linkChild,
     super.key,
@@ -156,10 +162,27 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
     }
   }
 
-  static Future<Map<String, dynamic>> _defaultLinkChild(String uid) async {
-    final api = ApiService();
+  /// Vínculo de verdade: manda a pulseira e o evento em que a pessoa está. Usa o ApiService do app (com o login),
+  /// ou um novo se o painel estiver fora de um ProviderScope.
+  Future<Map<String, dynamic>> _defaultLinkChild(String uid) async {
+    ProviderContainer? container;
+    try {
+      container = ProviderScope.containerOf(context, listen: false);
+    } catch (_) {
+      container = null;
+    }
+    final api = container?.read(apiServiceProvider) ?? ApiService();
     await api.init();
-    return api.linkChildWithBracelet(uid);
+
+    var eventoId = widget.eventoId ?? container?.read(selectedEventIdProvider);
+    if (eventoId == null && container != null) {
+      // Sem evento escolhido: se a conta só tem um evento, é esse (mesma regra de linkEventIdProvider)
+      try {
+        final eventos = await container.read(familyEventsProvider.future);
+        if (eventos.length == 1) eventoId = eventos.first['id'] as String?;
+      } catch (_) {}
+    }
+    return api.linkChildWithBracelet(uid, eventoId: eventoId);
   }
 
   @override

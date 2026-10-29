@@ -81,6 +81,16 @@ Rect floorPlanRect(double aspect) {
   return Rect.fromLTWH(canvasWidth / 2 - width / 2, 0, width, canvasHeight);
 }
 
+/// Identificador de um checkpoint como a leitura da criança o traz (WebSocket e histórico: `checkpointId`).
+/// O back manda o `checkpointId` (texto) nas respostas e NÃO manda `id`; `id` só entra como alternativa para
+/// respostas antigas. O `codigo`/`numCheck` é o número que o buffet vê e pode repetir entre checkpoints de
+/// buffets diferentes, por isso nunca serve para casar a leitura com o checkpoint.
+String? checkpointKeyOf(Map<String, dynamic> checkpoint) {
+  final valor = checkpoint['checkpointId'] ?? checkpoint['id'];
+  final chave = valor?.toString().trim();
+  return (chave == null || chave.isEmpty) ? null : chave;
+}
+
 /// 🗺️ Widget de Mapa do Evento com Zonas, Checkpoints e Filhos - VERSÃO MELHORADA
 class EventMapWidget extends ConsumerStatefulWidget {
   final List<Child>? childrenList; // Lista de filhos vinculados no app (todos são "meus filhos")
@@ -285,7 +295,9 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
   Future<void> _loadFloorPlanFromRef() async {
     try {
       final apiService = ref.read(apiServiceProvider);
-      final floorPlanUrl = await apiService.getFloorPlan();
+      // A planta é do buffet do evento em exibição (o escolhido no app, ou o evento ativo)
+      final eventoId = widget.eventoId ?? ref.read(activeEventProvider).value?['id'] as String?;
+      final floorPlanUrl = await apiService.getFloorPlan(eventoId: eventoId);
 
       if (mounted && floorPlanUrl != null && floorPlanUrl.isNotEmpty) {
         final image = _decodeFloorPlanImage(floorPlanUrl);
@@ -1280,14 +1292,14 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       
       if (lastCheckpointData != null) {
         // ✅ Criança tem um checkpoint - posiciona lá
-        final checkpointId = lastCheckpointData['checkpointId'];
-        
+        final checkpointId = lastCheckpointData['checkpointId'].toString().trim().toLowerCase();
+
         final checkpoint = checkpoints.firstWhere(
-          (cp) => cp['id'].toString().toLowerCase() == checkpointId.toString().toLowerCase(),
+          (cp) => checkpointKeyOf(cp)?.toLowerCase() == checkpointId,
           orElse: () => {},
         );
-        
-        if (checkpoint.isNotEmpty && checkpoint['id'] != null) {
+
+        if (checkpoint.isNotEmpty) {
           final cpPos = _getCheckpointPosition(checkpoint, checkpoints);
           
           positions.add({
@@ -1460,6 +1472,13 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                           ],
                         ),
                       ),
+                      // Liga/desliga o mapa de calor (onde os filhos passaram mais tempo)
+                      _buildHeaderButton(
+                        _mostrarCalor ? Icons.whatshot : Icons.whatshot_outlined,
+                        _mostrarCalor ? 'Esconder mapa de calor' : 'Mapa de calor',
+                        () => setState(() => _mostrarCalor = !_mostrarCalor),
+                        color: _mostrarCalor ? PulynColors.accent : null,
+                      ),
                       // Zoom e "mapa inteiro" no cabeçalho: sobre o mapa eles cobriam
                       // e bloqueavam o toque em checkpoints do canto.
                       _buildHeaderButton(Icons.remove, 'Afastar', () => _zoomBy(1 / 1.6)),
@@ -1469,6 +1488,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   ),
                 ),
 
+                if (_mostrarCalor) _buildBarraCalor(),
 
                 // Mapa interativo
                 AspectRatio(

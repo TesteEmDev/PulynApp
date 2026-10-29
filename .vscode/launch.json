@@ -6,11 +6,12 @@
     "configurations": [
     
         {
-            // Debug apontando para o backend local (http://192.168.0.50:3001). O celular precisa estar na mesma rede.
+            // Debug apontando para o backend local. O endereço fica em config-local.json (PULYN_LOCAL_API).
+            // O celular precisa estar na mesma rede.
             "name": "pulyn_app (back local)",
             "request": "launch",
             "type": "dart",
-            "toolArgs": ["--dart-define=PULYN_USE_LOCAL=true"]
+            "toolArgs": ["--dart-define-from-file=config-local.json"]
         },
         {
             "name": "pulyn_app",

@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pulyn_app/config/theme.dart';
 import 'package:pulyn_app/models/family_models.dart';
+import 'package:pulyn_app/providers/index.dart';
+import 'package:pulyn_app/services/api_service.dart';
 import 'package:pulyn_app/services/nfc_reader.dart';
 import 'package:pulyn_app/widgets/bracelet_link_panel.dart';
 import 'package:pulyn_app/widgets/qr_link_panel.dart';
@@ -31,6 +34,25 @@ class _FakeReader implements NfcReader {
   Future<void> cancel() async => cancelCalls++;
 }
 
+/// ApiService falso que anota para qual evento a pulseira foi mandada.
+class _FakeApi extends ApiService {
+  final List<({String uid, String? eventoId})> chamadas = [];
+  final List<Map<String, dynamic>> eventosDaConta;
+  _FakeApi({this.eventosDaConta = const []});
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<List<Map<String, dynamic>>> getFamilyEvents() async => eventosDaConta;
+
+  @override
+  Future<Map<String, dynamic>> linkChildWithBracelet(String uid, {String? eventoId}) async {
+    chamadas.add((uid: uid, eventoId: eventoId));
+    return _linked;
+  }
+}
+
 const _linked = <String, dynamic>{
   'success': true,
   'linkedChild': {'id': 'c1', 'nome': 'Lia Souza', 'apelido': 'Lia', 'idade': 6, 'evento': 'Festa da Lia'},
@@ -53,6 +75,61 @@ void main() {
 
     test('byte negativo (vindo do Android) é tratado como sem sinal', () {
       expect(uidToHex([-1, -128]), 'FF80');
+    });
+  });
+
+  group('BraceletLinkPanel: evento do vínculo', () {
+    /// Abre o painel de verdade (sem `linkChild` de teste) dentro de um ProviderScope e lê uma pulseira.
+    Future<void> lerPulseira(WidgetTester tester, _FakeApi api, {String? eventoEscolhido, String? eventoDoPainel}) async {
+      final reader = _FakeReader();
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          apiServiceProvider.overrideWithValue(api),
+          if (eventoEscolhido != null) selectedEventIdProvider.overrideWith((ref) => eventoEscolhido),
+        ],
+        child: _wrap(BraceletLinkPanel(reader: reader, eventoId: eventoDoPainel)),
+      ));
+      await tester.pump();
+      await tester.tap(find.text('Ler pulseira'));
+      await tester.pump();
+      reader.reads.single.complete('04E72C1A896880');
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('manda o evento escolhido no app junto com a pulseira', (tester) async {
+      final api = _FakeApi(eventosDaConta: [
+        {'id': 'e1', 'nome': 'Festa A'},
+        {'id': 'e2', 'nome': 'Festa B'},
+      ]);
+      await lerPulseira(tester, api, eventoEscolhido: 'e2');
+
+      expect(api.chamadas, [(uid: '04E72C1A896880', eventoId: 'e2')]);
+    });
+
+    testWidgets('sem evento escolhido e com um único evento na conta, é esse', (tester) async {
+      final api = _FakeApi(eventosDaConta: [
+        {'id': 'e1', 'nome': 'Festa A'},
+      ]);
+      await lerPulseira(tester, api);
+
+      expect(api.chamadas.single.eventoId, 'e1');
+    });
+
+    testWidgets('sem evento escolhido e com vários eventos, não chuta: segue o comportamento antigo', (tester) async {
+      final api = _FakeApi(eventosDaConta: [
+        {'id': 'e1', 'nome': 'Festa A'},
+        {'id': 'e2', 'nome': 'Festa B'},
+      ]);
+      await lerPulseira(tester, api);
+
+      expect(api.chamadas.single.eventoId, isNull);
+    });
+
+    testWidgets('o evento informado ao painel vale mais que o escolhido', (tester) async {
+      final api = _FakeApi();
+      await lerPulseira(tester, api, eventoEscolhido: 'e2', eventoDoPainel: 'e9');
+
+      expect(api.chamadas.single.eventoId, 'e9');
     });
   });
 

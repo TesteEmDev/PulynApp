@@ -457,8 +457,50 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /familias/children - Eventos das crianças da família (um por evento), para o seletor
+  /// ✅ GET /familias/eventos - Eventos da conta (adicionados pelo código de convite e das crianças
+  /// vinculadas), passados e atuais, com as crianças e os pontos de cada um.
+  Future<List<Map<String, dynamic>>> getMyEvents() async {
+    final response = await _dio.get('/familias/eventos');
+    final data = _validateResponseData(response.data);
+    final eventos = data['eventos'] as List<dynamic>? ?? [];
+    return eventos.whereType<Map<String, dynamic>>().toList();
+  }
+
+  /// ✅ POST /familias/invites/{token}/entrar - Adiciona à conta o evento do código de convite
+  /// (e vincula a criança, se o convite for de uma criança). Devolve `evento`, `crianca` e `jaTinhaEvento`.
+  Future<Map<String, dynamic>> joinEventWithInvite(String token) async {
+    try {
+      if (!_initialized) await init();
+      final response = await _dio.post('/familias/invites/$token/entrar');
+      return _validateResponseData(response.data);
+    } on DioException catch (e) {
+      log.e('[API] ❌ Erro ao adicionar evento pelo convite: ${e.response?.statusCode} ${e.response?.data}');
+      var mensagem = 'Não foi possível adicionar o evento';
+      final body = e.response?.data;
+      if (body is Map && body['error'] is String) mensagem = body['error'] as String;
+      throw Exception(mensagem);
+    }
+  }
+
+  /// ✅ Eventos para o seletor da home (um por evento). Usa /familias/eventos, que também traz os
+  /// eventos adicionados pelo código sem criança; se o back ainda não tem essa rota, cai para os
+  /// eventos das crianças.
   Future<List<Map<String, dynamic>>> getFamilyEvents() async {
+    try {
+      final eventos = await getMyEvents();
+      return [
+        for (final e in eventos)
+          if ((e['id'] as String?)?.isNotEmpty ?? false)
+            {'id': e['id'], 'nome': ((e['nome'] as String?)?.trim().isNotEmpty ?? false) ? (e['nome'] as String).trim() : 'Evento'},
+      ];
+    } catch (e) {
+      log.w('[API] ⚠️ /familias/eventos indisponível, usando os eventos das crianças: $e');
+      return _getEventsFromChildren();
+    }
+  }
+
+  /// ✅ GET /familias/children - Eventos das crianças da família (um por evento)
+  Future<List<Map<String, dynamic>>> _getEventsFromChildren() async {
     final response = await _dio.get('/familias/children');
     final data = response.data;
     final children = data is Map ? (data['children'] as List? ?? const []) : (data is List ? data : const []);
@@ -496,6 +538,12 @@ class ApiService {
       final escolhidas = eventoId == null
           ? const <Map<String, dynamic>>[]
           : children.where((c) => c['eventoId'] == eventoId).toList();
+      if (eventoId != null && escolhidas.isEmpty) {
+        // Evento adicionado pelo código e ainda sem criança vinculada: não está na lista das crianças
+        final doConvite = await _findMyEvent(eventoId);
+        if (doConvite != null) return doConvite;
+      }
+
       final alvo = escolhidas.isNotEmpty ? escolhidas.first : children.first;
       final id = alvo['eventoId'] as String;
       final nome = alvo['eventoNome'] as String?;
@@ -510,6 +558,25 @@ class ApiService {
       log.w('[API] ⚠️ Erro ao buscar evento ativo: $e');
       return null;
     }
+  }
+
+  /// Evento da conta (por /familias/eventos) no mesmo formato de [getActiveEvent]; null se não for da conta.
+  Future<Map<String, dynamic>?> _findMyEvent(String eventoId) async {
+    try {
+      final eventos = await getMyEvents();
+      for (final e in eventos) {
+        if (e['id'] != eventoId) continue;
+        final nome = e['nome'] as String?;
+        return {
+          'id': eventoId,
+          'nome': (nome == null || nome.trim().isEmpty) ? 'Evento' : nome.trim(),
+          'status': e['encerrado'] == true ? 'finished' : 'active',
+        };
+      }
+    } catch (e) {
+      log.w('[API] ⚠️ Erro ao buscar o evento escolhido: $e');
+    }
+    return null;
   }
 
   /// ✅ GET /familias/active-event - Jogo ativo (via evento ativo) 
@@ -533,10 +600,14 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /company-map/floor-plan - Planta baixa do buffet (imagem base64, vale para todos os eventos)
-  Future<String?> getFloorPlan() async {
+  /// ✅ GET /company-map/floor-plan - Planta baixa do buffet (imagem base64, vale para todos os eventos).
+  /// [eventoId] diz de qual evento é o mapa: o back usa o buffet desse evento (sem ele, o das crianças vinculadas).
+  Future<String?> getFloorPlan({String? eventoId}) async {
     try {
-      final response = await _dio.get('/company-map/floor-plan');
+      final response = await _dio.get(
+        '/company-map/floor-plan',
+        queryParameters: {if (eventoId != null && eventoId.isNotEmpty) 'eventoId': eventoId},
+      );
       final data = _validateResponseData(response.data);
       
       // Backend retorna { floorPlan: { dataUrl, nome, tipo } }
@@ -577,10 +648,14 @@ class ApiService {
     }
   }
 
-  /// ✅ GET /company-map/zones - Zonas do buffet (vale para todos os eventos)
-  Future<List<Map<String, dynamic>>> getZones() async {
+  /// ✅ GET /company-map/zones - Zonas do buffet (vale para todos os eventos).
+  /// [eventoId] diz de qual evento é o mapa: o back usa o buffet desse evento (sem ele, o das crianças vinculadas).
+  Future<List<Map<String, dynamic>>> getZones({String? eventoId}) async {
     try {
-      final response = await _dio.get('/company-map/zones');
+      final response = await _dio.get(
+        '/company-map/zones',
+        queryParameters: {if (eventoId != null && eventoId.isNotEmpty) 'eventoId': eventoId},
+      );
 
       final data = _validateResponseList(response.data);
       return data.map((item) => item as Map<String, dynamic>).toList();
@@ -780,11 +855,16 @@ class ApiService {
   /// POST /family/bracelet/validate - Vincular criança lendo a pulseira NFC.
   /// [uid] é o UID da pulseira em hexadecimal (veja `uidToHex`). Devolve o mesmo formato do QR
   /// (`success` + `linkedChild`); o vínculo fica pendente até a recepção aprovar.
-  Future<Map<String, dynamic>> linkChildWithBracelet(String uid) async {
+  /// [eventoId] é o evento escolhido no app: o back procura a pulseira no buffet desse evento
+  /// (sem ele, só no buffet em que a conta foi criada).
+  Future<Map<String, dynamic>> linkChildWithBracelet(String uid, {String? eventoId}) async {
     try {
       if (!_initialized) await init();
 
-      final response = await _dio.post('/family/bracelet/validate', data: {'uid': uid});
+      final response = await _dio.post(
+        '/family/bracelet/validate',
+        data: {'uid': uid, if (eventoId != null && eventoId.isNotEmpty) 'eventoId': eventoId},
+      );
       final data = _validateResponseData(response.data);
 
       if (data['success'] != true || data['linkedChild'] == null) {

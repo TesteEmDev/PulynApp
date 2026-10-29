@@ -217,6 +217,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // ===== HOME TAB =====
   Widget _buildHomeTab(BuildContext context, WidgetRef ref) {
     final noChildren = ref.watch(childrenProvider.select(hasNoChildren));
+    // Evento escolhido em "Meus eventos" onde a conta ainda não tem criança: a home mostra o vínculo para ele
+    final eventoEscolhido = ref.watch(selectedEventIdProvider);
+    final semCriancaNoEvento = ref.watch(childrenProvider.select(
+      (criancas) => eventoEscolhido != null &&
+          criancas.hasValue &&
+          !(criancas.value ?? const <Child>[]).any((c) => c.eventoId == eventoEscolhido),
+    ));
 
     return Scaffold(
       appBar: AppBar(
@@ -242,14 +249,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _buildWelcomeCard(context, ref),
                 const SizedBox(height: 16),
                 _buildPreRegisteredSection(ref),
-                if (noChildren) ...[
+                _buildMyEventsLink(context),
+                if (noChildren || semCriancaNoEvento) ...[
+                  // Em qual evento a criança vai ser vinculada (e como trocar)
+                  _buildEventoDoVinculo(context, ref),
                   // Sem crianças, o mapa e a lista seriam só caixas vazias: o destaque leva ao QR Code
                   LinkChildHero(
                     onLinked: (child) => _handleChildLinked(child, announce: true),
                   ),
                   const SizedBox(height: 12),
                   // Cadastro feito pelo próprio responsável, antes de ir ao buffet
-                  _buildCadastroCard(),
+                  if (noChildren) _buildCadastroCard(),
                 ]
                 else ...[
                   _buildEventMapSection(context, ref),
@@ -569,6 +579,73 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// Crianças cadastradas pelo responsável que ainda não entraram no buffet (sem pulseira).
   /// Erro ou carregamento escondem a seção, sem derrubar a home.
+  /// Faixa "Evento atual" acima do vínculo: mostra em qual evento a criança será vinculada (o escolhido em
+  /// "Meus eventos", ou o único da conta) e leva a "Meus eventos" para trocar. Some se não dá para saber.
+  Widget _buildEventoDoVinculo(BuildContext context, WidgetRef ref) {
+    final eventoId = ref.watch(linkEventIdProvider);
+    if (eventoId == null) return const SizedBox.shrink();
+    final eventos = ref.watch(familyEventsProvider).value ?? const <Map<String, dynamic>>[];
+    final nome = eventos.where((e) => e['id'] == eventoId).map((e) => e['nome'] as String).firstOrNull;
+    if (nome == null) return const SizedBox.shrink();
+
+    return Container(
+      key: const Key('evento-do-vinculo'),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.fromLTRB(14, 8, 6, 8),
+      decoration: BoxDecoration(
+        color: PulynColors.darkCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PulynColors.primary.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.event_rounded, size: 20, color: PulynColors.primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Evento atual', style: TextStyle(fontSize: 11, color: PulynColors.textSecondary)),
+                Text(
+                  nome,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w700, color: PulynColors.textPrimary),
+                ),
+              ],
+            ),
+          ),
+          TextButton(onPressed: () => context.push('/my-events'), child: const Text('Trocar')),
+        ],
+      ),
+    );
+  }
+
+  /// Atalho para "Meus eventos": navegar entre os eventos da conta e adicionar um com o código do convite.
+  Widget _buildMyEventsLink(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: PulynColors.darkCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PulynColors.darkBorder),
+      ),
+      child: ListTile(
+        key: const Key('abrir-meus-eventos'),
+        leading: const Icon(Icons.event_note_outlined, color: PulynColors.primary),
+        title: const Text(
+          'Meus eventos',
+          style: TextStyle(fontWeight: FontWeight.bold, color: PulynColors.textPrimary),
+        ),
+        subtitle: const Text(
+          'Veja os eventos que você já foi e adicione um novo com o código',
+          style: TextStyle(fontSize: 12, color: PulynColors.textSecondary),
+        ),
+        trailing: const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+        onTap: () => context.push('/my-events'),
+      ),
+    );
+  }
+
   Widget _buildPreRegisteredSection(WidgetRef ref) {
     final perfis = ref.watch(preRegisteredChildrenProvider).when(
           data: (lista) => lista,

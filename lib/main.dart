@@ -21,6 +21,7 @@ import 'screens/family/manage_linked_children_screen.dart';
 import 'screens/family/pre_register_child_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/event/pre_event_screen.dart';
+import 'screens/event/my_events_screen.dart';
 import 'screens/event/event_result_screen.dart';
 
 // ✅ Provider para detectar primeira execução
@@ -195,6 +196,10 @@ class MyApp extends ConsumerWidget {
           GoRoute(
             path: '/pre-register-child',
             builder: (context, state) => const PreRegisterChildScreen(),
+          ),
+          GoRoute(
+            path: '/my-events',
+            builder: (context, state) => const MyEventsScreen(),
           ),
           GoRoute(
             path: '/pre-event',

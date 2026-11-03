@@ -257,6 +257,7 @@ class _ManageLinkedChildrenScreenState
           ),
         ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: PulynColors.primary,
         foregroundColor: Colors.white,

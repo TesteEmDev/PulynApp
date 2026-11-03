@@ -257,20 +257,23 @@ class _ManageLinkedChildrenScreenState
           ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: PulynColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PulynMedidas.raioBotao)),
-        icon: const Icon(Icons.add),
-        label: const Text('Cadastrar criança'),
-        onPressed: () async {
-          final cadastrou = await context.push<bool>('/pre-register-child');
-          if (cadastrou == true) {
-            ref.invalidate(preRegisteredChildrenProvider);
-          }
-        },
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                final cadastrou = await context.push<bool>('/pre-register-child');
+                if (cadastrou == true) {
+                  ref.invalidate(preRegisteredChildrenProvider);
+                }
+              },
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Cadastrar criança'),
+            ),
+          ),
+        ),
       ),
     );
   }

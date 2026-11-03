@@ -32,6 +32,22 @@ class AuthHeader extends StatelessWidget {
           errorBuilder: (_, _, _) => SizedBox(height: fullLogo ? 96 : 44),
         ),
         SizedBox(height: fullLogo ? 20 : 24),
+        // Faixa com as cores da logo: a marca aparece em todas as telas de entrada.
+        if (fullLogo) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (final cor in [PulynColors.primary, PulynColors.secondary, PulynColors.accent, PulynColors.pink])
+                Container(
+                  width: 28,
+                  height: 5,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(color: cor, borderRadius: BorderRadius.circular(3)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 18),
+        ],
         Text(
           title,
           textAlign: TextAlign.center,
@@ -105,7 +121,7 @@ class AuthInfoCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     mensagem!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: PulynColors.textSecondary,
                       fontSize: 13,
                       height: 1.35,
@@ -156,7 +172,7 @@ class AuthSectionTitle extends StatelessWidget {
               if (subtitle != null)
                 Text(
                   subtitle!,
-                  style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                  style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                 ),
             ],
           ),
@@ -335,7 +351,7 @@ class AuthStep extends StatelessWidget {
             padding: const EdgeInsets.only(top: 2),
             child: Text(
               texto,
-              style: const TextStyle(
+              style: TextStyle(
                 color: PulynColors.textSecondary,
                 fontSize: 14,
                 height: 1.4,

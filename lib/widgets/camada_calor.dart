@@ -159,11 +159,11 @@ class LegendaCalor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const estilo = TextStyle(fontSize: 11, color: PulynColors.textMuted, fontWeight: FontWeight.w500);
+    final estilo = TextStyle(fontSize: 11, color: PulynColors.textMuted, fontWeight: FontWeight.w500);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('Pouco tempo', style: estilo),
+        Text('Pouco tempo', style: estilo),
         const SizedBox(width: 8),
         Container(
           width: 96,
@@ -174,7 +174,7 @@ class LegendaCalor extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        const Text('Muito tempo', style: estilo),
+        Text('Muito tempo', style: estilo),
       ],
     );
   }

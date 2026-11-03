@@ -69,14 +69,7 @@ class _EventResultScreenState extends State<EventResultScreen> with TickerProvid
           // Fundo com gradiente
           Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                  Colors.transparent,
-                ],
-              ),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
             ),
           ),
 
@@ -193,12 +186,7 @@ class _ResultHeader extends StatelessWidget {
       builder: (context, child) {
         return Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withValues(alpha: 0.7),
-              ],
-            ),
+            color: Theme.of(context).primaryColor,
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(20),

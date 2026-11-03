@@ -83,7 +83,7 @@ class _ManageLinkedChildrenScreenState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              Icon(Icons.error_outline, size: 64, color: PulynColors.danger),
               const SizedBox(height: 16),
               Text('Erro ao carregar: $error'),
             ],
@@ -91,7 +91,7 @@ class _ManageLinkedChildrenScreenState
         ),
         data: (children) {
           if (children.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -162,7 +162,7 @@ class _ManageLinkedChildrenScreenState
                                 ),
                                 Text(
                                   '${child.idade} anos • ${child.teamName}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     color: PulynColors.textMuted,
                                   ),
@@ -192,7 +192,7 @@ class _ManageLinkedChildrenScreenState
                             const SizedBox(height: 4),
                             Text(
                               'Ranking: #${child.rank}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: PulynColors.textMuted,
                               ),
@@ -205,19 +205,14 @@ class _ManageLinkedChildrenScreenState
                         children: [
                           Expanded(
                             child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: PulynColors.primary,
-                              ),
-                              onPressed: () {
-                                // Navegar para detalhes da criança
-                              },
-                              child: const Text('Ver Detalhes'),
+                              onPressed: () => context.push('/child/${child.id}'),
+                              child: const Text('Ver detalhes'),
                             ),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: PulynColors.danger,
                             ),
                             onPressed: () {
                               showDialog(
@@ -240,7 +235,7 @@ class _ManageLinkedChildrenScreenState
                                       },
                                       child: const Text(
                                         'Desvincular',
-                                        style: TextStyle(color: Colors.red),
+                                        style: TextStyle(color: PulynColors.danger),
                                       ),
                                     ),
                                   ],
@@ -262,16 +257,23 @@ class _ManageLinkedChildrenScreenState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.green,
-        icon: const Icon(Icons.add),
-        label: const Text('Cadastrar criança'),
-        onPressed: () async {
-          final cadastrou = await context.push<bool>('/pre-register-child');
-          if (cadastrou == true) {
-            ref.invalidate(preRegisteredChildrenProvider);
-          }
-        },
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                final cadastrou = await context.push<bool>('/pre-register-child');
+                if (cadastrou == true) {
+                  ref.invalidate(preRegisteredChildrenProvider);
+                }
+              },
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Cadastrar criança'),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -305,7 +307,7 @@ class _PreRegisteredSection extends ConsumerWidget {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Cadastradas, mas ainda sem pulseira. Leve a criança à recepção do buffet.',
                 style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
               ),
@@ -313,7 +315,7 @@ class _PreRegisteredSection extends ConsumerWidget {
               for (final perfil in perfis)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.hourglass_empty, color: PulynColors.textMuted),
+                  leading: Icon(Icons.hourglass_empty, color: PulynColors.textMuted),
                   title: Text((perfil['apelido'] as String?)?.isNotEmpty == true
                       ? perfil['apelido'] as String
                       : perfil['nome'] as String),

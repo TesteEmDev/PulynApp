@@ -86,11 +86,11 @@ void main() {
     expect(find.text('Crianças vinculadas'), findsNothing);
   });
 
-  testWidgets('sem crianças mostra como vincular pelo QR Code', (tester) async {
+  testWidgets('sem crianças não oferece vincular pela aba Perfil (o vínculo fica com a recepção)', (tester) async {
     await pumpTab(tester, children: const AsyncValue.data(<Child>[]));
 
     expect(find.text('Nenhuma criança vinculada ainda'), findsOneWidget);
-    expect(find.text('Vincular com QR Code'), findsOneWidget);
+    expect(find.text('Vincular com QR Code'), findsNothing);
     expect(find.text('0'), findsNWidgets(2)); // 0 crianças, 0 pontos
   });
 
@@ -166,10 +166,10 @@ void main() {
     expect(retries, 1);
   });
 
-  testWidgets('não tem controles que não fazem nada (interruptores, editar)', (tester) async {
+  testWidgets('o único interruptor é o de tema, e nada que não funciona aparece', (tester) async {
     await pumpTab(tester);
 
-    expect(find.byType(Switch), findsNothing);
+    expect(find.byType(Switch), findsOneWidget); // tema claro
     expect(find.byTooltip('Editar perfil'), findsNothing);
     expect(find.text('Tema Escuro'), findsNothing);
   });

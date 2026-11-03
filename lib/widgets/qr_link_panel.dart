@@ -274,7 +274,7 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
         children: [
           indicator,
           const SizedBox(height: 16),
-          Text(texto, style: const TextStyle(color: PulynColors.textSecondary)),
+          Text(texto, style: TextStyle(color: PulynColors.textSecondary)),
         ],
       ),
     );
@@ -356,7 +356,7 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
               ? 'Para ler o QR Code, permita o acesso à câmera.'
               : 'O acesso à câmera está desativado. Ative nas configurações do app e volte aqui.',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: PulynColors.textSecondary, height: 1.4),
+          style: TextStyle(color: PulynColors.textSecondary, height: 1.4),
         ),
         const SizedBox(height: 16),
         if (_canAskAgain)
@@ -411,7 +411,7 @@ class _QrLinkPanelState extends State<QrLinkPanel> {
             if (child.teamName.isNotEmpty) child.teamName,
           ].join(' · '),
           textAlign: TextAlign.center,
-          style: const TextStyle(color: PulynColors.textSecondary),
+          style: TextStyle(color: PulynColors.textSecondary),
         ),
         const SizedBox(height: 16),
         OutlinedButton.icon(

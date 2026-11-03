@@ -35,7 +35,7 @@ class _ConsentimentoPrivacidadeState extends State<ConsentimentoPrivacidade> {
 
   @override
   Widget build(BuildContext context) {
-    const estiloTexto = TextStyle(color: PulynColors.textSecondary, fontSize: 13, height: 1.4);
+    final estiloTexto = TextStyle(color: PulynColors.textSecondary, fontSize: 13, height: 1.4);
     return CheckboxListTile(
       value: widget.value,
       onChanged: widget.enabled ? (novo) => widget.onChanged(novo ?? false) : null,

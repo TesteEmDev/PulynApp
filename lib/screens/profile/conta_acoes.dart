@@ -74,13 +74,19 @@ Future<void> excluirConta(BuildContext context, WidgetRef ref) async {
   );
   if (senha == null || !context.mounted) return;
 
+  // Captura o que precisa antes de navegar: depois de sair da tela, o ref desta tela não vale mais.
+  final api = ref.read(apiServiceProvider);
+  final sessao = ref.read(authProvider.notifier);
   try {
-    await ref.read(apiServiceProvider).excluirConta(senha);
-    await ref.read(authProvider.notifier).logout();
-    if (!context.mounted) return;
-    context.go('/login');
+    await api.excluirConta(senha);
   } catch (e) {
     if (!context.mounted) return;
     showErrorSnackBar(context, e.toString().replaceFirst('Exception: ', ''));
+    return;
   }
+  // Primeiro sai para o login (ainda na rota atual), depois limpa a sessão. Assim a troca de rota não
+  // acontece no meio da reconstrução da tela de perfil.
+  if (context.mounted) context.go('/login');
+  await Future<void>.delayed(Duration.zero);
+  await sessao.logout();
 }

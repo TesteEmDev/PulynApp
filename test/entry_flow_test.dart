@@ -91,7 +91,7 @@ void main() {
   }
 
   group('onboarding', () {
-    testWidgets('"Começar" leva para a tela de colar o link do convite, não para o login', (tester) async {
+    testWidgets('"Começar" leva direto para o cadastro, sem código de convite', (tester) async {
       await pumpApp(tester, initial: '/onboarding');
 
       await tester.tap(find.text('Próximo'));
@@ -101,8 +101,8 @@ void main() {
       await tester.tap(find.text('Começar'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Bem-vindo!'), findsOneWidget);
-      expect(find.text('Código do convite'), findsOneWidget);
+      expect(find.text('Criar conta'), findsWidgets);
+      expect(find.text('Código do convite'), findsNothing);
       expect(find.text('TELA DE LOGIN'), findsNothing);
     });
 

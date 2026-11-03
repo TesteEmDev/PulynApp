@@ -24,12 +24,12 @@ class PoliticaPrivacidadeScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
               children: [
-                const Text(
+                Text(
                   'Pulyn Family',
                   style: TextStyle(color: PulynColors.textMuted, fontSize: 13),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Última atualização: 03/11/2026',
                   style: TextStyle(color: PulynColors.textMuted, fontSize: 13),
                 ),
@@ -41,7 +41,7 @@ class PoliticaPrivacidadeScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 for (final secao in _secoes) _SecaoView(secao),
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   'ADVANTAG TECNOLOGIA E SERVICOS LTDA - EPP · contato@advantag.com.br',
                   style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                 ),

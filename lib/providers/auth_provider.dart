@@ -7,6 +7,9 @@ import '../utils/logger.dart';
 
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 
+/// E-mail de um cadastro que ainda precisa de confirmação (null quando não há nenhum).
+final cadastroPendenteProvider = StateProvider<String?>((ref) => null);
+
 /// Se o e-mail da conta logada já foi confirmado. Recalcula quando muda o usuário logado.
 final emailConfirmadoProvider = FutureProvider.autoDispose<bool>((ref) async {
   ref.watch(authProvider.select((estado) => estado.valueOrNull?.id));
@@ -172,7 +175,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] ✅ Login bem-sucedido para $email');
       
       state = AsyncValue.data(loginResponse.user);
-    } on EmailNaoConfirmadoException {
+    } on EmailNaoConfirmadoException catch (e) {
+      ref.read(cadastroPendenteProvider.notifier).state = e.email;
       state = const AsyncValue.data(null);
       rethrow;
     } catch (e, st) {
@@ -213,7 +217,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] 👤 Usuário: ${loginResponse.user.email} (${loginResponse.user.nome})');
       
       state = AsyncValue.data(loginResponse.user);
-    } on EmailNaoConfirmadoException {
+    } on EmailNaoConfirmadoException catch (e) {
+      ref.read(cadastroPendenteProvider.notifier).state = e.email;
       state = const AsyncValue.data(null);
       rethrow;
     } catch (e, st) {

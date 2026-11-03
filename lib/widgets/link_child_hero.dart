@@ -62,14 +62,7 @@ class _LinkChildHeroState extends State<LinkChildHero> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PulynColors.primary.withValues(alpha: 0.30),
-            PulynColors.darkCard,
-          ],
-        ),
+        color: PulynColors.primary.withValues(alpha: 0.30),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: PulynColors.primary.withValues(alpha: 0.4)),
       ),
@@ -109,18 +102,7 @@ class _LinkChildHeroState extends State<LinkChildHero> {
             height: 72,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [PulynColors.primary, PulynColors.primaryLight],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: PulynColors.primary.withValues(alpha: 0.45),
-                  blurRadius: 18,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+              color: PulynColors.primary,
             ),
             child: const Icon(Icons.qr_code_scanner_rounded, size: 36, color: Colors.white),
           ),
@@ -132,7 +114,7 @@ class _LinkChildHeroState extends State<LinkChildHero> {
           style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'Peça o QR Code na recepção do buffet e escaneie para acompanhar a festa em tempo real.',
           textAlign: TextAlign.center,
           style: TextStyle(color: PulynColors.textSecondary, fontSize: 14, height: 1.4),
@@ -154,7 +136,7 @@ class _LinkChildHeroState extends State<LinkChildHero> {
         ),
         if (_nfcOffered) ...[
           const SizedBox(height: 16),
-          const Row(
+          Row(
             children: [
               Expanded(child: Divider(color: PulynColors.textMuted)),
               Padding(

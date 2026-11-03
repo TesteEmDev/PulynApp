@@ -179,7 +179,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
           Expanded(
             child: Text(
               mensagem,
-              style: const TextStyle(color: PulynColors.textPrimary),
+              style: TextStyle(color: PulynColors.textPrimary),
             ),
           ),
         ],
@@ -191,7 +191,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
     return Center(
       child: Column(
         children: [
-          const Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
+          Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
           const SizedBox(height: 16),
           Text(
             title,
@@ -201,7 +201,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
           Text(
             descricao,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: PulynColors.textMuted),
+            style: TextStyle(color: PulynColors.textMuted),
           ),
         ],
       ),
@@ -266,7 +266,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
               children: [
                 Text(
                   child.apelido.isNotEmpty ? child.apelido : child.nome,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: PulynColors.textPrimary,
@@ -275,7 +275,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                 const SizedBox(height: 4),
                 Text(
                   child.teamName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     color: PulynColors.textMuted,
                   ),
@@ -361,7 +361,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
           const SizedBox(height: 12),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               color: PulynColors.textMuted,
               fontWeight: FontWeight.w500,
@@ -370,7 +370,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               color: PulynColors.textPrimary,
               fontWeight: FontWeight.bold,
@@ -412,7 +412,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
               children: [
                 Text(
                   achievement.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: PulynColors.textPrimary,
@@ -421,7 +421,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                 const SizedBox(height: 4),
                 Text(
                   achievement.descricao,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: PulynColors.textMuted,
                   ),

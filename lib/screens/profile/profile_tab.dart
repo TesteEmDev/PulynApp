@@ -17,6 +17,10 @@ class ProfileTab extends StatelessWidget {
   /// Usuário logado.
   final AsyncValue<User?> auth;
 
+  /// Tema claro escolhido (true = claro) e a troca dele.
+  final bool temaClaro;
+  final ValueChanged<bool>? onTemaClaroChanged;
+
   /// Se o e-mail da conta já foi confirmado (null enquanto não se sabe).
   final AsyncValue<bool>? emailConfirmado;
 
@@ -37,6 +41,8 @@ class ProfileTab extends StatelessWidget {
     required this.auth,
     required this.children,
     this.emailConfirmado,
+    this.temaClaro = false,
+    this.onTemaClaroChanged,
     required this.onLogout,
     this.onRetry,
     this.onExcluirConta,
@@ -94,7 +100,7 @@ class ProfileTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _ProfileHeader(user: user),
+              _ProfileHeader(user: user, emailConfirmado: emailConfirmado?.valueOrNull),
               const SizedBox(height: 16),
 
               Row(
@@ -130,10 +136,16 @@ class ProfileTab extends StatelessWidget {
                 ],
               const SizedBox(height: 14),
 
-              if (emailConfirmado != null) ...[
-                _EmailStatusCard(status: emailConfirmado!),
-                const SizedBox(height: 14),
-              ],
+              const _SectionHeader(title: 'Preferências'),
+              const SizedBox(height: 12),
+              _SwitchTile(
+                icon: Icons.light_mode_outlined,
+                title: 'Tema claro',
+                subtitle: temaClaro ? 'Ativado' : 'Desativado (modo escuro)',
+                value: temaClaro,
+                onChanged: onTemaClaroChanged,
+              ),
+              const SizedBox(height: 14),
 
               const _SectionHeader(title: 'Conta'),
               const SizedBox(height: 12),
@@ -241,7 +253,10 @@ Color _parseHex(String hex, {Color fallback = PulynColors.primary}) {
 class _ProfileHeader extends StatelessWidget {
   final User user;
 
-  const _ProfileHeader({required this.user});
+  /// null enquanto não se sabe se o e-mail está confirmado.
+  final bool? emailConfirmado;
+
+  const _ProfileHeader({required this.user, this.emailConfirmado});
 
   @override
   Widget build(BuildContext context) {
@@ -250,14 +265,7 @@ class _ProfileHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PulynColors.primary.withValues(alpha: 0.28),
-            PulynColors.darkCard,
-          ],
-        ),
+        color: PulynColors.primary.withValues(alpha: 0.28),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: PulynColors.primary.withValues(alpha: 0.35)),
       ),
@@ -269,11 +277,7 @@ class _ProfileHeader extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [PulynColors.primary, PulynColors.primaryLight],
-              ),
+              color: PulynColors.primary,
               border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 3),
             ),
             child: Text(
@@ -305,8 +309,12 @@ class _ProfileHeader extends StatelessWidget {
                   user.email,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: PulynColors.textSecondary, fontSize: 13),
+                  style: TextStyle(color: PulynColors.textSecondary, fontSize: 13),
                 ),
+                if (emailConfirmado != null) ...[
+                  const SizedBox(height: 8),
+                  _EmailChip(confirmado: emailConfirmado!),
+                ],
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -348,6 +356,7 @@ class _StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 96,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: PulynColors.darkCard,
@@ -372,8 +381,8 @@ class _StatTile extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: PulynColors.textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1.1,
@@ -383,7 +392,7 @@ class _StatTile extends StatelessWidget {
                   label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                  style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                 ),
               ],
             ),
@@ -403,8 +412,8 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: PulynColors.textPrimary,
         fontSize: 16,
         fontWeight: FontWeight.w700,
       ),
@@ -452,8 +461,8 @@ class _ChildTile extends StatelessWidget {
                       nome,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: PulynColors.textPrimary,
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
                       ),
@@ -463,12 +472,12 @@ class _ChildTile extends StatelessWidget {
                       '$team · ${child.currentScore} pts',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                      style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+              Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
             ],
           ),
         ),
@@ -493,13 +502,13 @@ class _EmptyChildren extends StatelessWidget {
         children: [
           const Icon(Icons.child_care_rounded, size: 40, color: PulynColors.primary),
           const SizedBox(height: 10),
-          const Text(
+          Text(
             'Nenhuma criança vinculada ainda',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: TextStyle(color: PulynColors.textPrimary, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'A recepção do buffet vincula seus filhos. Procure a equipe no dia do evento.',
             textAlign: TextAlign.center,
             style: TextStyle(color: PulynColors.textMuted, fontSize: 13, height: 1.35),
@@ -510,55 +519,72 @@ class _EmptyChildren extends StatelessWidget {
   }
 }
 
-/// Mostra se o e-mail está confirmado. Quando não está, toque leva para a confirmação.
-class _EmailStatusCard extends StatelessWidget {
-  final AsyncValue<bool> status;
+/// Linha com interruptor (preferências).
+class _SwitchTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool>? onChanged;
 
-  const _EmailStatusCard({required this.status});
+  const _SwitchTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final confirmado = status.valueOrNull;
-    if (status.isLoading || status.hasError || confirmado == null) return const SizedBox.shrink();
-
-    final cor = confirmado ? PulynColors.secondary : PulynColors.accent;
-    return Material(
-      color: PulynColors.darkCard,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
-        onTap: confirmado ? null : () => context.push('/confirmar-email'),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: cor.withValues(alpha: 0.6)),
-          ),
-          child: Row(
-            children: [
-              Icon(confirmado ? Icons.verified_rounded : Icons.warning_amber_rounded, color: cor, size: 22),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      confirmado ? 'E-mail confirmado' : 'E-mail ainda não confirmado',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      confirmado
-                          ? 'Sua conta pode ser recuperada por este e-mail.'
-                          : 'Toque para receber o código e confirmar.',
-                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              if (!confirmado) const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
-            ],
-          ),
+        border: Border.all(color: PulynColors.darkBorder),
+      ),
+      child: SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        secondary: Icon(icon, color: PulynColors.primary, size: 22),
+        title: Text(title, style: TextStyle(color: PulynColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
+        subtitle: Text(subtitle, style: TextStyle(color: PulynColors.textMuted, fontSize: 12)),
+        value: value,
+        activeThumbColor: PulynColors.primary,
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+/// Selo com o estado do e-mail, no cabeçalho do perfil. Quando não está confirmado, toque leva para a confirmação.
+class _EmailChip extends StatelessWidget {
+  final bool confirmado;
+
+  const _EmailChip({required this.confirmado});
+
+  @override
+  Widget build(BuildContext context) {
+    final cor = confirmado ? PulynColors.secondary : PulynColors.accent;
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: confirmado ? null : () => context.push('/confirmar-email'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: cor.withValues(alpha: 0.16),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(confirmado ? Icons.verified_rounded : Icons.error_outline_rounded, size: 14, color: cor),
+            const SizedBox(width: 6),
+            Text(
+              confirmado ? 'E-mail confirmado' : 'Confirmar e-mail',
+              style: TextStyle(color: cor, fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+          ],
         ),
       ),
     );
@@ -602,8 +628,8 @@ class _MenuTile extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: PulynColors.textPrimary,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -611,12 +637,12 @@ class _MenuTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                      style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+              Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
             ],
           ),
         ),

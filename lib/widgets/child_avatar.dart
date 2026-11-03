@@ -50,11 +50,7 @@ class ChildAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         shape: circulo ? BoxShape.circle : BoxShape.rectangle,
         borderRadius: circulo ? null : BorderRadius.circular(10),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [cor, cor.withValues(alpha: 0.7)],
-        ),
+        color: cor,
       ),
       child: conteudo,
     );

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config/theme.dart';
+import 'config/tema_provider.dart';
 import 'config/api_config.dart';
 import 'providers/index.dart';
 import 'models/family_models.dart';
@@ -48,6 +49,26 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
+class _AppComTema extends ConsumerWidget {
+  final GoRouter router;
+
+  const _AppComTema({required this.router});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(temaClaroProvider);
+    return MaterialApp.router(
+      title: 'Pulyn Family',
+      theme: construirTema(),
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+      builder: (context, child) {
+        return _GlobalBackButtonHandler(child: child ?? const SizedBox());
+      },
+    );
+  }
+}
+
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
@@ -55,6 +76,8 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // ✅ Aguarda a inicialização do auth ANTES de construir o router
     ref.watch(authInitProvider);
+    // E-mail de cadastro pendente: o roteador abre a confirmação (sem depender de navegação feita antes).
+    ref.watch(cadastroPendenteProvider);
     final authState = ref.watch(authProvider);
     final isFirstTimeAsync = ref.watch(isFirstTimeProvider);
 
@@ -71,15 +94,9 @@ class MyApp extends ConsumerWidget {
       });
     });
 
-    return MaterialApp.router(
-      title: 'Pulyn Family',
-      theme: appTheme,
-      debugShowCheckedModeBanner: false,
-      routerConfig: _buildRouter(authState, isFirstTimeAsync, ref),
-      builder: (context, child) {
-        return _GlobalBackButtonHandler(child: child ?? const SizedBox());
-      },
-    );
+    // O roteador só é recriado quando a sessão muda. A troca de tema fica no widget de dentro,
+    // que reconstrói o MaterialApp com o mesmo roteador e não volta para a tela inicial.
+    return _AppComTema(router: _buildRouter(authState, isFirstTimeAsync, ref));
   }
 
   /// Constrói router baseado no estado de autenticação e primeira execução
@@ -96,13 +113,19 @@ class MyApp extends ConsumerWidget {
       ),
       // ✅ Usuário autenticado - acesso às rotas da app
       data: (user) => GoRouter(
-        initialLocation: user != null ? '/home' : _getInitialLocationForUnauth(isFirstTimeAsync),
+        initialLocation: user != null ? '/home' : _localInicialSemSessao(isFirstTimeAsync, ref),
+        redirect: (context, state) {
+          if (user != null) return null;
+          final pendente = ref.read(cadastroPendenteProvider);
+          if (pendente == null || state.uri.path == '/confirmar-cadastro') return null;
+          return '/confirmar-cadastro?email=${Uri.encodeComponent(pendente)}';
+        },
         routes: [
           GoRoute(
             path: '/',
             redirect: (context, state) {
               // Não precisa fazer redireção manual, o GoRouter cuida
-              return user != null ? '/home' : _getInitialLocationForUnauth(isFirstTimeAsync);
+              return user != null ? '/home' : _localInicialSemSessao(isFirstTimeAsync, ref);
             },
           ),
           GoRoute(
@@ -273,6 +296,12 @@ class MyApp extends ConsumerWidget {
   }
 
   /// Determina a rota inicial para usuário não autenticado
+  String _localInicialSemSessao(AsyncValue<bool> isFirstTimeAsync, WidgetRef ref) {
+    final pendente = ref.read(cadastroPendenteProvider);
+    if (pendente != null) return '/confirmar-cadastro?email=${Uri.encodeComponent(pendente)}';
+    return _getInitialLocationForUnauth(isFirstTimeAsync);
+  }
+
   String _getInitialLocationForUnauth(AsyncValue<bool> isFirstTimeAsync) {
     return isFirstTimeAsync.when(
       data: (isFirstTime) => isFirstTime ? '/onboarding' : '/login',

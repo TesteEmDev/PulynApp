@@ -294,7 +294,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
         children: [
           indicator,
           const SizedBox(height: 16),
-          Text(texto, textAlign: TextAlign.center, style: const TextStyle(color: PulynColors.textSecondary)),
+          Text(texto, textAlign: TextAlign.center, style: TextStyle(color: PulynColors.textSecondary)),
         ],
       ),
     );
@@ -325,7 +325,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
           Text(
             texto,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: PulynColors.textSecondary, height: 1.4),
+            style: TextStyle(color: PulynColors.textSecondary, height: 1.4),
           ),
         ],
         const SizedBox(height: 16),
@@ -378,7 +378,7 @@ class _BraceletLinkPanelState extends State<BraceletLinkPanel> {
             if (child.teamName.isNotEmpty) child.teamName,
           ].join(' · '),
           textAlign: TextAlign.center,
-          style: const TextStyle(color: PulynColors.textSecondary),
+          style: TextStyle(color: PulynColors.textSecondary),
         ),
         const SizedBox(height: 16),
         OutlinedButton.icon(

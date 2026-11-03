@@ -704,7 +704,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: PulynColors.darkCard,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
@@ -735,13 +735,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: _getCheckpointColor(checkpoint),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _getCheckpointColor(checkpoint).withValues(alpha: 0.3),
-                        blurRadius: 12,
-                        spreadRadius: 2,
-                      ),
-                    ],
                   ),
                   child: const Icon(
                     Icons.location_on,
@@ -765,7 +758,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                       const SizedBox(height: 4),
                       Text(
                         checkpoint['zona'] ?? checkpoint['localizacao'] ?? 'Zona não definida',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           color: PulynColors.textMuted,
                         ),
@@ -831,7 +824,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: PulynColors.darkCard,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
@@ -861,18 +854,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   height: 60,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [teamColor, teamColor.withValues(alpha: 0.7)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: teamColor.withValues(alpha: 0.3),
-                        blurRadius: 12,
-                        spreadRadius: 2,
-                      ),
-                    ],
+                    color: teamColor,
                   ),
                   child: Center(
                     child: Text(
@@ -903,7 +885,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                       const SizedBox(height: 4),
                       Text(
                         '${child.idade} anos • ${child.teamName}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           color: PulynColors.textMuted,
                         ),
@@ -941,7 +923,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Text(
+                        Text(
                           'Pontos',
                           style: TextStyle(
                             color: PulynColors.textMuted,
@@ -976,7 +958,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Text(
+                        Text(
                           'Conquistas',
                           style: TextStyle(
                             color: PulynColors.textMuted,
@@ -1442,7 +1424,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                 // Cabeçalho
                 Container(
                   padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(color: PulynColors.darkBorder),
                     ),
@@ -1532,14 +1514,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                       height: _world.height,
                       decoration: BoxDecoration(
                         color: PulynColors.darkCard.withValues(alpha: 0.3),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            const Color(0xFF1a2a3a).withValues(alpha: 0.5),
-                            const Color(0xFF2a3a4a).withValues(alpha: 0.5),
-                          ],
-                        ),
                       ),
                       child: Stack(
                         children: [
@@ -1659,13 +1633,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                             shape: BoxShape.circle,
                                             border: Border.all(color: cor, width: 3),
                                             color: PulynColors.darkCard.withValues(alpha: 0.95),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: cor.withValues(alpha: 0.4),
-                                                blurRadius: 12,
-                                                spreadRadius: 3,
-                                              ),
-                                            ],
                                           ),
                                           child: Center(
                                             child: Icon(
@@ -1783,19 +1750,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                         height: 34,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          gradient: LinearGradient(
-                                            colors: [teamColor, teamColor.withValues(alpha: 0.7)],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
+                                          color: teamColor,
                                           border: Border.all(color: Colors.yellow, width: 3),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: teamColor.withValues(alpha: 0.5),
-                                              blurRadius: 10,
-                                              spreadRadius: 1,
-                                            ),
-                                          ],
                                         ),
                                         child: childData.profileImage != null && childData.profileImage!.isNotEmpty
                                             ? ClipOval(
@@ -1909,7 +1865,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                         _ => 'Nenhuma leitura da pulseira neste evento',
                                       },
                                       textAlign: TextAlign.center,
-                                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                                      style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                                     ),
                                   ),
                                 ),
@@ -1983,7 +1939,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
                       top: BorderSide(color: PulynColors.darkBorder),
                     ),
@@ -2043,13 +1999,13 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 6, 10, 6),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: PulynColors.darkBorder)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Por onde seus filhos passaram (mais fraco = faz mais tempo)',
             maxLines: 2,
             style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
@@ -2080,19 +2036,12 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: color,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.3),
-                blurRadius: 4,
-                spreadRadius: 1,
-              ),
-            ],
           ),
         ),
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             color: PulynColors.textMuted,
             fontWeight: FontWeight.w500,

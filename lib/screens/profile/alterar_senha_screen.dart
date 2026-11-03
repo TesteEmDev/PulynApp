@@ -134,18 +134,7 @@ class _AlterarSenhaScreenState extends ConsumerState<AlterarSenhaScreen> {
                         height: 84,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [PulynColors.primary, PulynColors.primaryLight],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: PulynColors.primary.withValues(alpha: 0.35),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
+                          color: PulynColors.primary,
                         ),
                         child: const Icon(Icons.lock_reset_rounded, color: Colors.white, size: 40),
                       ),
@@ -190,7 +179,7 @@ class _AlterarSenhaScreenState extends ConsumerState<AlterarSenhaScreen> {
                           style: TextStyle(color: corForca, fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
+                        Text(
                           'Letras, números e símbolos deixam a senha mais forte',
                           style: TextStyle(color: PulynColors.textMuted, fontSize: 11),
                         ),

@@ -100,7 +100,7 @@ class ProfileTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _ProfileHeader(user: user),
+              _ProfileHeader(user: user, emailConfirmado: emailConfirmado?.valueOrNull),
               const SizedBox(height: 16),
 
               Row(
@@ -146,11 +146,6 @@ class ProfileTab extends StatelessWidget {
                 onChanged: onTemaClaroChanged,
               ),
               const SizedBox(height: 14),
-
-              if (emailConfirmado != null) ...[
-                _EmailStatusCard(status: emailConfirmado!),
-                const SizedBox(height: 14),
-              ],
 
               const _SectionHeader(title: 'Conta'),
               const SizedBox(height: 12),
@@ -258,7 +253,10 @@ Color _parseHex(String hex, {Color fallback = PulynColors.primary}) {
 class _ProfileHeader extends StatelessWidget {
   final User user;
 
-  const _ProfileHeader({required this.user});
+  /// null enquanto não se sabe se o e-mail está confirmado.
+  final bool? emailConfirmado;
+
+  const _ProfileHeader({required this.user, this.emailConfirmado});
 
   @override
   Widget build(BuildContext context) {
@@ -313,6 +311,10 @@ class _ProfileHeader extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: PulynColors.textSecondary, fontSize: 13),
                 ),
+                if (emailConfirmado != null) ...[
+                  const SizedBox(height: 8),
+                  _EmailChip(confirmado: emailConfirmado!),
+                ],
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -354,6 +356,7 @@ class _StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 96,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: PulynColors.darkCard,
@@ -554,55 +557,34 @@ class _SwitchTile extends StatelessWidget {
   }
 }
 
-/// Mostra se o e-mail está confirmado. Quando não está, toque leva para a confirmação.
-class _EmailStatusCard extends StatelessWidget {
-  final AsyncValue<bool> status;
+/// Selo com o estado do e-mail, no cabeçalho do perfil. Quando não está confirmado, toque leva para a confirmação.
+class _EmailChip extends StatelessWidget {
+  final bool confirmado;
 
-  const _EmailStatusCard({required this.status});
+  const _EmailChip({required this.confirmado});
 
   @override
   Widget build(BuildContext context) {
-    final confirmado = status.valueOrNull;
-    if (status.isLoading || status.hasError || confirmado == null) return const SizedBox.shrink();
-
     final cor = confirmado ? PulynColors.secondary : PulynColors.accent;
-    return Material(
-      color: PulynColors.darkCard,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: confirmado ? null : () => context.push('/confirmar-email'),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: cor.withValues(alpha: 0.6)),
-          ),
-          child: Row(
-            children: [
-              Icon(confirmado ? Icons.verified_rounded : Icons.warning_amber_rounded, color: cor, size: 22),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      confirmado ? 'E-mail confirmado' : 'E-mail ainda não confirmado',
-                      style: TextStyle(color: PulynColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      confirmado
-                          ? 'Sua conta pode ser recuperada por este e-mail.'
-                          : 'Toque para receber o código e confirmar.',
-                      style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              if (!confirmado) Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
-            ],
-          ),
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: confirmado ? null : () => context.push('/confirmar-email'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: cor.withValues(alpha: 0.16),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(confirmado ? Icons.verified_rounded : Icons.error_outline_rounded, size: 14, color: cor),
+            const SizedBox(width: 6),
+            Text(
+              confirmado ? 'E-mail confirmado' : 'Confirmar e-mail',
+              style: TextStyle(color: cor, fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+          ],
         ),
       ),
     );

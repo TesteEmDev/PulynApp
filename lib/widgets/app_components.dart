@@ -95,31 +95,13 @@ class PulynCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isHighlight
-                ? [
-                    PulynColors.darkSurface,
-                    PulynColors.darkSurface.withValues(alpha: 0.7),
-                  ]
-                : [
-                    PulynColors.darkCard,
-                    PulynColors.darkCard.withValues(alpha: 0.85),
-                  ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: isHighlight ? PulynColors.darkSurface : PulynColors.darkCard,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: borderColor ?? (isHighlight ? PulynColors.primary : PulynColors.darkBorder),
             width: isHighlight ? 2 : 1,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: (isHighlight ? PulynColors.primary : Colors.black).withValues(alpha: 0.15),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          
         ),
         padding: padding,
         child: child,
@@ -161,19 +143,9 @@ class AvatarCard extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [avatarColor, avatarColor.withValues(alpha: 0.7)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: avatarColor,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: avatarColor.withValues(alpha: 0.4),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  
                 ),
                 child: Center(
                   child: Text(
@@ -467,12 +439,7 @@ class ScoreBadge extends StatelessWidget {
         vertical: isLarge ? 10 : 6,
       ),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            (backgroundColor ?? PulynColors.accent).withValues(alpha: 0.3),
-            (backgroundColor ?? PulynColors.accent).withValues(alpha: 0.1),
-          ],
-        ),
+        color: (backgroundColor ?? PulynColors.accent).withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: (backgroundColor ?? PulynColors.accent).withValues(alpha: 0.5),
@@ -764,47 +731,9 @@ class RankingCard extends StatelessWidget {
               width: 54,
               height: 54,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [teamColor, teamColor.withValues(alpha: 0.7)],
-                ),
+                color: teamColor,
                 borderRadius: BorderRadius.circular(27),
-                boxShadow: [
-                  BoxShadow(
-                    color: teamColor.withValues(alpha: 0.4),
-                    blurRadius: 8,
-                  )
-                ],
-              ),
-              child: Center(
-                child: Text(
-                  medal,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    nome,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: PulynColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    'Posição #$position',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: PulynColors.textMuted,
-                    ),
-                  ),
-                ],
+                
               ),
             ),
             ScoreBadge(score: score, isLarge: true),
@@ -851,12 +780,7 @@ class NotificationCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    _getNotificationColor(type).withValues(alpha: 0.3),
-                    _getNotificationColor(type).withValues(alpha: 0.1),
-                  ],
-                ),
+                color: _getNotificationColor(type).withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(

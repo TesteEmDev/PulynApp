@@ -19,11 +19,11 @@ class PulynColors {
   // O nome "dark" é mantido por compatibilidade: estas cores são as de fundo, cartão e borda do tema atual.
   static bool claro = false;
 
-  static Color get dark => claro ? const Color(0xFFF4F7FB) : const Color(0xFF0D1B2A);
-  static Color get darkCard => claro ? const Color(0xFFFFFFFF) : const Color(0xFF132338);
-  static Color get darkSurface => claro ? const Color(0xFFEEF3F9) : const Color(0xFF1A2F45);
-  static Color get darkHover => claro ? const Color(0xFFE3EBF5) : const Color(0xFF1E3A54);
-  static Color get darkBorder => claro ? const Color(0xFFD5DEEA) : const Color(0xFF1E3A54);
+  static Color get dark => claro ? const Color(0xFFFAF8F5) : const Color(0xFF121214);
+  static Color get darkCard => claro ? const Color(0xFFFFFFFF) : const Color(0xFF1C1C20);
+  static Color get darkSurface => claro ? const Color(0xFFF2EFEA) : const Color(0xFF26262B);
+  static Color get darkHover => claro ? const Color(0xFFE8E3DC) : const Color(0xFF2E2E34);
+  static Color get darkBorder => claro ? const Color(0xFFE6E1DA) : const Color(0xFF2E2E35);
 
   // Status colors
   static const Color success = Color(0xFF4CAF50);
@@ -32,9 +32,9 @@ class PulynColors {
   static const Color info = Color(0xFF1E9BD7);
 
   // Text colors
-  static Color get textPrimary => claro ? const Color(0xFF1A2233) : Colors.white;
-  static Color get textSecondary => claro ? const Color(0xFF4A5566) : const Color(0xFFA0A0A0);
-  static Color get textMuted => claro ? const Color(0xFF6B7784) : const Color(0xFF6B7280);
+  static Color get textPrimary => claro ? const Color(0xFF1F1B16) : Colors.white;
+  static Color get textSecondary => claro ? const Color(0xFF5F5A53) : const Color(0xFFB4B2AE);
+  static Color get textMuted => claro ? const Color(0xFF8A847C) : const Color(0xFF7D7B77);
 }
 
 /// Medidas padronizadas: botões, campos e cartões usam sempre estes valores.

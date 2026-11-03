@@ -132,7 +132,7 @@ class _LinkChildHeroState extends State<LinkChildHero> {
           style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'Peça o QR Code na recepção do buffet e escaneie para acompanhar a festa em tempo real.',
           textAlign: TextAlign.center,
           style: TextStyle(color: PulynColors.textSecondary, fontSize: 14, height: 1.4),
@@ -154,7 +154,7 @@ class _LinkChildHeroState extends State<LinkChildHero> {
         ),
         if (_nfcOffered) ...[
           const SizedBox(height: 16),
-          const Row(
+          Row(
             children: [
               Expanded(child: Divider(color: PulynColors.textMuted)),
               Padding(

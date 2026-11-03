@@ -290,7 +290,7 @@ class _PreRegisterChildScreenState
         color: PulynColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Icon(Icons.info_outline_rounded, color: PulynColors.primary),
           SizedBox(width: 12),
@@ -308,7 +308,7 @@ class _PreRegisterChildScreenState
   Widget _titulo(String texto) {
     return Text(
       texto,
-      style: const TextStyle(
+      style: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 15,
         color: PulynColors.textPrimary,
@@ -349,7 +349,7 @@ class _PreRegisterChildScreenState
       evento['nome'] as String? ?? 'Festa',
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: const TextStyle(
+      style: TextStyle(
         fontWeight: FontWeight.bold,
         color: PulynColors.textPrimary,
       ),
@@ -358,7 +358,7 @@ class _PreRegisterChildScreenState
       detalhes,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: const TextStyle(fontSize: 12, color: PulynColors.textSecondary),
+      style: TextStyle(fontSize: 12, color: PulynColors.textSecondary),
     );
 
     if (compacto) {
@@ -373,7 +373,7 @@ class _PreRegisterChildScreenState
                 detalhes,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   color: PulynColors.textSecondary,
                 ),
@@ -408,7 +408,7 @@ class _PreRegisterChildScreenState
             Text(
               titulo,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: PulynColors.textPrimary,
               ),
@@ -417,7 +417,7 @@ class _PreRegisterChildScreenState
             Text(
               texto,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: PulynColors.textMuted),
+              style: TextStyle(color: PulynColors.textMuted),
             ),
             if (acao != null) ...[const SizedBox(height: 16), acao],
           ],
@@ -524,7 +524,7 @@ class _CampoFestaState extends State<_CampoFesta> {
           shrinkWrap: true,
           itemCount: widget.eventos.length,
           separatorBuilder: (_, _) =>
-              const Divider(height: 1, color: PulynColors.darkBorder),
+              Divider(height: 1, color: PulynColors.darkBorder),
           itemBuilder: (context, indice) {
             final evento = widget.eventos[indice];
             final id = evento['eventoId'] as String;
@@ -582,7 +582,7 @@ class _CampoFestaState extends State<_CampoFesta> {
           errorText: widget.erro,
         ),
         child: selecionada == null
-            ? const Text(
+            ? Text(
                 'Toque para escolher a festa',
                 style: TextStyle(color: PulynColors.textMuted),
               )

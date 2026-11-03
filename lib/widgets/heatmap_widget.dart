@@ -41,7 +41,7 @@ class CheckpointHeatmapWidget extends StatelessWidget {
                   children: [
                     Text(
                       '${conqueredCheckpointNames.length}/${mockCheckpoints.length} conquistados',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: PulynColors.textMuted,

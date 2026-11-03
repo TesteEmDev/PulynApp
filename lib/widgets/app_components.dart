@@ -56,7 +56,7 @@ class LazyImage extends StatelessWidget {
             width: width,
             height: height,
             color: PulynColors.darkSurface,
-            child: const Center(
+            child: Center(
               child: Icon(Icons.broken_image, color: PulynColors.textMuted),
             ),
           );
@@ -213,7 +213,7 @@ class AvatarCard extends StatelessWidget {
               children: [
                 Text(
                   nome,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: PulynColors.textPrimary,
@@ -224,7 +224,7 @@ class AvatarCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: PulynColors.textMuted,
                   ),
@@ -234,7 +234,7 @@ class AvatarCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios, size: 16, color: PulynColors.textMuted),
+          Icon(Icons.arrow_forward_ios, size: 16, color: PulynColors.textMuted),
         ],
       ),
     );
@@ -394,7 +394,7 @@ class _PulynTextFieldState extends State<PulynTextField> {
       children: [
         Text(
           widget.label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: PulynColors.textPrimary,
@@ -409,7 +409,7 @@ class _PulynTextFieldState extends State<PulynTextField> {
           validator: widget.validator,
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: const TextStyle(color: PulynColors.textMuted),
+            hintStyle: TextStyle(color: PulynColors.textMuted),
             prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
             suffixIcon: widget.obscureText
                 ? IconButton(
@@ -421,7 +421,7 @@ class _PulynTextFieldState extends State<PulynTextField> {
             fillColor: PulynColors.darkSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: PulynColors.darkBorder),
+              borderSide: BorderSide(color: PulynColors.darkBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -433,7 +433,7 @@ class _PulynTextFieldState extends State<PulynTextField> {
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
-          style: const TextStyle(color: PulynColors.textPrimary),
+          style: TextStyle(color: PulynColors.textPrimary),
         ),
       ],
     );
@@ -493,7 +493,7 @@ class ScoreBadge extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 color: PulynColors.textMuted,
               ),
@@ -589,7 +589,7 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 subtitle!,
-                style: const TextStyle(color: PulynColors.textMuted),
+                style: TextStyle(color: PulynColors.textMuted),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -634,7 +634,7 @@ class ErrorState extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             mensagem,
-            style: const TextStyle(color: PulynColors.textMuted),
+            style: TextStyle(color: PulynColors.textMuted),
             textAlign: TextAlign.center,
           ),
           if (onRetry != null) ...[
@@ -789,7 +789,7 @@ class RankingCard extends StatelessWidget {
                 children: [
                   Text(
                     nome,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: PulynColors.textPrimary,
@@ -799,7 +799,7 @@ class RankingCard extends StatelessWidget {
                   ),
                   Text(
                     'Posição #$position',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: PulynColors.textMuted,
                     ),
@@ -876,7 +876,7 @@ class NotificationCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: PulynColors.textPrimary,
@@ -885,7 +885,7 @@ class NotificationCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     mensagem,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: PulynColors.textMuted,
                     ),
@@ -946,7 +946,7 @@ class NotificationCard extends StatelessWidget {
                     ),
                   ),
               ],
-              child: const Icon(
+              child: Icon(
                 Icons.more_vert,
                 color: PulynColors.textMuted,
                 size: 20,
@@ -1019,7 +1019,7 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               color: PulynColors.textMuted,
               fontWeight: FontWeight.w500,
@@ -1028,7 +1028,7 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               color: PulynColors.textPrimary,
               fontWeight: FontWeight.bold,

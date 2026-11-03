@@ -17,6 +17,10 @@ class ProfileTab extends StatelessWidget {
   /// Usuário logado.
   final AsyncValue<User?> auth;
 
+  /// Tema claro escolhido (true = claro) e a troca dele.
+  final bool temaClaro;
+  final ValueChanged<bool>? onTemaClaroChanged;
+
   /// Se o e-mail da conta já foi confirmado (null enquanto não se sabe).
   final AsyncValue<bool>? emailConfirmado;
 
@@ -37,6 +41,8 @@ class ProfileTab extends StatelessWidget {
     required this.auth,
     required this.children,
     this.emailConfirmado,
+    this.temaClaro = false,
+    this.onTemaClaroChanged,
     required this.onLogout,
     this.onRetry,
     this.onExcluirConta,
@@ -128,6 +134,17 @@ class ProfileTab extends StatelessWidget {
                   _ChildTile(child: child),
                   const SizedBox(height: 10),
                 ],
+              const SizedBox(height: 14),
+
+              const _SectionHeader(title: 'Preferências'),
+              const SizedBox(height: 12),
+              _SwitchTile(
+                icon: Icons.light_mode_outlined,
+                title: 'Tema claro',
+                subtitle: temaClaro ? 'Ativado' : 'Desativado (modo escuro)',
+                value: temaClaro,
+                onChanged: onTemaClaroChanged,
+              ),
               const SizedBox(height: 14),
 
               if (emailConfirmado != null) ...[
@@ -305,7 +322,7 @@ class _ProfileHeader extends StatelessWidget {
                   user.email,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: PulynColors.textSecondary, fontSize: 13),
+                  style: TextStyle(color: PulynColors.textSecondary, fontSize: 13),
                 ),
                 const SizedBox(height: 10),
                 Container(
@@ -372,8 +389,8 @@ class _StatTile extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: PulynColors.textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1.1,
@@ -383,7 +400,7 @@ class _StatTile extends StatelessWidget {
                   label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                  style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                 ),
               ],
             ),
@@ -403,8 +420,8 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: PulynColors.textPrimary,
         fontSize: 16,
         fontWeight: FontWeight.w700,
       ),
@@ -452,8 +469,8 @@ class _ChildTile extends StatelessWidget {
                       nome,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: PulynColors.textPrimary,
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
                       ),
@@ -463,12 +480,12 @@ class _ChildTile extends StatelessWidget {
                       '$team · ${child.currentScore} pts',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                      style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+              Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
             ],
           ),
         ),
@@ -493,18 +510,56 @@ class _EmptyChildren extends StatelessWidget {
         children: [
           const Icon(Icons.child_care_rounded, size: 40, color: PulynColors.primary),
           const SizedBox(height: 10),
-          const Text(
+          Text(
             'Nenhuma criança vinculada ainda',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: TextStyle(color: PulynColors.textPrimary, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'A recepção do buffet vincula seus filhos. Procure a equipe no dia do evento.',
             textAlign: TextAlign.center,
             style: TextStyle(color: PulynColors.textMuted, fontSize: 13, height: 1.35),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Linha com interruptor (preferências).
+class _SwitchTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+
+  const _SwitchTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: PulynColors.darkCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: PulynColors.darkBorder),
+      ),
+      child: SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        secondary: Icon(icon, color: PulynColors.primary, size: 22),
+        title: Text(title, style: TextStyle(color: PulynColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
+        subtitle: Text(subtitle, style: TextStyle(color: PulynColors.textMuted, fontSize: 12)),
+        value: value,
+        activeThumbColor: PulynColors.primary,
+        onChanged: onChanged,
       ),
     );
   }
@@ -544,19 +599,19 @@ class _EmailStatusCard extends StatelessWidget {
                   children: [
                     Text(
                       confirmado ? 'E-mail confirmado' : 'E-mail ainda não confirmado',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                      style: TextStyle(color: PulynColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       confirmado
                           ? 'Sua conta pode ser recuperada por este e-mail.'
                           : 'Toque para receber o código e confirmar.',
-                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                      style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              if (!confirmado) const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+              if (!confirmado) Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
             ],
           ),
         ),
@@ -602,8 +657,8 @@ class _MenuTile extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: PulynColors.textPrimary,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -611,12 +666,12 @@ class _MenuTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                      style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+              Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
             ],
           ),
         ),

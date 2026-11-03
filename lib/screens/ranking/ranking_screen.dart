@@ -229,7 +229,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
               children: [
                 Text(
                   nome,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: PulynColors.textPrimary,
@@ -239,7 +239,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                 ),
                 Text(
                   'Posição #$position',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: PulynColors.textMuted,
                   ),
@@ -317,7 +317,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
               children: [
                 Text(
                   nome,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: PulynColors.textPrimary,
@@ -327,7 +327,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                 ),
                 Text(
                   'Pontos totais do time',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: PulynColors.textMuted,
                   ),
@@ -348,7 +348,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
                   color: PulynColors.accent,
                 ),
               ),
-              const Text(
+              Text(
                 'pontos',
                 style: TextStyle(
                   fontSize: 11,
@@ -411,7 +411,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
+          Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
           const SizedBox(height: 16),
           Text(
             mensagem,

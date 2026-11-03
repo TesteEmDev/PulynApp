@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/index.dart';
+import '../../config/tema_provider.dart';
 import '../../utils/avatar_utils.dart';
 import '../family/pre_register_child_screen.dart';
 import '../../widgets/brincadeira_selo.dart';
@@ -441,6 +442,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       auth: ref.watch(authProvider),
       children: ref.watch(childrenProvider),
       emailConfirmado: ref.watch(emailConfirmadoProvider),
+      temaClaro: ref.watch(temaClaroProvider),
+      onTemaClaroChanged: (claro) => ref.read(temaClaroProvider.notifier).definir(claro),
       onLogout: () => ref.read(authProvider.notifier).logout(),
       onRetry: () => ref.invalidate(authProvider),
       onExcluirConta: () => excluirConta(context, ref),
@@ -536,7 +539,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -561,7 +564,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
                 color: PulynColors.textMuted,
               ),
@@ -607,11 +610,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Evento atual', style: TextStyle(fontSize: 11, color: PulynColors.textSecondary)),
+                Text('Evento atual', style: TextStyle(fontSize: 11, color: PulynColors.textSecondary)),
                 Text(
                   nome,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w700, color: PulynColors.textPrimary),
+                  style: TextStyle(fontWeight: FontWeight.w700, color: PulynColors.textPrimary),
                 ),
               ],
             ),
@@ -634,15 +637,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: ListTile(
         key: const Key('abrir-meus-eventos'),
         leading: const Icon(Icons.event_note_outlined, color: PulynColors.primary),
-        title: const Text(
+        title: Text(
           'Meus eventos',
           style: TextStyle(fontWeight: FontWeight.bold, color: PulynColors.textPrimary),
         ),
-        subtitle: const Text(
+        subtitle: Text(
           'Veja os eventos que você já foi e adicione um novo com o código',
           style: TextStyle(fontSize: 12, color: PulynColors.textSecondary),
         ),
-        trailing: const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+        trailing: Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
         onTap: () => context.push('/my-events'),
       ),
     );
@@ -667,12 +670,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Aguardando o buffet',
             style: TextStyle(fontWeight: FontWeight.bold, color: PulynColors.textPrimary),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Cadastradas, mas ainda sem pulseira. Leve a criança à recepção.',
             style: TextStyle(fontSize: 12, color: PulynColors.textSecondary),
           ),
@@ -682,19 +685,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 children: [
-                  const Icon(Icons.hourglass_empty_rounded, size: 18, color: PulynColors.textMuted),
+                  Icon(Icons.hourglass_empty_rounded, size: 18, color: PulynColors.textMuted),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       (perfil['apelido'] as String?)?.isNotEmpty == true
                           ? perfil['apelido'] as String
                           : perfil['nome'] as String,
-                      style: const TextStyle(color: PulynColors.textPrimary),
+                      style: TextStyle(color: PulynColors.textPrimary),
                     ),
                   ),
                   Text(
                     perfil['buffetNome'] as String? ?? '',
-                    style: const TextStyle(fontSize: 12, color: PulynColors.textMuted),
+                    style: TextStyle(fontSize: 12, color: PulynColors.textMuted),
                   ),
                 ],
               ),
@@ -719,7 +722,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'MAPA DO BUFFET',
           style: TextStyle(color: PulynColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2),
         ),
@@ -761,7 +764,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             nome,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: destaque ? PulynColors.primary : Colors.white,
+              color: destaque ? PulynColors.primary : PulynColors.textPrimary,
               fontSize: 15,
               fontWeight: destaque ? FontWeight.w800 : FontWeight.w600,
             ),
@@ -773,7 +776,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.only(left: 4, bottom: 6),
           child: Text(
             'EVENTO',
@@ -807,7 +810,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     color: PulynColors.textSecondary,
                   ),
                   const SizedBox(width: 10),
-                  const Text(
+                  Text(
                     'Escolha o evento',
                     style: TextStyle(
                       color: PulynColors.textSecondary,
@@ -908,7 +911,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: PulynColors.darkBorder),
       ),
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -954,26 +957,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: authState.when(
               data: (user) => Text(
                 'Olá, ${(user?.nome ?? 'Usuário').split(' ').first}! 👋',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: PulynColors.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              error: (_, _) => const Text(
+              error: (_, _) => Text(
                 'Olá! 👋',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: PulynColors.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              loading: () => const Text(
+              loading: () => Text(
                 'Carregando...',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: PulynColors.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1115,7 +1118,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Center(
               child: Column(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.person_outline,
                     size: 56,
                     color: PulynColors.textMuted,
@@ -1245,7 +1248,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   Text(
                     child.apelido.isNotEmpty ? child.apelido : child.nome,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: PulynColors.textPrimary,
@@ -1256,7 +1259,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const SizedBox(height: 2),
                   Text(
                     '${child.idade} anos • ${child.teamName}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: PulynColors.textMuted,
                     ),
@@ -1295,7 +1298,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                   const SizedBox(width: 2),
-                  const Text(
+                  Text(
                     'pts',
                     style: TextStyle(
                       fontSize: 10,
@@ -1306,7 +1309,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios,
               size: 16,
               color: PulynColors.textMuted,
@@ -1402,7 +1405,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Text(
                   nome,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: PulynColors.textPrimary,
@@ -1412,7 +1415,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 Text(
                   'Posição #$position',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: PulynColors.textMuted,
                   ),
@@ -1445,7 +1448,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     color: PulynColors.primary,
                   ),
                 ),
-                const Text(
+                Text(
                   'pts',
                   style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
                 ),
@@ -1529,7 +1532,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Text(
                   nome,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: PulynColors.textPrimary,
@@ -1537,7 +1540,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const Text(
+                Text(
                   'Pontos totais',
                   style: TextStyle(fontSize: 12, color: PulynColors.textMuted),
                 ),
@@ -1555,7 +1558,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   color: PulynColors.accent,
                 ),
               ),
-              const Text(
+              Text(
                 'pontos',
                 style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
               ),
@@ -1606,7 +1609,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.inbox_outlined,
             size: 64,
             color: PulynColors.textMuted,

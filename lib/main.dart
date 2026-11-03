@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config/theme.dart';
+import 'config/tema_provider.dart';
 import 'config/api_config.dart';
 import 'providers/index.dart';
 import 'models/family_models.dart';
@@ -55,6 +56,8 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // ✅ Aguarda a inicialização do auth ANTES de construir o router
     ref.watch(authInitProvider);
+    // Reconstrói o app quando a pessoa troca o tema (claro/escuro).
+    ref.watch(temaClaroProvider);
     final authState = ref.watch(authProvider);
     final isFirstTimeAsync = ref.watch(isFirstTimeProvider);
 
@@ -73,7 +76,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Pulyn Family',
-      theme: appTheme,
+      theme: construirTema(),
       debugShowCheckedModeBanner: false,
       routerConfig: _buildRouter(authState, isFirstTimeAsync, ref),
       builder: (context, child) {

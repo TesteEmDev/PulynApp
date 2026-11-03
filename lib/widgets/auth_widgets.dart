@@ -105,7 +105,7 @@ class AuthInfoCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     mensagem!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: PulynColors.textSecondary,
                       fontSize: 13,
                       height: 1.35,
@@ -156,7 +156,7 @@ class AuthSectionTitle extends StatelessWidget {
               if (subtitle != null)
                 Text(
                   subtitle!,
-                  style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                  style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
                 ),
             ],
           ),
@@ -335,7 +335,7 @@ class AuthStep extends StatelessWidget {
             padding: const EdgeInsets.only(top: 2),
             child: Text(
               texto,
-              style: const TextStyle(
+              style: TextStyle(
                 color: PulynColors.textSecondary,
                 fontSize: 14,
                 height: 1.4,

@@ -15,38 +15,61 @@ class PulynColors {
   // Pink - #E91E8C
   static const Color pink = Color(0xFFE91E8C);
   
-  // Dark theme
-  static const Color dark = Color(0xFF0D1B2A);
-  static const Color darkCard = Color(0xFF132338);
-  static const Color darkSurface = Color(0xFF1A2F45);
-  static const Color darkHover = Color(0xFF1E3A54);
-  static const Color darkBorder = Color(0xFF1E3A54);
-  
+  // Modo claro: quando true, as cores de superfície e texto mudam (ver os getters abaixo).
+  // O nome "dark" é mantido por compatibilidade: estas cores são as de fundo, cartão e borda do tema atual.
+  static bool claro = false;
+
+  static Color get dark => claro ? const Color(0xFFF4F7FB) : const Color(0xFF0D1B2A);
+  static Color get darkCard => claro ? const Color(0xFFFFFFFF) : const Color(0xFF132338);
+  static Color get darkSurface => claro ? const Color(0xFFEEF3F9) : const Color(0xFF1A2F45);
+  static Color get darkHover => claro ? const Color(0xFFE3EBF5) : const Color(0xFF1E3A54);
+  static Color get darkBorder => claro ? const Color(0xFFD5DEEA) : const Color(0xFF1E3A54);
+
   // Status colors
   static const Color success = Color(0xFF4CAF50);
   static const Color warning = Color(0xFFF5A623);
   static const Color danger = Color(0xFFE53935);
   static const Color info = Color(0xFF1E9BD7);
-  
+
   // Text colors
-  static const Color textPrimary = Colors.white;
-  static const Color textSecondary = Color(0xFFA0A0A0);
-  static const Color textMuted = Color(0xFF6B7280);
+  static Color get textPrimary => claro ? const Color(0xFF1A2233) : Colors.white;
+  static Color get textSecondary => claro ? const Color(0xFF4A5566) : const Color(0xFFA0A0A0);
+  static Color get textMuted => claro ? const Color(0xFF6B7784) : const Color(0xFF6B7280);
 }
 
-final ThemeData appTheme = ThemeData(
+/// Tema atual (conforme PulynColors.claro). Mantido para quem ainda usa `appTheme`.
+ThemeData get appTheme => construirTema();
+
+/// Tema do app, montado conforme o modo escolhido (PulynColors.claro).
+ThemeData construirTema() {
+  final claro = PulynColors.claro;
+  return _construirTemaBase(claro);
+}
+
+ThemeData _construirTemaBase(bool claro) {
+  final esquema = claro
+      ? ColorScheme.light(
+          primary: PulynColors.primary,
+          secondary: PulynColors.secondary,
+          tertiary: PulynColors.accent,
+          surface: PulynColors.darkSurface,
+          onSurface: PulynColors.textPrimary,
+          error: PulynColors.danger,
+        )
+      : ColorScheme.dark(
+          primary: PulynColors.primary,
+          secondary: PulynColors.secondary,
+          tertiary: PulynColors.accent,
+          surface: PulynColors.darkSurface,
+          onSurface: PulynColors.textPrimary,
+          error: PulynColors.danger,
+        );
+  return ThemeData(
   useMaterial3: true,
-  brightness: Brightness.dark,
+  brightness: claro ? Brightness.light : Brightness.dark,
   scaffoldBackgroundColor: PulynColors.dark,
-  colorScheme: const ColorScheme.dark(
-    primary: PulynColors.primary,
-    secondary: PulynColors.secondary,
-    tertiary: PulynColors.accent,
-    surface: PulynColors.darkSurface,
-    onSurface: PulynColors.textPrimary,
-    error: PulynColors.danger,
-  ),
-  appBarTheme: const AppBarTheme(
+  colorScheme: esquema,
+  appBarTheme: AppBarTheme(
     backgroundColor: PulynColors.dark,
     foregroundColor: PulynColors.textPrimary,
     elevation: 0,
@@ -62,7 +85,7 @@ final ThemeData appTheme = ThemeData(
     elevation: 0,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
-      side: const BorderSide(
+      side: BorderSide(
         color: PulynColors.darkBorder,
         width: 1,
       ),
@@ -73,23 +96,23 @@ final ThemeData appTheme = ThemeData(
     fillColor: PulynColors.darkSurface,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: PulynColors.darkBorder),
+      borderSide: BorderSide(color: PulynColors.darkBorder),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: PulynColors.darkBorder),
+      borderSide: BorderSide(color: PulynColors.darkBorder),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: PulynColors.primary, width: 2),
+      borderSide: BorderSide(color: PulynColors.primary, width: 2),
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: PulynColors.danger),
+      borderSide: BorderSide(color: PulynColors.danger),
     ),
-    labelStyle: const TextStyle(color: PulynColors.textSecondary),
-    hintStyle: const TextStyle(color: PulynColors.textMuted),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    labelStyle: TextStyle(color: PulynColors.textSecondary),
+    hintStyle: TextStyle(color: PulynColors.textMuted),
+    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
@@ -98,18 +121,18 @@ final ThemeData appTheme = ThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       elevation: 0,
     ),
   ),
   outlinedButtonTheme: OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
       foregroundColor: PulynColors.primary,
-      side: const BorderSide(color: PulynColors.darkBorder),
+      side: BorderSide(color: PulynColors.darkBorder),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
     ),
   ),
   textButtonTheme: TextButtonThemeData(
@@ -117,7 +140,7 @@ final ThemeData appTheme = ThemeData(
       foregroundColor: PulynColors.primary,
     ),
   ),
-  textTheme: const TextTheme(
+  textTheme: TextTheme(
     displaySmall: TextStyle(
       fontSize: 28,
       fontWeight: FontWeight.bold,
@@ -149,11 +172,12 @@ final ThemeData appTheme = ThemeData(
       color: PulynColors.textMuted,
     ),
   ),
-  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
     backgroundColor: PulynColors.darkCard,
     selectedItemColor: PulynColors.primary,
     unselectedItemColor: PulynColors.textMuted,
     elevation: 0,
     type: BottomNavigationBarType.fixed,
   ),
-);
+  );
+}

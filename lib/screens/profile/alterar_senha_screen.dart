@@ -190,7 +190,7 @@ class _AlterarSenhaScreenState extends ConsumerState<AlterarSenhaScreen> {
                           style: TextStyle(color: corForca, fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
+                        Text(
                           'Letras, números e símbolos deixam a senha mais forte',
                           style: TextStyle(color: PulynColors.textMuted, fontSize: 11),
                         ),

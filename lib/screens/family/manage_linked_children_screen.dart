@@ -91,7 +91,7 @@ class _ManageLinkedChildrenScreenState
         ),
         data: (children) {
           if (children.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -162,7 +162,7 @@ class _ManageLinkedChildrenScreenState
                                 ),
                                 Text(
                                   '${child.idade} anos • ${child.teamName}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     color: PulynColors.textMuted,
                                   ),
@@ -192,7 +192,7 @@ class _ManageLinkedChildrenScreenState
                             const SizedBox(height: 4),
                             Text(
                               'Ranking: #${child.rank}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: PulynColors.textMuted,
                               ),
@@ -305,7 +305,7 @@ class _PreRegisteredSection extends ConsumerWidget {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Cadastradas, mas ainda sem pulseira. Leve a criança à recepção do buffet.',
                 style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
               ),
@@ -313,7 +313,7 @@ class _PreRegisteredSection extends ConsumerWidget {
               for (final perfil in perfis)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.hourglass_empty, color: PulynColors.textMuted),
+                  leading: Icon(Icons.hourglass_empty, color: PulynColors.textMuted),
                   title: Text((perfil['apelido'] as String?)?.isNotEmpty == true
                       ? perfil['apelido'] as String
                       : perfil['nome'] as String),

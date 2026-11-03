@@ -182,11 +182,11 @@ class _CartaoEvento extends StatelessWidget {
               ),
               if (subtitulo.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Text(subtitulo, style: const TextStyle(fontSize: 13, color: PulynColors.textSecondary)),
+                Text(subtitulo, style: TextStyle(fontSize: 13, color: PulynColors.textSecondary)),
               ],
               const SizedBox(height: 10),
               if (criancas.isEmpty)
-                const Text(
+                Text(
                   'Nenhuma criança vinculada neste evento. Toque para vincular.',
                   style: TextStyle(fontSize: 13, color: PulynColors.textMuted),
                 )
@@ -204,7 +204,7 @@ class _CartaoEvento extends StatelessWidget {
                             style: const TextStyle(fontSize: 14, color: Colors.white),
                           ),
                         ),
-                        Text('${c['pontos'] ?? 0} pts', style: const TextStyle(fontSize: 13, color: PulynColors.textSecondary)),
+                        Text('${c['pontos'] ?? 0} pts', style: TextStyle(fontSize: 13, color: PulynColors.textSecondary)),
                       ],
                     ),
                   ),
@@ -215,7 +215,7 @@ class _CartaoEvento extends StatelessWidget {
                   runSpacing: 6,
                   children: [
                     if (exibindo) const _Etiqueta('Exibindo na home', PulynColors.primary),
-                    if (evento['adicionadoPorConvite'] == true) const _Etiqueta('Adicionado por código', PulynColors.textSecondary),
+                    if (evento['adicionadoPorConvite'] == true) _Etiqueta('Adicionado por código', PulynColors.textSecondary),
                   ],
                 ),
               ],
@@ -263,7 +263,7 @@ class _Aviso extends StatelessWidget {
           const SizedBox(height: 12),
           Text(titulo, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
           const SizedBox(height: 6),
-          Text(texto, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: PulynColors.textSecondary)),
+          Text(texto, textAlign: TextAlign.center, style: TextStyle(fontSize: 13, color: PulynColors.textSecondary)),
           ?acao,
         ],
       ),
@@ -328,7 +328,7 @@ class _AdicionarEventoSheetState extends ConsumerState<_AdicionarEventoSheet> {
         children: [
           const Text('Adicionar evento', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Digite o código de 8 caracteres do convite que o buffet enviou.',
             style: TextStyle(fontSize: 13, color: PulynColors.textSecondary),
           ),

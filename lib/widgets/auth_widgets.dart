@@ -32,6 +32,22 @@ class AuthHeader extends StatelessWidget {
           errorBuilder: (_, _, _) => SizedBox(height: fullLogo ? 96 : 44),
         ),
         SizedBox(height: fullLogo ? 20 : 24),
+        // Faixa com as cores da logo: a marca aparece em todas as telas de entrada.
+        if (fullLogo) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (final cor in [PulynColors.primary, PulynColors.secondary, PulynColors.accent, PulynColors.pink])
+                Container(
+                  width: 28,
+                  height: 5,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(color: cor, borderRadius: BorderRadius.circular(3)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 18),
+        ],
         Text(
           title,
           textAlign: TextAlign.center,

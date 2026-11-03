@@ -256,6 +256,59 @@ class ApiService {
     await _prefs.remove('auth_token');
   }
 
+  /// Mensagem que o backend mandou (campo `error`), ou um texto padrão.
+  String _mensagemDeErro(DioException e, String padrao) {
+    final body = e.response?.data;
+    if (body is Map && body['error'] is String) return body['error'] as String;
+    return padrao;
+  }
+
+  /// PATCH /auth/perfil - nome e e-mail. Trocar o e-mail exige a senha atual.
+  Future<void> atualizarPerfil({
+    required String nome,
+    required String email,
+    String? senhaAtual,
+  }) async {
+    await init();
+    try {
+      await _dio.patch('/auth/perfil', data: {
+        'nome': nome,
+        'email': email,
+        'senhaAtual': ?senhaAtual,
+      });
+    } on DioException catch (e) {
+      throw Exception(_mensagemDeErro(e, 'Não foi possível salvar o perfil'));
+    }
+  }
+
+  /// POST /auth/alterar-senha - troca a senha. O backend derruba as outras sessões e devolve um token novo,
+  /// que é guardado aqui para este aparelho continuar logado.
+  Future<void> alterarSenha({required String senhaAtual, required String novaSenha}) async {
+    await init();
+    try {
+      final response = await _dio.post('/auth/alterar-senha', data: {
+        'senhaAtual': senhaAtual,
+        'novaSenha': novaSenha,
+      });
+      final data = _validateResponseData(response.data);
+      final token = data['token'];
+      if (token is String) await _prefs.setString('auth_token', token);
+    } on DioException catch (e) {
+      throw Exception(_mensagemDeErro(e, 'Não foi possível trocar a senha'));
+    }
+  }
+
+  /// DELETE /auth/conta - exclui a conta de família. Depois disso o token deixa de valer.
+  Future<void> excluirConta(String senha) async {
+    await init();
+    try {
+      await _dio.delete('/auth/conta', data: {'senha': senha});
+    } on DioException catch (e) {
+      throw Exception(_mensagemDeErro(e, 'Não foi possível excluir a conta'));
+    }
+    await _prefs.remove('auth_token');
+  }
+
   // ===== ENDPOINTS DO BACKEND =====
 
   /// ✅ GET /familias/me - Com validação

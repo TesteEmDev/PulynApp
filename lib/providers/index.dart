@@ -9,7 +9,7 @@ import '../models/calor_models.dart';
 import '../utils/logger.dart';
 
 // ✅ Exporta providers externos
-export 'auth_provider.dart' show apiServiceProvider, authProvider, authInitProvider, emailConfirmadoProvider;
+export 'auth_provider.dart' show apiServiceProvider, authProvider, authInitProvider, emailConfirmadoProvider, cadastroPendenteProvider;
 export 'websocket_provider.dart' show webSocketConnectionProvider, webSocketServiceProvider, webSocketStatusProvider;
 export 'events_provider.dart' show currentEventProvider, upcomingEventsProvider, eventDetailsProvider, eventResultsProvider, certificateProvider;
 

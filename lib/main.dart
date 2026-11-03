@@ -58,6 +58,8 @@ class MyApp extends ConsumerWidget {
     ref.watch(authInitProvider);
     // Reconstrói o app quando a pessoa troca o tema (claro/escuro).
     ref.watch(temaClaroProvider);
+    // E-mail de cadastro pendente: o roteador abre a confirmação (sem depender de navegação feita antes).
+    ref.watch(cadastroPendenteProvider);
     final authState = ref.watch(authProvider);
     final isFirstTimeAsync = ref.watch(isFirstTimeProvider);
 
@@ -99,13 +101,13 @@ class MyApp extends ConsumerWidget {
       ),
       // ✅ Usuário autenticado - acesso às rotas da app
       data: (user) => GoRouter(
-        initialLocation: user != null ? '/home' : _getInitialLocationForUnauth(isFirstTimeAsync),
+        initialLocation: user != null ? '/home' : _localInicialSemSessao(isFirstTimeAsync, ref),
         routes: [
           GoRoute(
             path: '/',
             redirect: (context, state) {
               // Não precisa fazer redireção manual, o GoRouter cuida
-              return user != null ? '/home' : _getInitialLocationForUnauth(isFirstTimeAsync);
+              return user != null ? '/home' : _localInicialSemSessao(isFirstTimeAsync, ref);
             },
           ),
           GoRoute(
@@ -276,6 +278,12 @@ class MyApp extends ConsumerWidget {
   }
 
   /// Determina a rota inicial para usuário não autenticado
+  String _localInicialSemSessao(AsyncValue<bool> isFirstTimeAsync, WidgetRef ref) {
+    final pendente = ref.read(cadastroPendenteProvider);
+    if (pendente != null) return '/confirmar-cadastro?email=${Uri.encodeComponent(pendente)}';
+    return _getInitialLocationForUnauth(isFirstTimeAsync);
+  }
+
   String _getInitialLocationForUnauth(AsyncValue<bool> isFirstTimeAsync) {
     return isFirstTimeAsync.when(
       data: (isFirstTime) => isFirstTime ? '/onboarding' : '/login',

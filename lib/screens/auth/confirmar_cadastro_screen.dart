@@ -46,6 +46,7 @@ class _ConfirmarCadastroScreenState extends ConsumerState<ConfirmarCadastroScree
       // Entra com a sessão recebida; o roteador leva para a tela inicial.
       await ref.read(authProvider.notifier).finalizarCadastro(resposta);
       ref.invalidate(emailConfirmadoProvider);
+      ref.read(cadastroPendenteProvider.notifier).state = null;
       if (!mounted) return;
       showSuccessSnackBar(context, 'Conta ativada. Bem-vindo ao Pulyn!');
     } catch (e) {
@@ -78,7 +79,12 @@ class _ConfirmarCadastroScreenState extends ConsumerState<ConfirmarCadastroScree
         leading: IconButton(
           tooltip: 'Voltar',
           icon: const Icon(Icons.arrow_back),
-          onPressed: _isLoading ? null : () => context.go('/login'),
+          onPressed: _isLoading
+              ? null
+              : () {
+                  ref.read(cadastroPendenteProvider.notifier).state = null;
+                  context.go('/login');
+                },
         ),
       ),
       body: SafeArea(

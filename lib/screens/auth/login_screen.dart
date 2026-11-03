@@ -62,7 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } on EmailNaoConfirmadoException catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      context.push('/confirmar-cadastro', extra: e.email);
+      ref.read(cadastroPendenteProvider.notifier).state = e.email;
     } catch (e) {
       if (!mounted) return;
 

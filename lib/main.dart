@@ -123,7 +123,10 @@ class MyApp extends ConsumerWidget {
           ),
           GoRoute(
             path: '/confirmar-cadastro',
-            builder: (context, state) => ConfirmarCadastroScreen(email: state.extra as String? ?? ''),
+            builder: (context, state) => ConfirmarCadastroScreen(
+              email: state.uri.queryParameters['email'] ?? (state.extra as String?) ?? '',
+              codigoInicial: state.uri.queryParameters['codigo'],
+            ),
           ),
           GoRoute(
             path: '/politica-privacidade',

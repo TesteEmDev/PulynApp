@@ -49,9 +49,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final email = _emailController.text.trim();
     final emailAtual = ref.read(authProvider).valueOrNull?.email ?? '';
 
-    // Trocar o e-mail (que é o login) exige a senha atual.
+    // Trocar o e-mail (que é o login) exige o e-mail atual confirmado e a senha atual.
     String? senhaAtual;
     if (email.toLowerCase() != emailAtual.toLowerCase()) {
+      final confirmado = ref.read(emailConfirmadoProvider).valueOrNull;
+      if (confirmado == false) {
+        await _avisarConfirmarEmail();
+        return;
+      }
       senhaAtual = await _pedirSenha(
         titulo: 'Confirme sua senha',
         mensagem: 'Para trocar o e-mail, informe a senha atual.',
@@ -69,6 +74,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (!mounted) return;
       showErrorSnackBar(context, e.toString().replaceFirst('Exception: ', ''));
     }
+  }
+
+  /// Aviso quando a pessoa tenta trocar o e-mail sem ter confirmado o atual.
+  Future<void> _avisarConfirmarEmail() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: PulynColors.darkCard,
+        title: const Text('Confirme seu e-mail'),
+        content: const Text(
+          'Para poder alterar o e-mail da conta, primeiro confirme o e-mail atual. Enviamos um código para ele.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Agora não')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Confirmar agora')),
+        ],
+      ),
+    );
+    if (confirmar == true && mounted) context.push('/confirmar-email');
   }
 
   /// Pede a senha atual numa caixa de diálogo. Devolve null se cancelar ou deixar em branco.

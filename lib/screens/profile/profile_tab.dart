@@ -154,29 +154,8 @@ class ProfileTab extends StatelessWidget {
               _MenuTile(
                 icon: Icons.edit_outlined,
                 title: 'Editar dados',
-                subtitle: 'Nome, e-mail e telefone (exige e-mail confirmado)',
+                subtitle: 'Nome, telefone e e-mail',
                 onTap: () => context.push('/profile'),
-              ),
-              const SizedBox(height: 10),
-              _MenuTile(
-                icon: Icons.mark_email_read_outlined,
-                title: 'Confirmar e-mail',
-                subtitle: 'Confirma o endereço da sua conta',
-                onTap: () => context.push('/confirmar-email'),
-              ),
-              const SizedBox(height: 10),
-              _MenuTile(
-                icon: Icons.lock_outline,
-                title: 'Alterar senha',
-                subtitle: 'Troca a senha e encerra as outras sessões',
-                onTap: () => context.push('/alterar-senha'),
-              ),
-              const SizedBox(height: 10),
-              _MenuTile(
-                icon: Icons.delete_outline,
-                title: 'Excluir conta',
-                subtitle: 'Apaga sua conta e seus dados pessoais',
-                onTap: onExcluirConta ?? () {},
               ),
               const SizedBox(height: 10),
               _MenuTile(

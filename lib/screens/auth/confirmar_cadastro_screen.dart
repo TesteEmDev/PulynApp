@@ -9,7 +9,10 @@ import '../../widgets/auth_widgets.dart';
 class ConfirmarCadastroScreen extends ConsumerStatefulWidget {
   final String email;
 
-  const ConfirmarCadastroScreen({required this.email, super.key});
+  /// Código que veio no link do e-mail (já vem preenchido).
+  final String? codigoInicial;
+
+  const ConfirmarCadastroScreen({required this.email, this.codigoInicial, super.key});
 
   @override
   ConsumerState<ConfirmarCadastroScreen> createState() => _ConfirmarCadastroScreenState();
@@ -19,6 +22,12 @@ class _ConfirmarCadastroScreenState extends ConsumerState<ConfirmarCadastroScree
   final _formKey = GlobalKey<FormState>();
   final _codigoController = TextEditingController();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.codigoInicial != null) _codigoController.text = widget.codigoInicial!;
+  }
 
   @override
   void dispose() {

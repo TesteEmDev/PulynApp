@@ -102,6 +102,12 @@ class MyApp extends ConsumerWidget {
       // ✅ Usuário autenticado - acesso às rotas da app
       data: (user) => GoRouter(
         initialLocation: user != null ? '/home' : _localInicialSemSessao(isFirstTimeAsync, ref),
+        redirect: (context, state) {
+          if (user != null) return null;
+          final pendente = ref.read(cadastroPendenteProvider);
+          if (pendente == null || state.uri.path == '/confirmar-cadastro') return null;
+          return '/confirmar-cadastro?email=${Uri.encodeComponent(pendente)}';
+        },
         routes: [
           GoRoute(
             path: '/',

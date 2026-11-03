@@ -175,7 +175,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] ✅ Login bem-sucedido para $email');
       
       state = AsyncValue.data(loginResponse.user);
-    } on EmailNaoConfirmadoException {
+    } on EmailNaoConfirmadoException catch (e) {
+      ref.read(cadastroPendenteProvider.notifier).state = e.email;
       state = const AsyncValue.data(null);
       rethrow;
     } catch (e, st) {
@@ -216,7 +217,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] 👤 Usuário: ${loginResponse.user.email} (${loginResponse.user.nome})');
       
       state = AsyncValue.data(loginResponse.user);
-    } on EmailNaoConfirmadoException {
+    } on EmailNaoConfirmadoException catch (e) {
+      ref.read(cadastroPendenteProvider.notifier).state = e.email;
       state = const AsyncValue.data(null);
       rethrow;
     } catch (e, st) {

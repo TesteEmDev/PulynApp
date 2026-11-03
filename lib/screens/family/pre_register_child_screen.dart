@@ -36,7 +36,8 @@ class _PreRegisterChildScreenState
   final _formKey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
   final _apelidoController = TextEditingController();
-  final _idadeController = TextEditingController();
+  final _nascimentoController = TextEditingController();
+  DateTime? _nascimento;
   late Future<List<Map<String, dynamic>>> _eventos;
   String? _eventoId;
   bool _salvando = false;
@@ -51,7 +52,7 @@ class _PreRegisterChildScreenState
   void dispose() {
     _nomeController.dispose();
     _apelidoController.dispose();
-    _idadeController.dispose();
+    _nascimentoController.dispose();
     super.dispose();
   }
 
@@ -72,6 +73,38 @@ class _PreRegisterChildScreenState
 
   void _recarregar() {
     setState(() => _eventos = _carregarEventos());
+  }
+
+  // A criança tem até 17 anos: a data mais antiga aceita é 17 anos atrás.
+  Future<void> _escolherNascimento() async {
+    final hoje = DateTime.now();
+    final escolhida = await showDatePicker(
+      context: context,
+      initialDate: _nascimento ?? DateTime(hoje.year - 6, hoje.month, hoje.day),
+      firstDate: DateTime(hoje.year - 17, hoje.month, hoje.day),
+      lastDate: hoje,
+      helpText: 'Data de nascimento da criança',
+      cancelText: 'Cancelar',
+      confirmText: 'Confirmar',
+    );
+    if (escolhida == null || !mounted) return;
+    setState(() {
+      _nascimento = escolhida;
+      _nascimentoController.text =
+          '${escolhida.day.toString().padLeft(2, '0')}/${escolhida.month.toString().padLeft(2, '0')}/${escolhida.year}';
+    });
+  }
+
+  static String _dataIso(DateTime data) =>
+      '${data.year}-${data.month.toString().padLeft(2, '0')}-${data.day.toString().padLeft(2, '0')}';
+
+  static int _idadeAnos(DateTime nascimento) {
+    final hoje = DateTime.now();
+    var anos = hoje.year - nascimento.year;
+    final aindaNaoFez = hoje.month < nascimento.month ||
+        (hoje.month == nascimento.month && hoje.day < nascimento.day);
+    if (aindaNaoFez) anos -= 1;
+    return anos;
   }
 
   Future<void> _salvar() async {
@@ -97,7 +130,8 @@ class _PreRegisterChildScreenState
         apelido: _apelidoController.text.trim().isEmpty
             ? null
             : _apelidoController.text.trim(),
-        idade: int.parse(_idadeController.text.trim()),
+        idade: _idadeAnos(_nascimento!),
+        dataNascimento: _dataIso(_nascimento!),
       );
       log.i('[PRE_REGISTER] Cadastro criado com sucesso');
       if (!mounted) return;
@@ -214,17 +248,20 @@ class _PreRegisterChildScreenState
                   prefixIcon: Icons.face_outlined,
                 ),
                 const SizedBox(height: 12),
-                PulynTextField(
-                  label: 'Idade',
-                  controller: _idadeController,
-                  keyboardType: TextInputType.number,
-                  prefixIcon: Icons.cake_outlined,
-                  validator: (valor) {
-                    final idade = int.tryParse(valor?.trim() ?? '');
-                    return (idade == null || idade < 0)
-                        ? 'Informe a idade'
-                        : null;
-                  },
+                // Toque abre o calendário; o campo em si não abre o teclado.
+                GestureDetector(
+                  onTap: _escolherNascimento,
+                  child: AbsorbPointer(
+                    child: PulynTextField(
+                      label: 'Data de nascimento',
+                      hint: 'Toque para escolher',
+                      controller: _nascimentoController,
+                      prefixIcon: Icons.cake_outlined,
+                      validator: (valor) => _nascimento == null
+                          ? 'Informe a data de nascimento'
+                          : null,
+                    ),
+                  ),
                 ),
               ],
             ),

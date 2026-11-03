@@ -5,7 +5,6 @@ import '../../config/theme.dart';
 import '../../models/family_models.dart';
 import '../../widgets/child_avatar.dart';
 import '../../widgets/pulyn_logo.dart';
-import '../qr_scan/open_qr_scanner.dart';
 
 const _appVersion = '1.0.0';
 
@@ -18,6 +17,9 @@ class ProfileTab extends StatelessWidget {
   /// Usuário logado.
   final AsyncValue<User?> auth;
 
+  /// Se o e-mail da conta já foi confirmado (null enquanto não se sabe).
+  final AsyncValue<bool>? emailConfirmado;
+
   /// Crianças vinculadas (o `.value` mantém a lista anterior enquanto recarrega, então
   /// a tela não pisca a cada leitura de checkpoint).
   final AsyncValue<List<Child>> children;
@@ -28,15 +30,16 @@ class ProfileTab extends StatelessWidget {
   /// Tentar carregar o perfil de novo depois de um erro.
   final VoidCallback? onRetry;
 
-  /// Chamado depois que uma criança é vinculada pelo QR Code (para recarregar a lista).
-  final VoidCallback? onChildLinked;
+  /// Exclui a conta depois de confirmar (e pedir a senha).
+  final VoidCallback? onExcluirConta;
 
   const ProfileTab({
     required this.auth,
     required this.children,
+    this.emailConfirmado,
     required this.onLogout,
     this.onRetry,
-    this.onChildLinked,
+    this.onExcluirConta,
     super.key,
   });
 
@@ -116,20 +119,21 @@ class ProfileTab extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              _SectionHeader(
-                title: 'Minhas crianças',
-                actionLabel: 'Vincular',
-                onAction: () => _openQrScanner(context),
-              ),
+              const _SectionHeader(title: 'Minhas crianças'),
               const SizedBox(height: 12),
               if (list.isEmpty && !loadingFirstTime)
-                _EmptyChildren(onLink: () => _openQrScanner(context))
+                const _EmptyChildren()
               else
                 for (final child in list) ...[
                   _ChildTile(child: child),
                   const SizedBox(height: 10),
                 ],
               const SizedBox(height: 14),
+
+              if (emailConfirmado != null) ...[
+                _EmailStatusCard(status: emailConfirmado!),
+                const SizedBox(height: 14),
+              ],
 
               const _SectionHeader(title: 'Conta'),
               const SizedBox(height: 12),
@@ -145,6 +149,13 @@ class ProfileTab extends StatelessWidget {
                 title: 'Meus eventos',
                 subtitle: 'Ver os eventos e adicionar um com o código',
                 onTap: () => context.push('/my-events'),
+              ),
+              const SizedBox(height: 10),
+              _MenuTile(
+                icon: Icons.edit_outlined,
+                title: 'Editar dados',
+                subtitle: 'Nome, telefone e e-mail',
+                onTap: () => context.push('/profile'),
               ),
               const SizedBox(height: 10),
               _MenuTile(
@@ -178,7 +189,6 @@ class ProfileTab extends StatelessWidget {
     );
   }
 
-  void _openQrScanner(BuildContext context) => openQrScanner(context, onChildLinked: onChildLinked);
 
   Future<void> _confirmLogout(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -386,36 +396,18 @@ class _StatTile extends StatelessWidget {
 
 class _SectionHeader extends StatelessWidget {
   final String title;
-  final String? actionLabel;
-  final VoidCallback? onAction;
 
-  const _SectionHeader({required this.title, this.actionLabel, this.onAction});
+  const _SectionHeader({required this.title});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        if (actionLabel != null)
-          TextButton.icon(
-            onPressed: onAction,
-            icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
-            label: Text(actionLabel!),
-            style: TextButton.styleFrom(
-              visualDensity: VisualDensity.compact,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-            ),
-          ),
-      ],
+    return Text(
+      title,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+      ),
     );
   }
 }
@@ -486,9 +478,7 @@ class _ChildTile extends StatelessWidget {
 }
 
 class _EmptyChildren extends StatelessWidget {
-  final VoidCallback onLink;
-
-  const _EmptyChildren({required this.onLink});
+  const _EmptyChildren();
 
   @override
   Widget build(BuildContext context) {
@@ -501,7 +491,7 @@ class _EmptyChildren extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Icon(Icons.qr_code_2_rounded, size: 40, color: PulynColors.primary),
+          const Icon(Icons.child_care_rounded, size: 40, color: PulynColors.primary),
           const SizedBox(height: 10),
           const Text(
             'Nenhuma criança vinculada ainda',
@@ -510,21 +500,66 @@ class _EmptyChildren extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Escaneie o QR Code que a recepção entregar para acompanhar seu filho.',
+            'A recepção do buffet vincula seus filhos. Procure a equipe no dia do evento.',
             textAlign: TextAlign.center,
             style: TextStyle(color: PulynColors.textMuted, fontSize: 13, height: 1.35),
           ),
-          const SizedBox(height: 14),
-          ElevatedButton.icon(
-            onPressed: onLink,
-            icon: const Icon(Icons.qr_code_scanner_rounded),
-            label: const Text('Vincular com QR Code'),
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size.fromHeight(46),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
         ],
+      ),
+    );
+  }
+}
+
+/// Mostra se o e-mail está confirmado. Quando não está, toque leva para a confirmação.
+class _EmailStatusCard extends StatelessWidget {
+  final AsyncValue<bool> status;
+
+  const _EmailStatusCard({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final confirmado = status.valueOrNull;
+    if (status.isLoading || status.hasError || confirmado == null) return const SizedBox.shrink();
+
+    final cor = confirmado ? PulynColors.secondary : PulynColors.accent;
+    return Material(
+      color: PulynColors.darkCard,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: confirmado ? null : () => context.push('/confirmar-email'),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cor.withValues(alpha: 0.6)),
+          ),
+          child: Row(
+            children: [
+              Icon(confirmado ? Icons.verified_rounded : Icons.warning_amber_rounded, color: cor, size: 22),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      confirmado ? 'E-mail confirmado' : 'E-mail ainda não confirmado',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      confirmado
+                          ? 'Sua conta pode ser recuperada por este e-mail.'
+                          : 'Toque para receber o código e confirmar.',
+                      style: const TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              if (!confirmado) const Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/index.dart';
+import '../../services/api_service.dart';
 import '../../services/validation_service.dart';
 import '../../utils/logger.dart';
 
@@ -58,6 +59,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted) return;
 
       log.i('[LOGIN] ✅ Login realizado com sucesso');
+    } on EmailNaoConfirmadoException catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      context.push('/confirmar-cadastro', extra: e.email);
     } catch (e) {
       if (!mounted) return;
 
@@ -202,6 +207,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
 
                 const SizedBox(height: 16),
+
+                Center(
+                  child: TextButton(
+                    onPressed: _isLoading ? null : () => context.go('/esqueci-senha'),
+                    child: const Text('Esqueci minha senha'),
+                  ),
+                ),
 
                 // Register Link
                 Center(

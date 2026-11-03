@@ -7,6 +7,14 @@ import '../utils/logger.dart';
 
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 
+/// Se o e-mail da conta logada já foi confirmado. Recalcula quando muda o usuário logado.
+final emailConfirmadoProvider = FutureProvider.autoDispose<bool>((ref) async {
+  ref.watch(authProvider.select((estado) => estado.valueOrNull?.id));
+  final api = ref.read(apiServiceProvider);
+  await api.init();
+  return api.emailConfirmado();
+});
+
 /// ✅ FutureProvider que aguarda a inicialização completa
 final authInitProvider = FutureProvider<void>((ref) async {
   await ref.read(authProvider.notifier)._ensureInitialized();
@@ -147,6 +155,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
   Future<void> login(String email, String senha) async {
     state = const AsyncValue.loading();
+    // Quando o e-mail ainda não foi confirmado, quem chama precisa levar a pessoa para a confirmação.
+    // Por isso a exceção é relançada, sem marcar erro no estado.
     try {
       await _ensureInitialized();
       final apiService = ref.read(apiServiceProvider);
@@ -162,13 +172,16 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] ✅ Login bem-sucedido para $email');
       
       state = AsyncValue.data(loginResponse.user);
+    } on EmailNaoConfirmadoException {
+      state = const AsyncValue.data(null);
+      rethrow;
     } catch (e, st) {
       log.e('[AUTH] ❌ Erro no login: $e');
       state = AsyncValue.error(e, st);
     }
   }
 
-  Future<void> register(String email, String senha, String nome) async {
+  Future<void> register(String email, String senha, String nome, String telefone) async {
     state = const AsyncValue.loading();
     try {
       log.i('[AUTH] 📝 INICIANDO REGISTRO');
@@ -183,7 +196,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] ✅ ApiService inicializado');
       
       log.i('[AUTH] 🔄 Chamando /auth/register...');
-      final loginResponse = await apiService.register(email, senha, nome);
+      final loginResponse = await apiService.register(email, senha, nome, telefone);
       log.i('[AUTH] ✅ Resposta recebida do servidor');
       log.i('[AUTH] 🎫 Token recebido: ${loginResponse.token.substring(0, 20)}...');
       
@@ -200,11 +213,23 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       log.i('[AUTH] 👤 Usuário: ${loginResponse.user.email} (${loginResponse.user.nome})');
       
       state = AsyncValue.data(loginResponse.user);
+    } on EmailNaoConfirmadoException {
+      state = const AsyncValue.data(null);
+      rethrow;
     } catch (e, st) {
       log.e('[AUTH] ❌ ERRO NO REGISTRO: $e');
       log.e('[AUTH] 📍 StackTrace: $st');
       state = AsyncValue.error(e, st);
     }
+  }
+
+  /// Entra com a sessão devolvida pela confirmação do cadastro.
+  Future<void> finalizarCadastro(LoginResponse loginResponse) async {
+    _cachedUser = loginResponse.user;
+    _saveUserToCache(loginResponse.user);
+    await _ensureInitialized();
+    await _prefs.setString('auth_token', loginResponse.token);
+    state = AsyncValue.data(loginResponse.user);
   }
 
   Future<void> logout() async {

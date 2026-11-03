@@ -15,6 +15,7 @@ import '../../widgets/modern_bottom_nav.dart';
 import '../../widgets/pulyn_logo.dart';
 import '../../widgets/qr_link_panel.dart';
 import '../profile/profile_tab.dart';
+import '../profile/conta_acoes.dart';
 import '../../utils/logger.dart';
 import '../../utils/top_snackbar.dart';
 
@@ -439,9 +440,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return ProfileTab(
       auth: ref.watch(authProvider),
       children: ref.watch(childrenProvider),
+      emailConfirmado: ref.watch(emailConfirmadoProvider),
       onLogout: () => ref.read(authProvider.notifier).logout(),
       onRetry: () => ref.invalidate(authProvider),
-      onChildLinked: () => ref.read(childrenRefreshProvider.notifier).refresh(),
+      onExcluirConta: () => excluirConta(context, ref),
     );
   }
 

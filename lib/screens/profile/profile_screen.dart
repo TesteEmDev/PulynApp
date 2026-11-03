@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/theme.dart';
 import '../../providers/index.dart';
+import 'conta_acoes.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -48,9 +49,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final email = _emailController.text.trim();
     final emailAtual = ref.read(authProvider).valueOrNull?.email ?? '';
 
-    // Trocar o e-mail (que é o login) exige a senha atual.
+    // Trocar o e-mail (que é o login) exige o e-mail atual confirmado e a senha atual.
     String? senhaAtual;
     if (email.toLowerCase() != emailAtual.toLowerCase()) {
+      final confirmado = ref.read(emailConfirmadoProvider).valueOrNull;
+      if (confirmado == false) {
+        await _avisarConfirmarEmail();
+        return;
+      }
       senhaAtual = await _pedirSenha(
         titulo: 'Confirme sua senha',
         mensagem: 'Para trocar o e-mail, informe a senha atual.',
@@ -70,133 +76,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  /// Aviso quando a pessoa tenta trocar o e-mail sem ter confirmado o atual.
+  Future<void> _avisarConfirmarEmail() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: PulynColors.darkCard,
+        title: const Text('Confirme seu e-mail'),
+        content: const Text(
+          'Para poder alterar o e-mail da conta, primeiro confirme o e-mail atual. Enviamos um código para ele.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Agora não')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Confirmar agora')),
+        ],
+      ),
+    );
+    if (confirmar == true && mounted) context.push('/confirmar-email');
+  }
+
   /// Pede a senha atual numa caixa de diálogo. Devolve null se cancelar ou deixar em branco.
   Future<String?> _pedirSenha({
     required String titulo,
     required String mensagem,
     String confirmar = 'Confirmar',
-  }) async {
-    final controller = TextEditingController();
-    final senha = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: PulynColors.darkCard,
-        title: Text(titulo),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(mensagem),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              obscureText: true,
-              autofocus: true,
-              decoration: const InputDecoration(labelText: 'Senha atual'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(context, controller.text), child: Text(confirmar)),
-        ],
-      ),
-    );
-    controller.dispose();
-    return (senha == null || senha.isEmpty) ? null : senha;
-  }
-
-  Future<void> _abrirAlterarSenha() async {
-    final atual = TextEditingController();
-    final nova = TextEditingController();
-    final confirmacao = TextEditingController();
-    final confirmou = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: PulynColors.darkCard,
-        title: const Text('Alterar senha'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: atual, obscureText: true, decoration: const InputDecoration(labelText: 'Senha atual')),
-              const SizedBox(height: 8),
-              TextField(controller: nova, obscureText: true, decoration: const InputDecoration(labelText: 'Nova senha')),
-              const SizedBox(height: 8),
-              TextField(controller: confirmacao, obscureText: true, decoration: const InputDecoration(labelText: 'Repita a nova senha')),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Salvar')),
-        ],
-      ),
-    );
-    final senhaAtual = atual.text;
-    final novaSenha = nova.text;
-    final repetida = confirmacao.text;
-    atual.dispose();
-    nova.dispose();
-    confirmacao.dispose();
-    if (confirmou != true || !mounted) return;
-
-    if (novaSenha.length < 6) {
-      showErrorSnackBar(context, 'A nova senha precisa ter pelo menos 6 caracteres');
-      return;
-    }
-    if (novaSenha != repetida) {
-      showErrorSnackBar(context, 'As senhas não conferem');
-      return;
-    }
-    try {
-      await ref.read(apiServiceProvider).alterarSenha(senhaAtual: senhaAtual, novaSenha: novaSenha);
-      if (!mounted) return;
-      showSuccessSnackBar(context, 'Senha alterada. As outras sessões foram encerradas.');
-    } catch (e) {
-      if (!mounted) return;
-      showErrorSnackBar(context, e.toString().replaceFirst('Exception: ', ''));
-    }
-  }
-
-  Future<void> _excluirConta() async {
-    final confirmou = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: PulynColors.darkCard,
-        title: const Text('Excluir conta?'),
-        content: const Text(
-          'Sua conta e seus dados pessoais (nome e e-mail) serão apagados e você não conseguirá mais entrar. '
-          'O histórico dos eventos permanece, sem identificação. Esta ação não pode ser desfeita.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Continuar', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-    if (confirmou != true || !mounted) return;
-
-    final senha = await _pedirSenha(
-      titulo: 'Confirme sua senha',
-      mensagem: 'Digite sua senha para excluir a conta.',
-      confirmar: 'Excluir',
-    );
-    if (senha == null || !mounted) return;
-
-    try {
-      await ref.read(apiServiceProvider).excluirConta(senha);
-      await ref.read(authProvider.notifier).logout();
-      if (!mounted) return;
-      context.go('/login');
-    } catch (e) {
-      if (!mounted) return;
-      showErrorSnackBar(context, e.toString().replaceFirst('Exception: ', ''));
-    }
-  }
+  }) => pedirSenhaAtual(context, titulo: titulo, mensagem: mensagem, confirmar: confirmar);
 
   void _handleLogout() {
     showDialog(
@@ -579,17 +483,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         const SizedBox(height: 12),
         _buildSettingCard(
+          icon: Icons.mark_email_read_outlined,
+          label: 'Confirmar e-mail',
+          subtitle: 'Confirma o endereço da sua conta',
+          onTap: () => context.push('/confirmar-email'),
+        ),
+        const SizedBox(height: 12),
+        _buildSettingCard(
           icon: Icons.lock_outline,
           label: 'Alterar senha',
           subtitle: 'Troca a senha e encerra as outras sessões',
-          onTap: () => _abrirAlterarSenha(),
+          onTap: () => context.push('/alterar-senha'),
         ),
         const SizedBox(height: 12),
         _buildSettingCard(
           icon: Icons.delete_outline,
           label: 'Excluir conta',
           subtitle: 'Apaga sua conta e seus dados pessoais',
-          onTap: () => _excluirConta(),
+          onTap: () => excluirConta(context, ref),
         ),
       ],
     );

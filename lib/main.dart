@@ -49,6 +49,26 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
+class _AppComTema extends ConsumerWidget {
+  final GoRouter router;
+
+  const _AppComTema({required this.router});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(temaClaroProvider);
+    return MaterialApp.router(
+      title: 'Pulyn Family',
+      theme: construirTema(),
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+      builder: (context, child) {
+        return _GlobalBackButtonHandler(child: child ?? const SizedBox());
+      },
+    );
+  }
+}
+
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
@@ -56,8 +76,6 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // ✅ Aguarda a inicialização do auth ANTES de construir o router
     ref.watch(authInitProvider);
-    // Reconstrói o app quando a pessoa troca o tema (claro/escuro).
-    ref.watch(temaClaroProvider);
     // E-mail de cadastro pendente: o roteador abre a confirmação (sem depender de navegação feita antes).
     ref.watch(cadastroPendenteProvider);
     final authState = ref.watch(authProvider);
@@ -76,15 +94,9 @@ class MyApp extends ConsumerWidget {
       });
     });
 
-    return MaterialApp.router(
-      title: 'Pulyn Family',
-      theme: construirTema(),
-      debugShowCheckedModeBanner: false,
-      routerConfig: _buildRouter(authState, isFirstTimeAsync, ref),
-      builder: (context, child) {
-        return _GlobalBackButtonHandler(child: child ?? const SizedBox());
-      },
-    );
+    // O roteador só é recriado quando a sessão muda. A troca de tema fica no widget de dentro,
+    // que reconstrói o MaterialApp com o mesmo roteador e não volta para a tela inicial.
+    return _AppComTema(router: _buildRouter(authState, isFirstTimeAsync, ref));
   }
 
   /// Constrói router baseado no estado de autenticação e primeira execução

@@ -142,6 +142,18 @@ ThemeData _construirTemaBase(bool claro) {
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.1),
       ),
     ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: PulynColors.primary,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: PulynColors.primary.withValues(alpha: 0.4),
+        minimumSize: const Size.fromHeight(PulynMedidas.alturaBotao),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PulynMedidas.raioBotao)),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        elevation: 0,
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.1),
+      ),
+    ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: PulynColors.primary,

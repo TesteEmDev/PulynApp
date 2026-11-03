@@ -205,19 +205,14 @@ class _ManageLinkedChildrenScreenState
                         children: [
                           Expanded(
                             child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: PulynColors.primary,
-                              ),
-                              onPressed: () {
-                                // Navegar para detalhes da criança
-                              },
-                              child: const Text('Ver Detalhes'),
+                              onPressed: () => context.push('/child/${child.id}'),
+                              child: const Text('Ver detalhes'),
                             ),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: PulynColors.danger,
                             ),
                             onPressed: () {
                               showDialog(
@@ -263,7 +258,8 @@ class _ManageLinkedChildrenScreenState
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.green,
+        backgroundColor: PulynColors.secondary,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text('Cadastrar criança'),
         onPressed: () async {

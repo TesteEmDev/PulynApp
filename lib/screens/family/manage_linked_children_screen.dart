@@ -83,7 +83,7 @@ class _ManageLinkedChildrenScreenState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              Icon(Icons.error_outline, size: 64, color: PulynColors.danger),
               const SizedBox(height: 16),
               Text('Erro ao carregar: $error'),
             ],
@@ -235,7 +235,7 @@ class _ManageLinkedChildrenScreenState
                                       },
                                       child: const Text(
                                         'Desvincular',
-                                        style: TextStyle(color: Colors.red),
+                                        style: TextStyle(color: PulynColors.danger),
                                       ),
                                     ),
                                   ],
@@ -258,8 +258,10 @@ class _ManageLinkedChildrenScreenState
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: PulynColors.secondary,
+        backgroundColor: PulynColors.primary,
         foregroundColor: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PulynMedidas.raioBotao)),
         icon: const Icon(Icons.add),
         label: const Text('Cadastrar criança'),
         onPressed: () async {

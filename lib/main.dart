@@ -11,6 +11,11 @@ import 'utils/logger.dart';
 import 'screens/auth/invite_entry_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
+import 'screens/auth/esqueci_senha_screen.dart';
+import 'screens/profile/confirmar_email_screen.dart';
+import 'screens/profile/alterar_senha_screen.dart';
+import 'screens/auth/confirmar_cadastro_screen.dart';
+import 'screens/legal/politica_privacidade_screen.dart';
 import 'screens/auth/family_invite_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/child/child_detail_screen.dart';
@@ -107,6 +112,26 @@ class MyApp extends ConsumerWidget {
           GoRoute(
             path: '/register',
             builder: (context, state) => const RegisterScreen(),
+          ),
+          GoRoute(
+            path: '/esqueci-senha',
+            builder: (context, state) => const EsqueciSenhaScreen(),
+          ),
+          GoRoute(
+            path: '/confirmar-email',
+            builder: (context, state) => const ConfirmarEmailScreen(),
+          ),
+          GoRoute(
+            path: '/confirmar-cadastro',
+            builder: (context, state) => ConfirmarCadastroScreen(email: state.extra as String? ?? ''),
+          ),
+          GoRoute(
+            path: '/politica-privacidade',
+            builder: (context, state) => const PoliticaPrivacidadeScreen(),
+          ),
+          GoRoute(
+            path: '/alterar-senha',
+            builder: (context, state) => const AlterarSenhaScreen(),
           ),
           GoRoute(
             path: '/invite',

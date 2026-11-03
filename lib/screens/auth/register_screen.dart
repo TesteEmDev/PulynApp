@@ -3,6 +3,7 @@ import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/index.dart';
+import '../../services/api_service.dart';
 import '../../services/validation_service.dart';
 import '../../widgets/auth_widgets.dart';
 import '../../widgets/consentimento_privacidade.dart';
@@ -19,6 +20,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _telefoneController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
   bool _aceitouPrivacidade = false;
@@ -35,6 +37,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _telefoneController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
@@ -95,9 +98,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (!mounted) return;
 
       // Dispara register
-      await ref.read(authProvider.notifier).register(email, senha, nome);
+      final telefone = _telefoneController.text.replaceAll(RegExp(r'\D'), '');
+      await ref.read(authProvider.notifier).register(email, senha, nome, telefone);
 
       if (!mounted) return;
+    } on EmailNaoConfirmadoException catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      context.push('/confirmar-cadastro', extra: e.email);
     } catch (e) {
       if (!mounted) return;
 
@@ -218,7 +226,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           validator: _validateEmail,
                         ),
                         const SizedBox(height: 14),
-                        AuthPasswordField(
+                                                TextFormField(
+                          controller: _telefoneController,
+                          enabled: !_isLoading,
+                          keyboardType: TextInputType.phone,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.telephoneNumber],
+                          decoration: const InputDecoration(
+                            labelText: 'Telefone com DDD',
+                            hintText: '(11) 98765-4321',
+                            prefixIcon: Icon(Icons.phone_outlined),
+                            helperText: 'A recepção usa este número se precisar falar com você',
+                          ),
+                          validator: (valor) => RegExp(r'^\d{10,11}$').hasMatch((valor ?? '').replaceAll(RegExp(r'\D'), ''))
+                              ? null
+                              : 'Informe o telefone com DDD',
+                        ),
+                        const SizedBox(height: 14),
+AuthPasswordField(
                           controller: _passwordController,
                           enabled: !_isLoading,
                           helperText: 'Mínimo de 6 caracteres',

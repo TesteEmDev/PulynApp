@@ -7,6 +7,15 @@ import '../utils/network_helper.dart';
 import '../utils/logger.dart';
 import '../utils/text_sanitizer.dart';
 
+/// A conta existe, mas o e-mail ainda não foi confirmado com o código enviado.
+class EmailNaoConfirmadoException implements Exception {
+  final String email;
+  const EmailNaoConfirmadoException(this.email);
+
+  @override
+  String toString() => 'E-mail ainda não confirmado';
+}
+
 class ApiService {
   late Dio _dio;
   late String _baseUrl;
@@ -137,10 +146,19 @@ class ApiService {
         _prefs = await SharedPreferences.getInstance();
       }
       
-      final response = await _dio.post(
-        '/auth/login',
-        data: {'email': email, 'senha': senha},
-      );
+      final Response<dynamic> response;
+      try {
+        response = await _dio.post(
+          '/auth/login',
+          data: {'email': email, 'senha': senha},
+        );
+      } on DioException catch (e) {
+        final body = e.response?.data;
+        if (e.response?.statusCode == 403 && body is Map && body['codigo'] == 'EMAIL_NAO_CONFIRMADO') {
+          throw EmailNaoConfirmadoException((body['email'] ?? email).toString());
+        }
+        rethrow;
+      }
       
       final data = _validateResponseData(response.data);
       
@@ -177,7 +195,8 @@ class ApiService {
   Future<LoginResponse> register(
     String email,
     String senha,
-    String nome, {
+    String nome,
+    String telefone, {
     String? familyName,
   }) async {
     try {
@@ -202,6 +221,7 @@ class ApiService {
           'senha': senha,
           'nome': nome,
           'nomeFamilia': familyName ?? nome,
+          'telefone': telefone,
         },
       );
       
@@ -210,6 +230,11 @@ class ApiService {
       
       final data = _validateResponseData(response.data);
       log.i('[API] ✅ Dados validados');
+
+      // Cadastro novo: a conta só entra depois de confirmar o e-mail com o código.
+      if (data['precisaConfirmarEmail'] == true) {
+        throw EmailNaoConfirmadoException((data['email'] ?? email).toString());
+      }
       
       final token = data['token'] ?? data['data']?['token'];
       final userData = data['user'] ?? data['data']?['user'];
@@ -281,6 +306,39 @@ class ApiService {
     }
   }
 
+  /// POST /auth/confirmar-cadastro - confirma o código e devolve a sessão (conta ativa).
+  Future<LoginResponse> confirmarCadastro(String email, String codigo) async {
+    await init();
+    try {
+      final response = await _dio.post('/auth/confirmar-cadastro', data: {'email': email, 'codigo': codigo});
+      final data = _validateResponseData(response.data);
+      final token = data['token'];
+      final userData = data['user'];
+      if (token is! String || userData is! Map) throw Exception('Resposta inválida do servidor');
+      final user = User(
+        id: (userData['id'] ?? '').toString(),
+        email: (userData['email'] ?? email).toString(),
+        nome: (userData['nome'] ?? userData['nomeFamilia'] ?? userData['name'] ?? 'User').toString(),
+        perfil: 'family',
+        empresaId: (userData['empresaId'] ?? '').toString(),
+      );
+      await _prefs.setString('auth_token', token);
+      return LoginResponse(token: token, user: user);
+    } on DioException catch (e) {
+      throw Exception(_mensagemDeErro(e, 'Não foi possível confirmar o cadastro'));
+    }
+  }
+
+  /// POST /auth/reenviar-cadastro - manda o código de novo (resposta igual existindo ou não a conta).
+  Future<void> reenviarCadastro(String email) async {
+    await init();
+    try {
+      await _dio.post('/auth/reenviar-cadastro', data: {'email': email});
+    } on DioException catch (e) {
+      throw Exception(_mensagemDeErro(e, 'Não foi possível reenviar o código'));
+    }
+  }
+
   /// POST /auth/alterar-senha - troca a senha. O backend derruba as outras sessões e devolve um token novo,
   /// que é guardado aqui para este aparelho continuar logado.
   Future<void> alterarSenha({required String senhaAtual, required String novaSenha}) async {
@@ -295,6 +353,69 @@ class ApiService {
       if (token is String) await _prefs.setString('auth_token', token);
     } on DioException catch (e) {
       throw Exception(_mensagemDeErro(e, 'Não foi possível trocar a senha'));
+    }
+  }
+
+  /// POST /auth/esqueci-senha - manda o código por e-mail. A resposta é a mesma existindo ou não a conta.
+  Future<void> pedirCodigoSenha(String email) async {
+    await init();
+    try {
+      await _dio.post('/auth/esqueci-senha', data: {'email': email});
+    } on DioException catch (e) {
+      throw Exception(_mensagemDeErro(e, 'Não foi possível enviar o código'));
+    }
+  }
+
+  /// POST /auth/redefinir-senha - confere o código e grava a senha nova.
+  Future<void> redefinirSenha({
+    required String email,
+    required String codigo,
+    required String novaSenha,
+  }) async {
+    await init();
+    try {
+      await _dio.post('/auth/redefinir-senha', data: {
+        'email': email,
+        'codigo': codigo,
+        'novaSenha': novaSenha,
+      });
+    } on DioException catch (e) {
+      throw Exception(_mensagemDeErro(e, 'Não foi possível redefinir a senha'));
+    }
+  }
+
+  /// POST /auth/confirmacao-email/enviar - manda o código para o e-mail da conta logada.
+  /// Devolve true se o e-mail já estava confirmado.
+  Future<bool> enviarCodigoConfirmacao() async {
+    await init();
+    try {
+      final response = await _dio.post('/auth/confirmacao-email/enviar');
+      final data = response.data;
+      return data is Map && data['jaConfirmado'] == true;
+    } on DioException catch (e) {
+      throw Exception(_mensagemDeErro(e, 'Não foi possível enviar o código'));
+    }
+  }
+
+  /// GET /auth/confirmacao-email/status - se o e-mail da conta logada já foi confirmado.
+  Future<bool> emailConfirmado() async {
+    await init();
+    try {
+      final response = await _dio.get('/auth/confirmacao-email/status');
+      final data = response.data;
+      return data is Map && data['confirmado'] == true;
+    } on DioException catch (e) {
+      throw Exception(_mensagemDeErro(e, 'Não foi possível ver o status do e-mail'));
+    }
+  }
+
+  /// POST /auth/confirmacao-email/confirmar - confirma o e-mail com o código recebido.
+  Future<void> confirmarEmail(String codigo) async {
+    await init();
+    try {
+      await _dio.post('/auth/confirmacao-email/confirmar', data: {'codigo': codigo});
+    } on DioException catch (e) {
+      throw Exception(_mensagemDeErro(e, 'Não foi possível confirmar o e-mail'));
     }
   }
 
@@ -449,12 +570,14 @@ class ApiService {
     required String nome,
     String? apelido,
     required int idade,
+    String? dataNascimento,
   }) async {
     final response = await _dio.post('/familias/perfis', data: {
       'eventoId': eventoId,
       'nome': nome,
       'apelido': apelido,
       'idade': idade,
+      'dataNascimento': dataNascimento,
     });
     return _validateResponseData(response.data);
   }

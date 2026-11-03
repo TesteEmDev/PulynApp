@@ -36,9 +36,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Fim do onboarding: vai para a tela de colar o link/código do convite,
-      // que leva ao cadastro. Quem já tem conta usa "Já tenho conta" (login).
-      context.go('/invite');
+      // Fim do onboarding: vai direto para o cadastro. Quem já tem conta usa "Já tenho conta" (login).
+      context.go('/register');
     }
   }
 

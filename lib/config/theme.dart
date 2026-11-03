@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-// 🎨 Cores Pulyn (replicadas do Tailwind web)
+// 🎨 Cores Pulyn (da logo: azul, verde, laranja, rosa)
 class PulynColors {
-  // Primary (Cyan/Blue) - #1E9BD7
+  // Primary (azul da logo)
   static const Color primary = Color(0xFF1E9BD7);
   static const Color primaryLight = Color(0xFF29B6F6);
-  
-  // Secondary (Green) - #4CAF50
+
+  // Secondary (verde da logo)
   static const Color secondary = Color(0xFF4CAF50);
-  
-  // Accent (Orange) - #F5A623
+
+  // Accent (laranja da logo)
   static const Color accent = Color(0xFFF5A623);
-  
-  // Pink - #E91E8C
+
+  // Pink (rosa da logo)
   static const Color pink = Color(0xFFE91E8C);
-  
+
   // Modo claro: quando true, as cores de superfície e texto mudam (ver os getters abaixo).
   // O nome "dark" é mantido por compatibilidade: estas cores são as de fundo, cartão e borda do tema atual.
   static bool claro = false;
@@ -37,14 +37,23 @@ class PulynColors {
   static Color get textMuted => claro ? const Color(0xFF6B7784) : const Color(0xFF6B7280);
 }
 
-/// Tema atual (conforme PulynColors.claro). Mantido para quem ainda usa `appTheme`.
-ThemeData get appTheme => construirTema();
+/// Medidas padronizadas: botões, campos e cartões usam sempre estes valores.
+class PulynMedidas {
+  static const double raioBotao = 14;
+  static const double raioCampo = 14;
+  static const double raioCartao = 18;
+  static const double alturaBotao = 54;
+  static const double alturaCampo = 56;
+  static const EdgeInsets paddingCampo = EdgeInsets.symmetric(horizontal: 16, vertical: 16);
+}
 
 /// Tema do app, montado conforme o modo escolhido (PulynColors.claro).
 ThemeData construirTema() {
-  final claro = PulynColors.claro;
-  return _construirTemaBase(claro);
+  return _construirTemaBase(PulynColors.claro);
 }
+
+/// Tema atual (conforme PulynColors.claro). Mantido para quem ainda usa `appTheme`.
+ThemeData get appTheme => construirTema();
 
 ThemeData _construirTemaBase(bool claro) {
   final esquema = claro
@@ -64,120 +73,105 @@ ThemeData _construirTemaBase(bool claro) {
           onSurface: PulynColors.textPrimary,
           error: PulynColors.danger,
         );
+
+  final bordaCampo = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(PulynMedidas.raioCampo),
+    borderSide: BorderSide(color: PulynColors.darkBorder),
+  );
+
   return ThemeData(
-  useMaterial3: true,
-  brightness: claro ? Brightness.light : Brightness.dark,
-  scaffoldBackgroundColor: PulynColors.dark,
-  colorScheme: esquema,
-  appBarTheme: AppBarTheme(
-    backgroundColor: PulynColors.dark,
-    foregroundColor: PulynColors.textPrimary,
-    elevation: 0,
-    centerTitle: false,
-    titleTextStyle: TextStyle(
-      color: PulynColors.textPrimary,
-      fontSize: 20,
-      fontWeight: FontWeight.w600,
-    ),
-  ),
-  cardTheme: CardThemeData(
-    color: PulynColors.darkCard,
-    elevation: 0,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-      side: BorderSide(
-        color: PulynColors.darkBorder,
-        width: 1,
-      ),
-    ),
-  ),
-  inputDecorationTheme: InputDecorationTheme(
-    filled: true,
-    fillColor: PulynColors.darkSurface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide(color: PulynColors.darkBorder),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide(color: PulynColors.darkBorder),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide(color: PulynColors.primary, width: 2),
-    ),
-    errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide(color: PulynColors.danger),
-    ),
-    labelStyle: TextStyle(color: PulynColors.textSecondary),
-    hintStyle: TextStyle(color: PulynColors.textMuted),
-    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-  ),
-  elevatedButtonTheme: ElevatedButtonThemeData(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: PulynColors.primary,
-      foregroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+    useMaterial3: true,
+    brightness: claro ? Brightness.light : Brightness.dark,
+    scaffoldBackgroundColor: PulynColors.dark,
+    colorScheme: esquema,
+    appBarTheme: AppBarTheme(
+      backgroundColor: PulynColors.dark,
+      foregroundColor: PulynColors.textPrimary,
       elevation: 0,
-    ),
-  ),
-  outlinedButtonTheme: OutlinedButtonThemeData(
-    style: OutlinedButton.styleFrom(
-      foregroundColor: PulynColors.primary,
-      side: BorderSide(color: PulynColors.darkBorder),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+      titleTextStyle: TextStyle(
+        color: PulynColors.textPrimary,
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.2,
       ),
-      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
     ),
-  ),
-  textButtonTheme: TextButtonThemeData(
-    style: TextButton.styleFrom(
-      foregroundColor: PulynColors.primary,
+    cardTheme: CardThemeData(
+      color: PulynColors.darkCard,
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(PulynMedidas.raioCartao),
+        side: BorderSide(color: PulynColors.darkBorder, width: 1),
+      ),
     ),
-  ),
-  textTheme: TextTheme(
-    displaySmall: TextStyle(
-      fontSize: 28,
-      fontWeight: FontWeight.bold,
-      color: PulynColors.textPrimary,
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: PulynColors.darkSurface,
+      contentPadding: PulynMedidas.paddingCampo,
+      border: bordaCampo,
+      enabledBorder: bordaCampo,
+      disabledBorder: bordaCampo,
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(PulynMedidas.raioCampo),
+        borderSide: BorderSide(color: PulynColors.primary, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(PulynMedidas.raioCampo),
+        borderSide: BorderSide(color: PulynColors.danger),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(PulynMedidas.raioCampo),
+        borderSide: BorderSide(color: PulynColors.danger, width: 1.5),
+      ),
+      labelStyle: TextStyle(color: PulynColors.textSecondary),
+      floatingLabelStyle: TextStyle(color: PulynColors.primary),
+      hintStyle: TextStyle(color: PulynColors.textMuted),
+      helperStyle: TextStyle(color: PulynColors.textMuted, fontSize: 12),
     ),
-    headlineSmall: TextStyle(
-      fontSize: 20,
-      fontWeight: FontWeight.w600,
-      color: PulynColors.textPrimary,
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: PulynColors.primary,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: PulynColors.primary.withValues(alpha: 0.4),
+        minimumSize: const Size.fromHeight(PulynMedidas.alturaBotao),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PulynMedidas.raioBotao)),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        elevation: 0,
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.1),
+      ),
     ),
-    titleLarge: TextStyle(
-      fontSize: 18,
-      fontWeight: FontWeight.w600,
-      color: PulynColors.textPrimary,
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: PulynColors.primary,
+        minimumSize: const Size.fromHeight(PulynMedidas.alturaBotao),
+        side: BorderSide(color: PulynColors.primary, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PulynMedidas.raioBotao)),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      ),
     ),
-    titleMedium: TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-      color: PulynColors.textPrimary,
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: PulynColors.primary,
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+      ),
     ),
-    bodyMedium: TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w400,
-      color: PulynColors.textSecondary,
+    textTheme: TextTheme(
+      displaySmall: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: PulynColors.textPrimary),
+      headlineSmall: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.3, color: PulynColors.textPrimary),
+      titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: PulynColors.textPrimary),
+      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: PulynColors.textPrimary),
+      bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, height: 1.45, color: PulynColors.textSecondary),
+      bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: PulynColors.textMuted),
     ),
-    bodySmall: TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w400,
-      color: PulynColors.textMuted,
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: PulynColors.darkCard,
+      selectedItemColor: PulynColors.primary,
+      unselectedItemColor: PulynColors.textMuted,
+      elevation: 0,
+      type: BottomNavigationBarType.fixed,
     ),
-  ),
-  bottomNavigationBarTheme: BottomNavigationBarThemeData(
-    backgroundColor: PulynColors.darkCard,
-    selectedItemColor: PulynColors.primary,
-    unselectedItemColor: PulynColors.textMuted,
-    elevation: 0,
-    type: BottomNavigationBarType.fixed,
-  ),
   );
 }

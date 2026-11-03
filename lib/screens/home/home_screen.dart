@@ -936,19 +936,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [PulynColors.primary, PulynColors.primaryLight],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: PulynColors.primary,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: PulynColors.primary.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
@@ -1182,23 +1171,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       onTap: () => context.go('/child/${child.id}'),
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              PulynColors.darkCard,
-              PulynColors.darkCard.withValues(alpha: 0.8),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: PulynColors.darkCard,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: PulynColors.darkBorder, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -1208,19 +1183,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [teamColor, teamColor.withValues(alpha: 0.7)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: teamColor,
                 borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: teamColor.withValues(alpha: 0.3),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               child: Center(
                 // Avatar do catálogo (SVG); sem avatar válido, mostra a inicial como antes
@@ -1275,12 +1239,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    PulynColors.accent.withValues(alpha: 0.2),
-                    PulynColors.accent.withValues(alpha: 0.1),
-                  ],
-                ),
+                color: PulynColors.accent.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: PulynColors.accent.withValues(alpha: 0.4),
@@ -1345,33 +1304,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isTop
-              ? [
-                  PulynColors.darkSurface,
-                  PulynColors.darkSurface.withValues(alpha: 0.8),
-                ]
-              : [
-                  PulynColors.darkCard,
-                  PulynColors.darkCard.withValues(alpha: 0.8),
-                ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isTop ? PulynColors.primary : PulynColors.darkBorder,
           width: isTop ? 2 : 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: (isTop ? PulynColors.primary : Colors.black).withValues(
-              alpha: 0.2,
-            ),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -1380,13 +1318,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [cor, cor.withValues(alpha: 0.7)],
-              ),
+              color: cor,
               borderRadius: BorderRadius.circular(27),
-              boxShadow: [
-                BoxShadow(color: cor.withValues(alpha: 0.4), blurRadius: 8),
-              ],
             ),
             child: Center(
               child: Text(
@@ -1426,12 +1359,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  PulynColors.primary.withValues(alpha: 0.2),
-                  PulynColors.primary.withValues(alpha: 0.1),
-                ],
-              ),
+              color: PulynColors.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: PulynColors.primary.withValues(alpha: 0.5),
@@ -1472,33 +1400,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isTop
-              ? [
-                  PulynColors.darkSurface,
-                  PulynColors.darkSurface.withValues(alpha: 0.8),
-                ]
-              : [
-                  PulynColors.darkCard,
-                  PulynColors.darkCard.withValues(alpha: 0.8),
-                ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isTop ? PulynColors.primary : PulynColors.darkBorder,
           width: isTop ? 2 : 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: (isTop ? PulynColors.primary : Colors.black).withValues(
-              alpha: 0.2,
-            ),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -1507,13 +1414,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [cor, cor.withValues(alpha: 0.7)],
-              ),
+              color: cor,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(color: cor.withValues(alpha: 0.4), blurRadius: 8),
-              ],
             ),
             child: Center(
               child: Text(

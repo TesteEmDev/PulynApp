@@ -188,12 +188,7 @@ class _EventHeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withValues(alpha: 0.8),
-          ],
-        ),
+        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(20),

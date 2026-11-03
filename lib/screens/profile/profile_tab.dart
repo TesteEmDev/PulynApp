@@ -267,14 +267,7 @@ class _ProfileHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PulynColors.primary.withValues(alpha: 0.28),
-            PulynColors.darkCard,
-          ],
-        ),
+        color: PulynColors.primary.withValues(alpha: 0.28),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: PulynColors.primary.withValues(alpha: 0.35)),
       ),
@@ -286,11 +279,7 @@ class _ProfileHeader extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [PulynColors.primary, PulynColors.primaryLight],
-              ),
+              color: PulynColors.primary,
               border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 3),
             ),
             child: Text(

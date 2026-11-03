@@ -735,13 +735,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: _getCheckpointColor(checkpoint),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _getCheckpointColor(checkpoint).withValues(alpha: 0.3),
-                        blurRadius: 12,
-                        spreadRadius: 2,
-                      ),
-                    ],
                   ),
                   child: const Icon(
                     Icons.location_on,
@@ -861,18 +854,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                   height: 60,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [teamColor, teamColor.withValues(alpha: 0.7)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: teamColor.withValues(alpha: 0.3),
-                        blurRadius: 12,
-                        spreadRadius: 2,
-                      ),
-                    ],
+                    color: teamColor,
                   ),
                   child: Center(
                     child: Text(
@@ -1532,14 +1514,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                       height: _world.height,
                       decoration: BoxDecoration(
                         color: PulynColors.darkCard.withValues(alpha: 0.3),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            const Color(0xFF1a2a3a).withValues(alpha: 0.5),
-                            const Color(0xFF2a3a4a).withValues(alpha: 0.5),
-                          ],
-                        ),
                       ),
                       child: Stack(
                         children: [
@@ -1659,13 +1633,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                             shape: BoxShape.circle,
                                             border: Border.all(color: cor, width: 3),
                                             color: PulynColors.darkCard.withValues(alpha: 0.95),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: cor.withValues(alpha: 0.4),
-                                                blurRadius: 12,
-                                                spreadRadius: 3,
-                                              ),
-                                            ],
                                           ),
                                           child: Center(
                                             child: Icon(
@@ -1783,19 +1750,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                         height: 34,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          gradient: LinearGradient(
-                                            colors: [teamColor, teamColor.withValues(alpha: 0.7)],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
+                                          color: teamColor,
                                           border: Border.all(color: Colors.yellow, width: 3),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: teamColor.withValues(alpha: 0.5),
-                                              blurRadius: 10,
-                                              spreadRadius: 1,
-                                            ),
-                                          ],
                                         ),
                                         child: childData.profileImage != null && childData.profileImage!.isNotEmpty
                                             ? ClipOval(
@@ -2080,13 +2036,6 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: color,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.3),
-                blurRadius: 4,
-                spreadRadius: 1,
-              ),
-            ],
           ),
         ),
         const SizedBox(width: 6),

@@ -62,14 +62,7 @@ class _LinkChildHeroState extends State<LinkChildHero> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PulynColors.primary.withValues(alpha: 0.30),
-            PulynColors.darkCard,
-          ],
-        ),
+        color: PulynColors.primary.withValues(alpha: 0.30),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: PulynColors.primary.withValues(alpha: 0.4)),
       ),
@@ -109,18 +102,7 @@ class _LinkChildHeroState extends State<LinkChildHero> {
             height: 72,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [PulynColors.primary, PulynColors.primaryLight],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: PulynColors.primary.withValues(alpha: 0.45),
-                  blurRadius: 18,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+              color: PulynColors.primary,
             ),
             child: const Icon(Icons.qr_code_scanner_rounded, size: 36, color: Colors.white),
           ),

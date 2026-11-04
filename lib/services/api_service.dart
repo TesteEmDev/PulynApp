@@ -157,7 +157,11 @@ class ApiService {
         if (e.response?.statusCode == 403 && body is Map && body['codigo'] == 'EMAIL_NAO_CONFIRMADO') {
           throw EmailNaoConfirmadoException((body['email'] ?? email).toString());
         }
-        rethrow;
+        if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
+          throw Exception('Sem conexão com o servidor. Verifique sua internet.');
+        }
+        // Senha ou e-mail errados: o backend manda "Email ou senha incorretos".
+        throw Exception(_mensagemDeErro(e, 'Não foi possível entrar. Tente de novo.'));
       }
       
       final data = _validateResponseData(response.data);

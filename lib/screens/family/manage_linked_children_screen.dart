@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../utils/top_snackbar.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../models/family_models.dart';
 import '../../services/api_service.dart';
 import '../../config/theme.dart';
@@ -11,7 +14,9 @@ import 'pre_register_child_screen.dart';
 
 // autoDispose: a lista é buscada de novo sempre que a tela abre. Sem isso, o cache fica
 // vivo com a sessão e uma criança vinculada depois (pela Home) não aparece aqui.
-final linkedChildrenProvider = FutureProvider.autoDispose<List<Child>>((ref) async {
+final linkedChildrenProvider = FutureProvider.autoDispose<List<Child>>((
+  ref,
+) async {
   final apiService = ref.read(apiServiceProvider);
   await apiService.init();
   return await apiService.getChildren();
@@ -38,12 +43,13 @@ class _ManageLinkedChildrenScreenState
   Future<void> _unlinkChild(Child child) async {
     try {
       await _apiService.init();
-      await _apiService.dio.delete(
-        '/family/children/${child.id}/unlink',
-      );
+      await _apiService.dio.delete('/family/children/${child.id}/unlink');
 
       if (mounted) {
-        showSuccessSnackBar(context, '${child.apelido} desvinculada com sucesso');
+        showSuccessSnackBar(
+          context,
+          '${child.apelido} desvinculada com sucesso',
+        );
       }
 
       // Atualizar lista
@@ -61,199 +67,212 @@ class _ManageLinkedChildrenScreenState
     final childrenAsyncValue = ref.watch(linkedChildrenProvider);
 
     return Scaffold(
-         appBar: AppBar(
+      appBar: AppBar(
         title: const Text('Gerenciar Crianças Vinculadas'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           // Se a tela foi aberta com context.go() não há rota anterior para
           // dar pop — nesse caso volta pra home em vez de não fazer nada.
-          onPressed: () => context.canPop() ? context.pop() : context.go('/home'),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/home'),
         ),
       ),
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
           const _PreRegisteredSection(),
-          Expanded(
-            child: childrenAsyncValue.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: PulynColors.danger),
-              const SizedBox(height: 16),
-              Text('Erro ao carregar: $error'),
-            ],
-          ),
-        ),
-        data: (children) {
-          if (children.isEmpty) {
-            return Center(
+          childrenAsyncValue.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.person_outline,
-                      size: 64, color: PulynColors.textMuted),
-                  SizedBox(height: 16),
-                  Text(
-                    'Nenhuma criança vinculada',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: PulynColors.textMuted,
-                    ),
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: PulynColors.danger,
                   ),
+                  const SizedBox(height: 16),
+                  Text('Erro ao carregar: $error'),
                 ],
               ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: children.length,
-            itemBuilder: (context, index) {
-              final child = children[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+            ),
+            data: (children) {
+              if (children.isEmpty) {
+                return Center(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Color(int.parse(
-                                '0xFF${child.teamColor.replaceFirst('#', '')}',
-                              )),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Center(
-                              child: Text(
-                                child.apelido.isNotEmpty
-                                    ? child.apelido[0].toUpperCase()
-                                    : '?',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      Icon(
+                        Icons.person_outline,
+                        size: 64,
+                        color: PulynColors.textMuted,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Nenhuma criança vinculada',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: PulynColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final child in children)
+                    Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                Text(
-                                  child.apelido.isNotEmpty
-                                      ? child.apelido
-                                      : child.nome,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: Color(
+                                      int.parse(
+                                        '0xFF${child.teamColor.replaceFirst('#', '')}',
+                                      ),
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      child.apelido.isNotEmpty
+                                          ? child.apelido[0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                Text(
-                                  '${child.idade} anos • ${child.teamName}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: PulynColors.textMuted,
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        child.apelido.isNotEmpty
+                                            ? child.apelido
+                                            : child.nome,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${child.idade} anos • ${child.teamName}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: PulynColors.textMuted,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: PulynColors.darkSurface,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Pontuação: ${child.currentScore} pontos',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: PulynColors.darkSurface,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Pontuação: ${child.currentScore} pontos',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Ranking: #${child.rank}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: PulynColors.textMuted,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Ranking: #${child.rank}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: PulynColors.textMuted,
-                              ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () =>
+                                        context.push('/child/${child.id}'),
+                                    child: const Text('Ver detalhes'),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: PulynColors.danger,
+                                    // O tema define largura mínima infinita (Size.fromHeight); numa Row sem
+                                    // Expanded isso quebra o layout do cartão inteiro.
+                                    minimumSize: const Size(56, PulynMedidas.alturaBotao),
+                                  ),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Desvincular?'),
+                                        content: Text(
+                                          'Deseja desvincular ${child.apelido.isNotEmpty ? child.apelido : child.nome}?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: const Text('Cancelar'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              _unlinkChild(child);
+                                            },
+                                            child: const Text(
+                                              'Desvincular',
+                                              style: TextStyle(
+                                                color: PulynColors.danger,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  child: const Icon(Icons.delete, size: 20),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () => context.push('/child/${child.id}'),
-                              child: const Text('Ver detalhes'),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: PulynColors.danger,
-                            ),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Desvincular?'),
-                                  content: Text(
-                                    'Deseja desvincular ${child.apelido.isNotEmpty ? child.apelido : child.nome}?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context),
-                                      child: const Text('Cancelar'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        _unlinkChild(child);
-                                      },
-                                      child: const Text(
-                                        'Desvincular',
-                                        style: TextStyle(color: PulynColors.danger),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            child: const Icon(Icons.delete, size: 20),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                ],
               );
             },
-          );
-        },
-            ),
           ),
         ],
       ),
@@ -264,7 +283,9 @@ class _ManageLinkedChildrenScreenState
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () async {
-                final cadastrou = await context.push<bool>('/pre-register-child');
+                final cadastrou = await context.push<bool>(
+                  '/pre-register-child',
+                );
                 if (cadastrou == true) {
                   ref.invalidate(preRegisteredChildrenProvider);
                 }
@@ -287,7 +308,9 @@ class _PreRegisteredSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // `.value` relança o erro do provider (ex.: 404 de rota ainda não publicada) e derrubaria a tela.
     // Com `when`, erro ou carregamento simplesmente escondem a seção.
-    final perfis = ref.watch(preRegisteredChildrenProvider).when(
+    final perfis = ref
+        .watch(preRegisteredChildrenProvider)
+        .when(
           data: (lista) => lista,
           loading: () => const <Map<String, dynamic>>[],
           error: (_, _) => const <Map<String, dynamic>>[],
@@ -315,10 +338,15 @@ class _PreRegisteredSection extends ConsumerWidget {
               for (final perfil in perfis)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.hourglass_empty, color: PulynColors.textMuted),
-                  title: Text((perfil['apelido'] as String?)?.isNotEmpty == true
-                      ? perfil['apelido'] as String
-                      : perfil['nome'] as String),
+                  leading: Icon(
+                    Icons.hourglass_empty,
+                    color: PulynColors.textMuted,
+                  ),
+                  title: Text(
+                    (perfil['apelido'] as String?)?.isNotEmpty == true
+                        ? perfil['apelido'] as String
+                        : perfil['nome'] as String,
+                  ),
                   subtitle: Text(perfil['buffetNome'] as String? ?? ''),
                 ),
             ],

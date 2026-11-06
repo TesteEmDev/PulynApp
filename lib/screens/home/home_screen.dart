@@ -124,6 +124,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.invalidate(childrenProvider);
     ref.invalidate(childrenRankingProvider);
     ref.invalidate(familyEventsProvider);
+    // A criança pode ter saído da seção "Aguardando o buffet" (agora tem vínculo/perfil no evento).
+    ref.invalidate(preRegisteredChildrenProvider);
     if (!announce || !mounted) return;
     final nome = child.apelido.isNotEmpty ? child.apelido : child.nome;
     showSuccessSnackBar(
@@ -290,6 +292,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.invalidate(activeEventProvider);
     ref.invalidate(activeGameProvider);
     ref.invalidate(familyEventsProvider);
+    ref.invalidate(preRegisteredChildrenProvider);
 
     await Future.wait([
       ref.read(childrenProvider.future),
@@ -486,6 +489,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             final activeEvent = activeEventAsync.value;
             final activeGame = activeGameAsync.value;
+            final filhosDoEvento = _filhosDoEvento(children, activeEvent?['id'] as String?);
+            if (filhosDoEvento.isEmpty) {
+              return _buildMapEmptyState(
+                mensagem: 'Nenhum filho seu neste evento. Troque o evento ou vincule uma criança.',
+              );
+            }
 
             // O selo da brincadeira fica fora do cartão do mapa, acima dele
             return Column(
@@ -496,7 +505,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const SizedBox(height: 12),
                 ],
                 EventMapWidget(
-                  childrenList: _filhosDoEvento(children, activeEventAsync.value?['id'] as String?),
+                  childrenList: filhosDoEvento,
                   eventoId: activeEvent?['id'],
                   onInteractionChanged: _setMapInteracting,
                 ),
@@ -863,8 +872,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// O mapa mostra só as crianças do evento ativo (a família pode ter crianças em outros eventos).
   List<Child> _filhosDoEvento(List<Child> filhos, String? eventoAtivo) {
     if (eventoAtivo == null) return filhos;
-    final doEvento = filhos.where((c) => c.eventoId == eventoAtivo).toList();
-    return doEvento.isEmpty ? filhos : doEvento;
+    // Sem cair de volta para a lista inteira: se nenhum filho está neste evento, a lista fica vazia.
+    return filhos.where((c) => c.eventoId == eventoAtivo).toList();
   }
 
   Widget _buildMapLoadingState() {
@@ -903,7 +912,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildMapEmptyState() {
+  Widget _buildMapEmptyState({
+    String mensagem = 'Mapa aparecerá quando você vincular filhos',
+  }) {
     return Container(
       height: 480, // Mapa maior e com mais espaço pra arrastar/zoom
       decoration: BoxDecoration(
@@ -918,7 +929,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Icon(Icons.map_outlined, color: PulynColors.textMuted, size: 48),
             SizedBox(height: 16),
             Text(
-              'Mapa aparecerá quando você vincular filhos',
+              mensagem,
               style: TextStyle(color: PulynColors.textMuted),
               textAlign: TextAlign.center,
             ),

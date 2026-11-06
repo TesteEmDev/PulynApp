@@ -58,6 +58,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (!mounted) return;
 
+      // O provedor guarda o erro no estado (não o devolve): a mensagem sai daqui.
+      final estado = ref.read(authProvider);
+      if (estado.hasError) {
+        _showError(estado.error.toString().replaceFirst('Exception: ', ''));
+        setState(() => _isLoading = false);
+        return;
+      }
+
       log.i('[LOGIN] ✅ Login realizado com sucesso');
     } on EmailNaoConfirmadoException catch (e) {
       if (!mounted) return;

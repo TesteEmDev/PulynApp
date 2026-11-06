@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../utils/top_snackbar.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../widgets/pulyn_logo.dart';
 
 /// 🎯 FASE 4: EVENT RESULT SCREEN
@@ -41,9 +42,36 @@ class _EventResultScreenState extends State<EventResultScreen> with TickerProvid
     super.dispose();
   }
 
-  void _shareResult() {
-    // TODO: Implementar compartilhamento via share_plus
-    showInfoSnackBar(context, 'Compartilhamento implementado em breve!');
+  /// Compartilha só os filhos da própria família (não o ranking geral),
+  /// para não expor dados de crianças de outras famílias.
+  Future<void> _shareResult() async {
+    final eventName = widget.event['nome'] as String? ?? 'Festa';
+    final children = (widget.event['children'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+
+    if (children.isEmpty) {
+      showInfoSnackBar(context, 'Nenhum filho para compartilhar.');
+      return;
+    }
+
+    final linhas = children.map((child) {
+      final nome = child['nome'] as String? ?? 'Criança';
+      final rank = child['finalRank'] as int? ?? 0;
+      final score = child['finalScore'] as int? ?? 0;
+      final posicao = rank > 0 ? '$rankº lugar' : 'sem posição';
+      return '• $nome: $posicao, $score pts';
+    }).join('\n');
+
+    final texto = 'Resultado do evento "$eventName" no Pulyn Family:\n$linhas';
+
+    try {
+      await SharePlus.instance.share(
+        ShareParams(text: texto, subject: 'Resultado - $eventName'),
+      );
+    } catch (_) {
+      if (mounted) {
+        showInfoSnackBar(context, 'Não foi possível compartilhar agora.');
+      }
+    }
   }
 
   void _downloadCertificate() {

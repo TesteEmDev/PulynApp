@@ -1351,7 +1351,8 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     List<Map<String, dynamic>> zonesFromBackend,
   ) {
     // ✅ Converte zonas do backend para ZoneConfig
-    // Backend envia: {id, nome, color, x, y, width, height}
+    // O admin web salva {id, name, color, x, y, width, height}; aceita também nome/cor (formato antigo).
+    // Só com nome/cor toda zona virava "Zona Desconhecida", sempre na cor padrão.
     List<ZoneConfig> convertedZones = zonesFromBackend.isEmpty
         ? _getDefaultZones() // Fallback se vazio
         : zonesFromBackend.map((zona) {
@@ -1360,11 +1361,12 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
             final w = double.tryParse((zona['width'] ?? zona['w'])?.toString() ?? '20') ?? 20;
             final h = double.tryParse((zona['height'] ?? zona['h'])?.toString() ?? '20') ?? 20;
             
-            log.i('🎨 [MAP] Convertendo zona: ${zona['nome']} (x:$x, y:$y, w:$w, h:$h)');
-            
+            final nomeDaZona = zona['name'] ?? zona['nome'];
+            log.i('🎨 [MAP] Convertendo zona: $nomeDaZona (x:$x, y:$y, w:$w, h:$h)');
+
             return ZoneConfig(
-              nome: sanitizeUtf16((zona['nome'] ?? 'Zona Desconhecida').toString()),
-              color: _getZoneColor(zona['cor']),
+              nome: sanitizeUtf16((nomeDaZona ?? 'Zona Desconhecida').toString()),
+              color: _getZoneColor(zona['color'] ?? zona['cor']),
               x: x,
               y: y,
               w: w,

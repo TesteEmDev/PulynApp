@@ -371,6 +371,17 @@ void main() {
     expect(events, [true, false]);
   });
 
+  testWidgets('zona no formato do admin web (name/color) mostra o nome e a cor dela, não "Zona Desconhecida"', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(app(zones: [
+      {'id': '1', 'name': 'Entrada', 'color': '#EF4444', 'x': 50, 'y': 20, 'width': 120, 'height': 80},
+    ]));
+    await settle(tester, 500);
+
+    expect(find.text('Entrada'), findsOneWidget);
+    expect(find.text('Zona Desconhecida'), findsNothing);
+  });
+
   testWidgets('zona que passa da borda do canvas aparece inteira (o mapa cresce para abranger)', (tester) async {
     phone(tester);
     // Zona salva pelo admin web com parte fora do canvas 450x320

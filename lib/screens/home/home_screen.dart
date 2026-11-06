@@ -636,12 +636,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// Atalho para "Meus eventos": navegar entre os eventos da conta e adicionar um com o código do convite.
   Widget _buildMyEventsLink(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: PulynColors.darkCard,
+    // Material (e não DecoratedBox) para o ListTile pintar o fundo e o toque por cima da cor do cartão
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Material(
+      color: PulynColors.darkCard,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: PulynColors.darkBorder),
+        side: BorderSide(color: PulynColors.darkBorder),
       ),
       child: ListTile(
         key: const Key('abrir-meus-eventos'),
@@ -656,6 +659,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         trailing: Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
         onTap: () => context.push('/my-events'),
+      ),
       ),
     );
   }
@@ -1088,6 +1092,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: PulynColors.primary,
                 foregroundColor: Colors.white,
+                // O tema dá largura infinita aos botões (Size.fromHeight); dentro de uma Row isso
+                // quebra o layout e a home inteira some. Aqui o botão tem o tamanho do conteúdo.
+                minimumSize: const Size(0, 40),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,

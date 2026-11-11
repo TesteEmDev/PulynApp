@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -69,6 +70,29 @@ class _PreRegisterChildScreenState
       _nascimentoController.text =
           '${escolhida.day.toString().padLeft(2, '0')}/${escolhida.month.toString().padLeft(2, '0')}/${escolhida.year}';
     });
+  }
+
+  // Digitando DD/MM/AAAA: só vale uma data que existe, não é futura e de quem tem até 17 anos.
+  void _aoDigitarNascimento(String texto) {
+    DateTime? data;
+    final partes = texto.split('/');
+    if (partes.length == 3 && partes[2].length == 4) {
+      final dia = int.tryParse(partes[0]);
+      final mes = int.tryParse(partes[1]);
+      final ano = int.tryParse(partes[2]);
+      if (dia != null && mes != null && ano != null) {
+        final candidata = DateTime(ano, mes, dia);
+        final hoje = DateTime.now();
+        final maisAntiga = DateTime(hoje.year - 17, hoje.month, hoje.day);
+        final existe = candidata.day == dia && candidata.month == mes;
+        if (existe &&
+            !candidata.isAfter(hoje) &&
+            !candidata.isBefore(maisAntiga)) {
+          data = candidata;
+        }
+      }
+    }
+    setState(() => _nascimento = data);
   }
 
   static String _dataIso(DateTime data) =>
@@ -224,20 +248,28 @@ class _PreRegisterChildScreenState
                   prefixIcon: Icons.face_outlined,
                 ),
                 const SizedBox(height: 12),
-                // Toque abre o calendário; o campo em si não abre o teclado.
-                GestureDetector(
-                  onTap: _escolherNascimento,
-                  child: AbsorbPointer(
-                    child: PulynTextField(
-                      label: 'Data de nascimento',
-                      hint: 'Toque para escolher',
-                      controller: _nascimentoController,
-                      prefixIcon: Icons.cake_outlined,
-                      validator: (valor) => _nascimento == null
-                          ? 'Informe a data de nascimento'
-                          : null,
-                    ),
+                // Dá para digitar (DD/MM/AAAA) ou abrir o calendário pelo ícone.
+                PulynTextField(
+                  label: 'Data de nascimento',
+                  hint: 'DD/MM/AAAA',
+                  controller: _nascimentoController,
+                  keyboardType: TextInputType.number,
+                  prefixIcon: Icons.cake_outlined,
+                  inputFormatters: [_MascaraData()],
+                  onChanged: _aoDigitarNascimento,
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.calendar_month_rounded),
+                    tooltip: 'Abrir calendário',
+                    onPressed: _escolherNascimento,
                   ),
+                  validator: (valor) {
+                    if (valor == null || valor.trim().isEmpty) {
+                      return 'Informe a data de nascimento';
+                    }
+                    return _nascimento == null
+                        ? 'Data inválida (a criança tem até 17 anos)'
+                        : null;
+                  },
                 ),
               ],
             ),
@@ -289,6 +321,28 @@ class _PreRegisterChildScreenState
         fontSize: 15,
         color: PulynColors.textPrimary,
       ),
+    );
+  }
+}
+
+/// Máscara DD/MM/AAAA: só números, com as barras entrando sozinhas.
+class _MascaraData extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue antigo,
+    TextEditingValue novo,
+  ) {
+    final digitos = novo.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final limitado = digitos.length > 8 ? digitos.substring(0, 8) : digitos;
+    final buffer = StringBuffer();
+    for (var i = 0; i < limitado.length; i++) {
+      if (i == 2 || i == 4) buffer.write('/');
+      buffer.write(limitado[i]);
+    }
+    final texto = buffer.toString();
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
     );
   }
 }

@@ -568,6 +568,14 @@ class ApiService {
     return perfis.map((perfil) => perfil as Map<String, dynamic>).toList();
   }
 
+  /// GET /familias/todas-criancas - todas as crianças do responsável (com e sem pulseira)
+  Future<List<Map<String, dynamic>>> getAllChildren() async {
+    final response = await _dio.get('/familias/todas-criancas');
+    final data = _validateResponseData(response.data);
+    final lista = data['criancas'] as List<dynamic>? ?? [];
+    return lista.map((c) => c as Map<String, dynamic>).toList();
+  }
+
   /// ✅ POST /familias/perfis - Pré-cadastra a criança no buffet do evento escolhido
   Future<Map<String, dynamic>> createPreRegisteredChild({
     required String nome,
@@ -585,9 +593,9 @@ class ApiService {
   }
 
   /// POST /familias/perfis/verificar - já existe cadastro com a mesma criança, nascimento e responsável?
-  /// Devolve a data de criação (ISO) do cadastro parecido, ou null se não existe. Nunca falha o cadastro:
-  /// qualquer erro na verificação vira "não existe".
-  Future<String?> buscarCadastroParecido({
+  /// Devolve o cadastro parecido (criadoEm em ISO e os nomes já abreviados pelo servidor, ex.: "Guilherme G. C."),
+  /// ou null se não existe. Nunca falha o cadastro: qualquer erro na verificação vira "não existe".
+  Future<Map<String, String>?> buscarCadastroParecido({
     required String nome,
     required String dataNascimento,
   }) async {
@@ -597,11 +605,18 @@ class ApiService {
         'dataNascimento': dataNascimento,
       });
       final data = response.data;
-      if (data is Map && data['existe'] == true) {
-        return (data['criadoEm'] ?? '').toString();
+      final existe = data is Map && data['existe'] == true;
+      log.i('[PRE_REGISTER] Verificação de cadastro parecido: status ${response.statusCode}, existe=$existe');
+      if (existe) {
+        return {
+          'criadoEm': (data['criadoEm'] ?? '').toString(),
+          'crianca': (data['crianca'] ?? '').toString(),
+          'responsavel': (data['responsavel'] ?? '').toString(),
+        };
       }
-    } catch (_) {
-      // a verificação é só um aviso
+    } catch (e) {
+      // a verificação é só um aviso: não impede o cadastro, mas o motivo fica no log
+      log.w('[PRE_REGISTER] Verificação de cadastro parecido falhou: ${e is DioException ? 'HTTP ${e.response?.statusCode} ${e.response?.data}' : e}');
     }
     return null;
   }

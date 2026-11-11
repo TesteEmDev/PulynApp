@@ -348,7 +348,7 @@ void main() {
   });
 
   group('cadastro simples', () {
-    testWidgets('valida os campos e oferece os caminhos de login e de convite', (tester) async {
+    testWidgets('valida os campos e oferece só o caminho de login', (tester) async {
       await pumpApp(tester, initial: '/register');
 
       expect(find.text('Criar conta'), findsWidgets);
@@ -357,9 +357,9 @@ void main() {
       expect(find.text('Nome é obrigatório'), findsOneWidget);
       expect(find.text('Email é obrigatório'), findsOneWidget);
 
-      await tester.tap(find.text('Tenho um código de convite'));
-      await tester.pumpAndSettle();
-      expect(find.text('Bem-vindo!'), findsOneWidget);
+      // O cadastro não oferece mais a entrada por código de convite (antes do login).
+      expect(find.text('Tenho um código de convite'), findsNothing);
+      expect(find.text('Já tenho conta'), findsOneWidget);
     });
   });
 }

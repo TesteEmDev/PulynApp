@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,6 +28,7 @@ import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/event/pre_event_screen.dart';
 import 'screens/event/my_events_screen.dart';
 import 'screens/event/event_result_screen.dart';
+import 'widgets/duplo_voltar_para_sair.dart';
 
 // ✅ Provider para detectar primeira execução
 final isFirstTimeProvider = FutureProvider<bool>((ref) async {
@@ -62,9 +62,6 @@ class _AppComTema extends ConsumerWidget {
       theme: construirTema(),
       debugShowCheckedModeBanner: false,
       routerConfig: router,
-      builder: (context, child) {
-        return _GlobalBackButtonHandler(child: child ?? const SizedBox());
-      },
     );
   }
 }
@@ -101,16 +98,25 @@ class MyApp extends ConsumerWidget {
 
   /// Constrói router baseado no estado de autenticação e primeira execução
   GoRouter _buildRouter(AsyncValue<User?> authState, AsyncValue<bool> isFirstTimeAsync, WidgetRef ref) {
+    GoRouter roteadorSplash() => GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const _SplashScreen(),
+        ),
+      ],
+    );
+
+    // Sem sessão, a rota inicial depende de "é a primeira vez?". Na primeira abertura essa leitura
+    // grava no disco antes de responder e termina depois da sessão. Se o roteador fosse montado antes,
+    // ele nasceria em /login e seria trocado por outro em /onboarding logo em seguida; duas trocas
+    // seguidas deixavam a tela vazia até fechar e abrir o app. Por isso o splash segue até a resposta.
+    final semSessao = !authState.hasError && !authState.isLoading && authState.valueOrNull == null;
+    if (semSessao && isFirstTimeAsync.isLoading) return roteadorSplash();
+
     return authState.when(
       // 🔄 Carregando - mostra tela de splash
-      loading: () => GoRouter(
-        routes: [
-          GoRoute(
-            path: '/',
-            builder: (context, state) => const _SplashScreen(),
-          ),
-        ],
-      ),
+      loading: roteadorSplash,
       // ✅ Usuário autenticado - acesso às rotas da app
       data: (user) => GoRouter(
         initialLocation: user != null ? '/home' : _localInicialSemSessao(isFirstTimeAsync, ref),
@@ -130,7 +136,7 @@ class MyApp extends ConsumerWidget {
           ),
           GoRoute(
             path: '/login',
-            builder: (context, state) => const LoginScreen(),
+            builder: (context, state) => const DuploVoltarParaSair(child: LoginScreen()),
           ),
           GoRoute(
             path: '/register',
@@ -185,11 +191,11 @@ class MyApp extends ConsumerWidget {
           ),
           GoRoute(
             path: '/onboarding',
-            builder: (context, state) => const OnboardingScreen(),
+            builder: (context, state) => const DuploVoltarParaSair(child: OnboardingScreen()),
           ),
           GoRoute(
             path: '/home',
-            builder: (context, state) => const HomeScreen(),
+            builder: (context, state) => const DuploVoltarParaSair(child: HomeScreen()),
           ),
           GoRoute(
             path: '/child/:id',
@@ -217,18 +223,6 @@ class MyApp extends ConsumerWidget {
           GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
-          ),
-          GoRoute(
-            path: '/notifications',
-            builder: (context, state) => Scaffold(
-              appBar: AppBar(title: const Text('Notificações')),
-              body: const Center(
-                child: Text(
-                  'Em desenvolvimento...',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
           ),
           GoRoute(
             path: '/linked-children',
@@ -280,11 +274,11 @@ class MyApp extends ConsumerWidget {
           GoRoute(
             path: '/',
             redirect: (context, state) => '/login',
-            builder: (context, state) => const LoginScreen(),
+            builder: (context, state) => const DuploVoltarParaSair(child: LoginScreen()),
           ),
           GoRoute(
             path: '/login',
-            builder: (context, state) => const LoginScreen(),
+            builder: (context, state) => const DuploVoltarParaSair(child: LoginScreen()),
           ),
           GoRoute(
             path: '/invite',
@@ -338,67 +332,6 @@ class _SplashScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// ✅ Widget global com Double Back to Exit
-/// Requer 2 cliques no botão de voltar para sair do app
-class _GlobalBackButtonHandler extends StatefulWidget {
-  final Widget child;
-
-  const _GlobalBackButtonHandler({required this.child});
-
-  @override
-  State<_GlobalBackButtonHandler> createState() =>
-      _GlobalBackButtonHandlerState();
-}
-
-class _GlobalBackButtonHandlerState extends State<_GlobalBackButtonHandler> {
-  DateTime? _lastBackPressTime;
-
-  Future<bool> _handleBackPressed() async {
-    // Se pode voltar para tela anterior, volta
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-      return false;
-    }
-
-    // Estamos na Home (raiz da navegação)
-    // Verifique o último clique
-    final now = DateTime.now();
-    const timeDifference = Duration(seconds: 2);
-
-    if (_lastBackPressTime == null ||
-        now.difference(_lastBackPressTime!) > timeDifference) {
-      // Primeiro clique
-      _lastBackPressTime = now;
-      
-      if (mounted) {
-        showInfoSnackBar(context, 'Clique novamente para sair do app', duration: const Duration(seconds: 2));
-      }
-      
-      return false; // Não sai do app
-    } else {
-      // Segundo clique dentro de 2 segundos - sai do app
-      return true;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (!didPop) {
-          final shouldExit = await _handleBackPressed();
-          if (shouldExit && mounted) {
-            // Ignora o resultado e deixa sair (em desenvolvimento)
-            // Em produção, use: SystemNavigator.pop()
-          }
-        }
-      },
-      child: widget.child,
     );
   }
 }

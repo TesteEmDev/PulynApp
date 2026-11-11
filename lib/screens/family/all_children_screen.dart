@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../config/theme.dart';
 import '../../providers/index.dart';
 import '../../widgets/child_avatar.dart';
+import 'pre_register_child_screen.dart';
 
 // Todas as crianças do responsável, com ou sem pulseira vinculada. Busca de novo sempre que a tela abre.
 final allChildrenProvider =
@@ -82,7 +83,7 @@ class AllChildrenScreen extends ConsumerWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
-                for (final c in lista) _linha(c),
+                for (final c in lista) _linha(c, ref),
               ],
             ),
           );
@@ -91,7 +92,7 @@ class AllChildrenScreen extends ConsumerWidget {
     );
   }
 
-  Widget _linha(Map<String, dynamic> c) {
+  Widget _linha(Map<String, dynamic> c, WidgetRef ref) {
     final apelido = (c['apelido'] as String?) ?? '';
     final nome = (c['nome'] as String?) ?? '';
     final titulo = apelido.isNotEmpty ? apelido : nome;
@@ -107,7 +108,13 @@ class AllChildrenScreen extends ConsumerWidget {
     final ultimo = evento.isEmpty
         ? 'Nenhum evento ainda'
         : 'Último evento: $evento${dataEvento.isEmpty ? '' : ' ($dataEvento)'}';
-    final detalhes = [if (idade != null) '$idade anos', ultimo].join(' · ');
+    final pontos = (c['pontosTotais'] as num?)?.toInt() ?? 0;
+    // O total de pontos de todos os eventos (sem o histórico de cada um)
+    final detalhes = [
+      if (idade != null) '$idade anos',
+      '$pontos ${pontos == 1 ? 'ponto' : 'pontos'}',
+      ultimo,
+    ].join(' · ');
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
@@ -118,20 +125,34 @@ class AllChildrenScreen extends ConsumerWidget {
         ),
         title: Text(titulo, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle: Text(detalhes, maxLines: 2, overflow: TextOverflow.ellipsis),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: cor.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            rotulo,
-            style: TextStyle(
-              color: cor,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: cor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                rotulo,
+                style: TextStyle(
+                  color: cor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-          ),
+            // Só quem ainda não entrou em nenhum evento pode ser editado ou excluído
+            if (situacao == 'aguardando')
+              MenuCadastroPendente(
+                perfil: c,
+                onMudou: () {
+                  ref.invalidate(allChildrenProvider);
+                  ref.invalidate(preRegisteredChildrenProvider);
+                },
+              ),
+          ],
         ),
       ),
     );

@@ -37,7 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
     } else {
       // Fim do onboarding: vai direto para o cadastro. Quem já tem conta usa "Já tenho conta" (login).
-      context.go('/register');
+      context.push('/register');
     }
   }
 

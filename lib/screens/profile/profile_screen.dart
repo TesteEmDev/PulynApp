@@ -449,16 +449,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         const SizedBox(height: 16),
         _buildSettingOption(
-          icon: Icons.notifications_outlined,
-          label: 'Notificações',
-          subtitle: 'Receber alertas de eventos',
-          enabled: true,
-          onChanged: (value) {
-            // TODO: Implementar
-          },
-        ),
-        const SizedBox(height: 12),
-        _buildSettingOption(
           icon: Icons.brightness_4_outlined,
           label: 'Tema Escuro',
           subtitle: 'Sempre ativado',
@@ -472,12 +462,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _buildSettingCard(
           icon: Icons.info_outlined,
           label: 'Sobre',
-          subtitle: 'Versão 1.0.0',
+          subtitle: 'Versão 1.0.1',
           onTap: () {
             showAboutDialog(
               context: context,
               applicationName: 'Pulyn Family',
-              applicationVersion: '1.0.0',
+              applicationVersion: '1.0.1',
             );
           },
         ),

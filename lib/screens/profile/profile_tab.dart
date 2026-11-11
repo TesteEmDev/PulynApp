@@ -6,7 +6,7 @@ import '../../models/family_models.dart';
 import '../../widgets/child_avatar.dart';
 import '../../widgets/pulyn_logo.dart';
 
-const _appVersion = '1.0.0';
+const _appVersion = '1.0.1';
 
 /// Aba "Perfil" do menu de baixo: quem está logado, resumo das crianças, atalhos
 /// e sair da conta. Só mostra o que funciona (nada de interruptores que não fazem nada).

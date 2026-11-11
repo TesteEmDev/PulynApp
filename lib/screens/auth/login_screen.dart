@@ -218,7 +218,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 Center(
                   child: TextButton(
-                    onPressed: _isLoading ? null : () => context.go('/esqueci-senha'),
+                    onPressed: _isLoading ? null : () => context.push('/esqueci-senha'),
                     child: const Text('Esqueci minha senha'),
                   ),
                 ),
@@ -226,35 +226,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Register Link
                 Center(
                   child: TextButton(
-                    onPressed: _isLoading ? null : () => context.go('/register'),
+                    onPressed: _isLoading ? null : () => context.push('/register'),
                     child: const Text('Não tem uma conta? Registre-se'),
                   ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Divider
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.3))),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        'ou',
-                        style: TextStyle(color: Colors.grey.withValues(alpha: 0.6)),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: Colors.grey.withValues(alpha: 0.3))),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Invite Code Link
-                TextButton.icon(
-                  onPressed: _isLoading ? null : () => context.go('/invite'),
-                  icon: const Icon(Icons.card_giftcard),
-                  label: const Text('Ou use um código de convite'),
                 ),
               ],
             ),

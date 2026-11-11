@@ -74,11 +74,6 @@ class _EventResultScreenState extends State<EventResultScreen> with TickerProvid
     }
   }
 
-  void _downloadCertificate() {
-    // TODO: Implementar download de certificado (PDF ou imagem)
-    showInfoSnackBar(context, 'Certificado gerado em breve!');
-  }
-
   @override
   Widget build(BuildContext context) {
     final eventName = widget.event['nome'] as String? ?? 'Festa';
@@ -162,17 +157,6 @@ class _EventResultScreenState extends State<EventResultScreen> with TickerProvid
                       onPressed: _shareResult,
                       icon: const Icon(Icons.share),
                       label: const Text('Compartilhar Resultado'),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton.icon(
-                      onPressed: _downloadCertificate,
-                      icon: const Icon(Icons.download),
-                      label: const Text('Baixar Certificado'),
                     ),
                   ),
                   const SizedBox(height: 12),

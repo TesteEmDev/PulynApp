@@ -280,13 +280,6 @@ AuthPasswordField(
                         child: const Text('Já tenho conta'),
                       ),
                     ),
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: _isLoading ? null : () => context.go('/invite'),
-                        icon: const Icon(Icons.card_giftcard_rounded, size: 18),
-                        label: const Text('Tenho um código de convite'),
-                      ),
-                    ),
                   ],
                 ),
               ),

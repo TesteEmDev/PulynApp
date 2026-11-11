@@ -155,8 +155,15 @@ class _PreRegisterChildScreenState
     }
   }
 
-  Future<bool?> _avisarCadastroParecido(String criadoEmIso) {
-    final data = _dataCurta(criadoEmIso);
+  Future<bool?> _avisarCadastroParecido(Map<String, String> cadastro) {
+    final data = _dataCurta(cadastro['criadoEm']);
+    final crianca = cadastro['crianca'] ?? '';
+    final responsavel = cadastro['responsavel'] ?? '';
+    // Nomes abreviados pelo servidor (privacidade): "Guilherme G. C."
+    final quem = [
+      if (crianca.isNotEmpty) 'Criança: $crianca',
+      if (responsavel.isNotEmpty) 'Responsável: $responsavel',
+    ].join('\n');
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -164,6 +171,7 @@ class _PreRegisterChildScreenState
         content: Text(
           'Já existe um cadastro bem parecido com as suas informações'
           '${data.isEmpty ? '' : ', criado em $data'}.\n\n'
+          '${quem.isEmpty ? '' : '$quem\n\n'}'
           'Seu filho visitou algum evento${data.isEmpty ? '' : ' no dia $data'}?',
         ),
         actions: [

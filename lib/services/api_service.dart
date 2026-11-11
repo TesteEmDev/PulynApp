@@ -593,9 +593,9 @@ class ApiService {
   }
 
   /// POST /familias/perfis/verificar - já existe cadastro com a mesma criança, nascimento e responsável?
-  /// Devolve a data de criação (ISO) do cadastro parecido, ou null se não existe. Nunca falha o cadastro:
-  /// qualquer erro na verificação vira "não existe".
-  Future<String?> buscarCadastroParecido({
+  /// Devolve o cadastro parecido (criadoEm em ISO e os nomes já abreviados pelo servidor, ex.: "Guilherme G. C."),
+  /// ou null se não existe. Nunca falha o cadastro: qualquer erro na verificação vira "não existe".
+  Future<Map<String, String>?> buscarCadastroParecido({
     required String nome,
     required String dataNascimento,
   }) async {
@@ -608,7 +608,11 @@ class ApiService {
       final existe = data is Map && data['existe'] == true;
       log.i('[PRE_REGISTER] Verificação de cadastro parecido: status ${response.statusCode}, existe=$existe');
       if (existe) {
-        return (data['criadoEm'] ?? '').toString();
+        return {
+          'criadoEm': (data['criadoEm'] ?? '').toString(),
+          'crianca': (data['crianca'] ?? '').toString(),
+          'responsavel': (data['responsavel'] ?? '').toString(),
+        };
       }
     } catch (e) {
       // a verificação é só um aviso: não impede o cadastro, mas o motivo fica no log

@@ -568,6 +568,25 @@ class ApiService {
     return perfis.map((perfil) => perfil as Map<String, dynamic>).toList();
   }
 
+  /// PUT /familias/perfis/:id - edita um cadastro que ainda não entrou em nenhum evento
+  Future<void> updatePreRegisteredChild({
+    required String perfilCriancaId,
+    required String nome,
+    String? apelido,
+    required String dataNascimento,
+  }) async {
+    await _dio.put('/familias/perfis/$perfilCriancaId', data: {
+      'nome': nome,
+      'apelido': apelido,
+      'dataNascimento': dataNascimento,
+    });
+  }
+
+  /// DELETE /familias/perfis/:id - exclui um cadastro que ainda não entrou em nenhum evento
+  Future<void> deletePreRegisteredChild(String perfilCriancaId) async {
+    await _dio.delete('/familias/perfis/$perfilCriancaId');
+  }
+
   /// GET /familias/todas-criancas - todas as crianças do responsável (com e sem pulseira)
   Future<List<Map<String, dynamic>>> getAllChildren() async {
     final response = await _dio.get('/familias/todas-criancas');

@@ -356,6 +356,10 @@ class _PreRegisteredSection extends ConsumerWidget {
                         : perfil['nome'] as String,
                   ),
                   subtitle: Text(perfil['buffetNome'] as String? ?? ''),
+                  trailing: MenuCadastroPendente(
+                    perfil: perfil,
+                    onMudou: () => ref.invalidate(preRegisteredChildrenProvider),
+                  ),
                 ),
             ],
           ),

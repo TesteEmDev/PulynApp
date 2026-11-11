@@ -245,7 +245,9 @@ class MyApp extends ConsumerWidget {
           ),
           GoRoute(
             path: '/pre-register-child',
-            builder: (context, state) => const PreRegisterChildScreen(),
+            builder: (context, state) => PreRegisterChildScreen(
+              perfil: state.extra as Map<String, dynamic>?,
+            ),
           ),
           GoRoute(
             path: '/my-events',

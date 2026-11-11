@@ -23,7 +23,10 @@ final preRegisteredChildrenProvider =
 /// Pré-cadastro: o responsável escolhe a festa (buffet) e cadastra a criança antes de ir ao buffet.
 /// Volta `true` quando cadastra, para a lista atualizar.
 class PreRegisterChildScreen extends ConsumerStatefulWidget {
-  const PreRegisterChildScreen({super.key});
+  /// Cadastro a editar (perfilCriancaId, nome, apelido, dataNascimento). Sem ele, é um cadastro novo.
+  final Map<String, dynamic>? perfil;
+
+  const PreRegisterChildScreen({super.key, this.perfil});
 
   @override
   ConsumerState<PreRegisterChildScreen> createState() =>
@@ -39,9 +42,24 @@ class _PreRegisterChildScreenState
   DateTime? _nascimento;
   bool _salvando = false;
 
+  bool get _editando => widget.perfil != null;
+
   @override
   void initState() {
     super.initState();
+    final perfil = widget.perfil;
+    if (perfil != null) {
+      _nomeController.text = (perfil['nome'] as String?) ?? '';
+      _apelidoController.text = (perfil['apelido'] as String?) ?? '';
+      final nascimento = DateTime.tryParse(
+        (perfil['dataNascimento'] as String?) ?? '',
+      );
+      if (nascimento != null) {
+        _nascimento = nascimento;
+        _nascimentoController.text =
+            '${nascimento.day.toString().padLeft(2, '0')}/${nascimento.month.toString().padLeft(2, '0')}/${nascimento.year}';
+      }
+    }
   }
 
   @override
@@ -120,6 +138,21 @@ class _PreRegisterChildScreenState
     try {
       final apiService = ref.read(apiServiceProvider);
       await apiService.init();
+
+      if (_editando) {
+        await apiService.updatePreRegisteredChild(
+          perfilCriancaId: widget.perfil!['perfilCriancaId'] as String,
+          nome: _nomeController.text.trim(),
+          apelido: _apelidoController.text.trim().isEmpty
+              ? null
+              : _apelidoController.text.trim(),
+          dataNascimento: _dataIso(_nascimento!),
+        );
+        if (!mounted) return;
+        showSuccessSnackBar(context, 'Cadastro atualizado.');
+        context.pop(true);
+        return;
+      }
 
       // Antes de salvar: já existe um cadastro com esta criança, nascimento e responsável (feito na recepção, por exemplo)?
       final cadastroParecido = await apiService.buscarCadastroParecido(
@@ -214,7 +247,7 @@ class _PreRegisterChildScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cadastrar criança'),
+        title: Text(_editando ? 'Editar criança' : 'Cadastrar criança'),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -287,7 +320,7 @@ class _PreRegisterChildScreenState
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: PulynButton(
-                label: 'Cadastrar criança',
+                label: _editando ? 'Salvar alterações' : 'Cadastrar criança',
                 icon: Icons.person_add_alt_1_rounded,
                 isLoading: _salvando,
                 onPressed: _salvar,
@@ -351,6 +384,85 @@ class _MascaraData extends TextInputFormatter {
     return TextEditingValue(
       text: texto,
       selection: TextSelection.collapsed(offset: texto.length),
+    );
+  }
+}
+
+/// Menu de editar/excluir de um cadastro que ainda não entrou em nenhum evento.
+/// Chame `onMudou` para a tela recarregar a lista depois de editar ou excluir.
+class MenuCadastroPendente extends ConsumerWidget {
+  final Map<String, dynamic> perfil;
+  final VoidCallback onMudou;
+
+  const MenuCadastroPendente({
+    super.key,
+    required this.perfil,
+    required this.onMudou,
+  });
+
+  Future<void> _excluir(BuildContext context, WidgetRef ref) async {
+    final apelido = (perfil['apelido'] as String?) ?? '';
+    final nome = apelido.isNotEmpty ? apelido : (perfil['nome'] as String? ?? '');
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir cadastro?'),
+        content: Text(
+          'O cadastro de $nome será apagado. Essa ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Excluir', style: TextStyle(color: PulynColors.danger)),
+          ),
+        ],
+      ),
+    );
+    if (confirmou != true || !context.mounted) return;
+    try {
+      final apiService = ref.read(apiServiceProvider);
+      await apiService.init();
+      await apiService.deletePreRegisteredChild(
+        perfil['perfilCriancaId'] as String,
+      );
+      if (!context.mounted) return;
+      showSuccessSnackBar(context, 'Cadastro excluído.');
+      onMudou();
+    } catch (e) {
+      log.e('[PRE_REGISTER] Falha ao excluir: $e');
+      if (!context.mounted) return;
+      String mensagem = 'Não foi possível excluir. Tente novamente.';
+      if (e is DioException && e.response?.data is Map) {
+        final erro = (e.response!.data as Map)['error'];
+        if (erro is String && erro.isNotEmpty) mensagem = erro;
+      }
+      showErrorSnackBar(context, mensagem);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuButton<String>(
+      tooltip: 'Opções',
+      onSelected: (acao) async {
+        if (acao == 'editar') {
+          final mudou = await context.push<bool>(
+            '/pre-register-child',
+            extra: perfil,
+          );
+          if (mudou == true) onMudou();
+        } else {
+          await _excluir(context, ref);
+        }
+      },
+      itemBuilder: (context) => const [
+        PopupMenuItem(value: 'editar', child: Text('Editar')),
+        PopupMenuItem(value: 'excluir', child: Text('Excluir')),
+      ],
     );
   }
 }

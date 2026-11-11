@@ -108,7 +108,13 @@ class AllChildrenScreen extends ConsumerWidget {
     final ultimo = evento.isEmpty
         ? 'Nenhum evento ainda'
         : 'Último evento: $evento${dataEvento.isEmpty ? '' : ' ($dataEvento)'}';
-    final detalhes = [if (idade != null) '$idade anos', ultimo].join(' · ');
+    final pontos = (c['pontosTotais'] as num?)?.toInt() ?? 0;
+    // O total de pontos de todos os eventos (sem o histórico de cada um)
+    final detalhes = [
+      if (idade != null) '$idade anos',
+      '$pontos ${pontos == 1 ? 'ponto' : 'pontos'}',
+      ultimo,
+    ].join(' · ');
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(

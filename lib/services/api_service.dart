@@ -605,11 +605,14 @@ class ApiService {
         'dataNascimento': dataNascimento,
       });
       final data = response.data;
-      if (data is Map && data['existe'] == true) {
+      final existe = data is Map && data['existe'] == true;
+      log.i('[PRE_REGISTER] Verificação de cadastro parecido: status ${response.statusCode}, existe=$existe');
+      if (existe) {
         return (data['criadoEm'] ?? '').toString();
       }
-    } catch (_) {
-      // a verificação é só um aviso
+    } catch (e) {
+      // a verificação é só um aviso: não impede o cadastro, mas o motivo fica no log
+      log.w('[PRE_REGISTER] Verificação de cadastro parecido falhou: ${e is DioException ? 'HTTP ${e.response?.statusCode} ${e.response?.data}' : e}');
     }
     return null;
   }

@@ -81,6 +81,14 @@ class _ManageLinkedChildrenScreenState
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+            child: OutlinedButton.icon(
+              onPressed: () => context.push('/all-children'),
+              icon: const Icon(Icons.groups_rounded),
+              label: const Text('Ver todas as crianças'),
+            ),
+          ),
           const _PreRegisteredSection(),
           childrenAsyncValue.when(
             loading: () => const Center(child: CircularProgressIndicator()),

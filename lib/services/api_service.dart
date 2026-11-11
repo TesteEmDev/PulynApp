@@ -568,6 +568,14 @@ class ApiService {
     return perfis.map((perfil) => perfil as Map<String, dynamic>).toList();
   }
 
+  /// GET /familias/todas-criancas - todas as crianças do responsável (com e sem pulseira)
+  Future<List<Map<String, dynamic>>> getAllChildren() async {
+    final response = await _dio.get('/familias/todas-criancas');
+    final data = _validateResponseData(response.data);
+    final lista = data['criancas'] as List<dynamic>? ?? [];
+    return lista.map((c) => c as Map<String, dynamic>).toList();
+  }
+
   /// ✅ POST /familias/perfis - Pré-cadastra a criança no buffet do evento escolhido
   Future<Map<String, dynamic>> createPreRegisteredChild({
     required String nome,

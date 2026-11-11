@@ -5,6 +5,7 @@ import '../../config/theme.dart';
 import '../../models/family_models.dart';
 import '../../widgets/child_avatar.dart';
 import '../../widgets/pulyn_logo.dart';
+import '../family/all_children_screen.dart';
 
 const _appVersion = '1.0.1';
 
@@ -103,25 +104,40 @@ class ProfileTab extends StatelessWidget {
               _ProfileHeader(user: user, emailConfirmado: emailConfirmado?.valueOrNull),
               const SizedBox(height: 16),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: _StatTile(
-                      icon: Icons.child_care_rounded,
-                      value: loadingFirstTime ? '–' : '${list.length}',
-                      label: list.length == 1 ? 'Criança vinculada' : 'Crianças vinculadas',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatTile(
-                      icon: Icons.emoji_events_rounded,
-                      value: loadingFirstTime ? '–' : '$totalPoints',
-                      label: 'Pontos somados',
-                      accent: PulynColors.accent,
-                    ),
-                  ),
-                ],
+              // Conta todas as crianças do responsável (inclusive as vinculadas pelo cadastro e as que ainda aguardam
+              // o buffet), não só as que estão em um evento; sem essa lista, vale a de crianças em eventos.
+              Consumer(
+                builder: (context, ref, _) {
+                  final todas = ref.watch(allChildrenProvider).valueOrNull;
+                  final quantidade = todas?.length ?? list.length;
+                  final pontos = todas == null
+                      ? totalPoints
+                      : todas.fold<int>(
+                          0,
+                          (soma, c) => soma + ((c['pontosTotais'] as num?)?.toInt() ?? 0),
+                        );
+                  final carregando = loadingFirstTime && todas == null;
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: _StatTile(
+                          icon: Icons.child_care_rounded,
+                          value: carregando ? '–' : '$quantidade',
+                          label: quantidade == 1 ? 'Criança cadastrada' : 'Crianças cadastradas',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _StatTile(
+                          icon: Icons.emoji_events_rounded,
+                          value: carregando ? '–' : '$pontos',
+                          label: 'Pontos somados',
+                          accent: PulynColors.accent,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 24),
 

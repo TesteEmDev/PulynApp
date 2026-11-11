@@ -119,7 +119,9 @@ class _ManageLinkedChildrenScreenState
                       ),
                       SizedBox(height: 16),
                       Text(
-                        'Nenhuma criança vinculada',
+                        'Nenhuma criança em um evento no momento.
+Veja todas as suas crianças no botão acima.',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,
                           color: PulynColors.textMuted,

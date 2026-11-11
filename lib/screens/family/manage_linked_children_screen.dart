@@ -119,8 +119,7 @@ class _ManageLinkedChildrenScreenState
                       ),
                       SizedBox(height: 16),
                       Text(
-                        'Nenhuma criança em um evento no momento.
-Veja todas as suas crianças no botão acima.',
+                        'Nenhuma criança em um evento no momento.\nVeja todas as suas crianças no botão acima.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,

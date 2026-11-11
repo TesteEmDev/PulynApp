@@ -1,6 +1,5 @@
-import 'dart:math' as math;
-
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -38,14 +37,11 @@ class _PreRegisterChildScreenState
   final _apelidoController = TextEditingController();
   final _nascimentoController = TextEditingController();
   DateTime? _nascimento;
-  late Future<List<Map<String, dynamic>>> _eventos;
-  String? _eventoId;
   bool _salvando = false;
 
   @override
   void initState() {
     super.initState();
-    _eventos = _carregarEventos();
   }
 
   @override
@@ -56,32 +52,13 @@ class _PreRegisterChildScreenState
     super.dispose();
   }
 
-  Future<List<Map<String, dynamic>>> _carregarEventos() async {
-    final apiService = ref.read(apiServiceProvider);
-    try {
-      await apiService.init();
-      final eventos = await apiService.getOpenEvents();
-      log.i(
-        '[PRE_REGISTER] ${eventos.length} evento(s) aberto(s) carregado(s)',
-      );
-      return eventos;
-    } catch (e) {
-      log.e('[PRE_REGISTER] Erro ao carregar eventos: ${_detalheDeErro(e)}');
-      rethrow;
-    }
-  }
-
-  void _recarregar() {
-    setState(() => _eventos = _carregarEventos());
-  }
-
-  // A criança tem até 17 anos: a data mais antiga aceita é 17 anos atrás.
+  // Sem limite de idade: só não vale data futura nem anterior a 1900.
   Future<void> _escolherNascimento() async {
     final hoje = DateTime.now();
     final escolhida = await showDatePicker(
       context: context,
       initialDate: _nascimento ?? DateTime(hoje.year - 6, hoje.month, hoje.day),
-      firstDate: DateTime(hoje.year - 17, hoje.month, hoje.day),
+      firstDate: DateTime(1900),
       lastDate: hoje,
       helpText: 'Data de nascimento da criança',
       cancelText: 'Cancelar',
@@ -93,6 +70,29 @@ class _PreRegisterChildScreenState
       _nascimentoController.text =
           '${escolhida.day.toString().padLeft(2, '0')}/${escolhida.month.toString().padLeft(2, '0')}/${escolhida.year}';
     });
+  }
+
+  // Digitando DD/MM/AAAA: só vale uma data que existe e que não é futura.
+  void _aoDigitarNascimento(String texto) {
+    DateTime? data;
+    final partes = texto.split('/');
+    if (partes.length == 3 && partes[2].length == 4) {
+      final dia = int.tryParse(partes[0]);
+      final mes = int.tryParse(partes[1]);
+      final ano = int.tryParse(partes[2]);
+      if (dia != null && mes != null && ano != null) {
+        final candidata = DateTime(ano, mes, dia);
+        final hoje = DateTime.now();
+        final maisAntiga = DateTime(1900);
+        final existe = candidata.day == dia && candidata.month == mes;
+        if (existe &&
+            !candidata.isAfter(hoje) &&
+            !candidata.isBefore(maisAntiga)) {
+          data = candidata;
+        }
+      }
+    }
+    setState(() => _nascimento = data);
   }
 
   static String _dataIso(DateTime data) =>
@@ -109,13 +109,10 @@ class _PreRegisterChildScreenState
 
   Future<void> _salvar() async {
     log.i(
-      '[PRE_REGISTER] Botão Cadastrar pressionado (festa escolhida: ${_eventoId != null})',
+      '[PRE_REGISTER] Botão Cadastrar pressionado',
     );
-    // A festa também é validada pelo próprio dropdown (mostra "Escolha a festa" embaixo dele).
-    if (!_formKey.currentState!.validate() || _eventoId == null) {
-      log.w(
-        '[PRE_REGISTER] Não enviado: formulário inválido ou festa não escolhida',
-      );
+    if (!_formKey.currentState!.validate()) {
+      log.w('[PRE_REGISTER] Não enviado: formulário inválido');
       return;
     }
 
@@ -126,7 +123,6 @@ class _PreRegisterChildScreenState
 
       // Antes de salvar: já existe um cadastro com esta criança, nascimento e responsável (feito na recepção, por exemplo)?
       final cadastroParecido = await apiService.buscarCadastroParecido(
-        eventoId: _eventoId!,
         nome: _nomeController.text.trim(),
         dataNascimento: _dataIso(_nascimento!),
       );
@@ -135,9 +131,8 @@ class _PreRegisterChildScreenState
         final continuar = await _avisarCadastroParecido(cadastroParecido);
         if (continuar != true) return;
       }
-      log.i('[PRE_REGISTER] Enviando cadastro para o evento $_eventoId');
+      log.i('[PRE_REGISTER] Enviando cadastro');
       await apiService.createPreRegisteredChild(
-        eventoId: _eventoId!,
         nome: _nomeController.text.trim(),
         apelido: _apelidoController.text.trim().isEmpty
             ? null
@@ -220,39 +215,11 @@ class _PreRegisterChildScreenState
         ),
         actions: const [PulynAppBarLogo()],
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _eventos,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return _estadoVazio(
-              icon: Icons.cloud_off_rounded,
-              titulo: 'Não foi possível carregar as festas',
-              texto: 'Verifique sua conexão e tente de novo.',
-              acao: TextButton.icon(
-                onPressed: _recarregar,
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Tentar de novo'),
-              ),
-            );
-          }
-          final eventos = snapshot.data ?? const [];
-          if (eventos.isEmpty) {
-            return _estadoVazio(
-              icon: Icons.celebration_outlined,
-              titulo: 'Nenhuma festa aberta',
-              texto: 'Quando o buffet abrir a festa, ela aparece aqui.',
-            );
-          }
-          return _formulario(eventos);
-        },
-      ),
+      body: _formulario(),
     );
   }
 
-  Widget _formulario(List<Map<String, dynamic>> eventos) {
+  Widget _formulario() {
     return Form(
       key: _formKey,
       child: Column(
@@ -263,11 +230,7 @@ class _PreRegisterChildScreenState
               children: [
                 _cabecalho(),
                 const SizedBox(height: 24),
-                _titulo('1. Escolha a festa'),
-                const SizedBox(height: 10),
-                _campoFestas(eventos),
-                const SizedBox(height: 24),
-                _titulo('2. Dados da criança'),
+                _titulo('Dados da criança'),
                 const SizedBox(height: 10),
                 PulynTextField(
                   label: 'Nome completo',
@@ -285,20 +248,28 @@ class _PreRegisterChildScreenState
                   prefixIcon: Icons.face_outlined,
                 ),
                 const SizedBox(height: 12),
-                // Toque abre o calendário; o campo em si não abre o teclado.
-                GestureDetector(
-                  onTap: _escolherNascimento,
-                  child: AbsorbPointer(
-                    child: PulynTextField(
-                      label: 'Data de nascimento',
-                      hint: 'Toque para escolher',
-                      controller: _nascimentoController,
-                      prefixIcon: Icons.cake_outlined,
-                      validator: (valor) => _nascimento == null
-                          ? 'Informe a data de nascimento'
-                          : null,
-                    ),
+                // Dá para digitar (DD/MM/AAAA) ou abrir o calendário pelo ícone.
+                PulynTextField(
+                  label: 'Data de nascimento',
+                  hint: 'DD/MM/AAAA',
+                  controller: _nascimentoController,
+                  keyboardType: TextInputType.number,
+                  prefixIcon: Icons.cake_outlined,
+                  inputFormatters: [_MascaraData()],
+                  onChanged: _aoDigitarNascimento,
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.calendar_month_rounded),
+                    tooltip: 'Abrir calendário',
+                    onPressed: _escolherNascimento,
                   ),
+                  validator: (valor) {
+                    if (valor == null || valor.trim().isEmpty) {
+                      return 'Informe a data de nascimento';
+                    }
+                    return _nascimento == null
+                        ? 'Data inválida'
+                        : null;
+                  },
                 ),
               ],
             ),
@@ -333,7 +304,7 @@ class _PreRegisterChildScreenState
           SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Cadastre a criança antes de ir à festa. Na recepção ela recebe a pulseira e aparece no seu app.',
+              'Cadastre a criança antes de ir à festa. Na festa, ela se vincula ao evento pelo autoatendimento e aparece no seu app.',
               style: TextStyle(fontSize: 13, color: PulynColors.textPrimary),
             ),
           ),
@@ -352,279 +323,26 @@ class _PreRegisterChildScreenState
       ),
     );
   }
-
-  // Campo de festa: o menu abre sempre logo abaixo do campo (ver _CampoFesta).
-  // O FormField mantém o valor e o erro de validação, como um DropdownButtonFormField.
-  Widget _campoFestas(List<Map<String, dynamic>> eventos) {
-    return FormField<String>(
-      initialValue: _eventoId,
-      validator: (valor) => valor == null ? 'Escolha a festa' : null,
-      builder: (campo) => _CampoFesta(
-        eventos: eventos,
-        valor: campo.value,
-        erro: campo.errorText,
-        desabilitado: _salvando,
-        textoDaFesta: _textoFesta,
-        onSelecionado: (id) {
-          campo.didChange(id);
-          setState(() => _eventoId = id);
-        },
-      ),
-    );
-  }
-
-  // Nome da festa em destaque, com buffet, cidade e data embaixo (uma linha no campo fechado).
-  Widget _textoFesta(Map<String, dynamic> evento, {bool compacto = false}) {
-    final cidade = evento['buffetCidade'] as String?;
-    final detalhes = [
-      evento['buffetNome'] as String? ?? '',
-      if (cidade != null && cidade.isNotEmpty) cidade,
-      _dataCurta(evento['data'] as String?),
-    ].where((parte) => parte.isNotEmpty).join(' · ');
-
-    final nome = Text(
-      evento['nome'] as String? ?? 'Festa',
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        color: PulynColors.textPrimary,
-      ),
-    );
-    final info = Text(
-      detalhes,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(fontSize: 12, color: PulynColors.textSecondary),
-    );
-
-    if (compacto) {
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            Flexible(child: nome),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                detalhes,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: PulynColors.textSecondary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [nome, const SizedBox(height: 2), info],
-    );
-  }
-
-  Widget _estadoVazio({
-    required IconData icon,
-    required String titulo,
-    required String texto,
-    Widget? acao,
-  }) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 56, color: PulynColors.textMuted),
-            const SizedBox(height: 16),
-            Text(
-              titulo,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: PulynColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              texto,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: PulynColors.textMuted),
-            ),
-            if (acao != null) ...[const SizedBox(height: 16), acao],
-          ],
-        ),
-      ),
-    );
-  }
 }
 
-/// Campo de festa com menu que abre sempre logo abaixo do campo. O DropdownButton do Flutter
-/// troca para cima quando calcula que não cabe embaixo; aqui a posição é fixa. Toque fora fecha.
-class _CampoFesta extends StatefulWidget {
-  final List<Map<String, dynamic>> eventos;
-  final String? valor;
-  final String? erro;
-  final bool desabilitado;
-  final Widget Function(Map<String, dynamic>, {bool compacto}) textoDaFesta;
-  final ValueChanged<String> onSelecionado;
-
-  const _CampoFesta({
-    required this.eventos,
-    required this.valor,
-    required this.erro,
-    required this.desabilitado,
-    required this.textoDaFesta,
-    required this.onSelecionado,
-  });
-
+/// Máscara DD/MM/AAAA: só números, com as barras entrando sozinhas.
+class _MascaraData extends TextInputFormatter {
   @override
-  State<_CampoFesta> createState() => _CampoFestaState();
-}
-
-class _CampoFestaState extends State<_CampoFesta> {
-  final _campoKey = GlobalKey();
-  OverlayEntry? _menu;
-
-  @override
-  void dispose() {
-    _menu?.remove();
-    _menu = null;
-    super.dispose();
-  }
-
-  void _alternarMenu() {
-    if (_menu != null) {
-      _fecharMenu();
-    } else {
-      _abrirMenu();
+  TextEditingValue formatEditUpdate(
+    TextEditingValue antigo,
+    TextEditingValue novo,
+  ) {
+    final digitos = novo.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final limitado = digitos.length > 8 ? digitos.substring(0, 8) : digitos;
+    final buffer = StringBuffer();
+    for (var i = 0; i < limitado.length; i++) {
+      if (i == 2 || i == 4) buffer.write('/');
+      buffer.write(limitado[i]);
     }
-  }
-
-  void _abrirMenu() {
-    final caixa = _campoKey.currentContext!.findRenderObject()! as RenderBox;
-    final origem = caixa.localToGlobal(Offset.zero);
-    final topo = origem.dy + caixa.size.height + 6;
-    final alturaDisponivel = MediaQuery.sizeOf(context).height -
-        topo -
-        MediaQuery.paddingOf(context).bottom -
-        12;
-
-    _menu = OverlayEntry(
-      builder: (context) => Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _fecharMenu,
-            ),
-          ),
-          Positioned(
-            left: origem.dx,
-            top: topo,
-            width: caixa.size.width,
-            child: _painel(math.max(160, math.min(340, alturaDisponivel))),
-          ),
-        ],
-      ),
-    );
-    Overlay.of(context).insert(_menu!);
-    setState(() {});
-  }
-
-  void _fecharMenu() {
-    _menu?.remove();
-    _menu = null;
-    if (mounted) setState(() {});
-  }
-
-  Widget _painel(double alturaMaxima) {
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        constraints: BoxConstraints(maxHeight: alturaMaxima),
-        decoration: BoxDecoration(
-          color: PulynColors.darkCard,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: PulynColors.darkBorder),
-          boxShadow: const [
-            BoxShadow(color: Colors.black54, blurRadius: 16, offset: Offset(0, 6)),
-          ],
-        ),
-        child: ListView.separated(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          shrinkWrap: true,
-          itemCount: widget.eventos.length,
-          separatorBuilder: (_, _) =>
-              Divider(height: 1, color: PulynColors.darkBorder),
-          itemBuilder: (context, indice) {
-            final evento = widget.eventos[indice];
-            final id = evento['eventoId'] as String;
-            final selecionada = id == widget.valor;
-            return InkWell(
-              onTap: () {
-                widget.onSelecionado(id);
-                _fecharMenu();
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                child: Row(
-                  children: [
-                    Expanded(child: widget.textoDaFesta(evento)),
-                    if (selecionada)
-                      const Icon(Icons.check_rounded, color: PulynColors.primary),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Map<String, dynamic>? selecionada;
-    for (final evento in widget.eventos) {
-      if (evento['eventoId'] == widget.valor) selecionada = evento;
-    }
-    OutlineInputBorder borda(Color cor, double largura) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: cor, width: largura),
-        );
-
-    return GestureDetector(
-      key: _campoKey,
-      behavior: HitTestBehavior.opaque,
-      onTap: widget.desabilitado ? null : _alternarMenu,
-      child: InputDecorator(
-        isEmpty: selecionada == null,
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.celebration_rounded, color: PulynColors.primary),
-          suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded, color: PulynColors.primary),
-          filled: true,
-          fillColor: PulynColors.darkCard,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          border: borda(PulynColors.darkBorder, 1),
-          enabledBorder: borda(PulynColors.darkBorder, 1),
-          focusedBorder: borda(PulynColors.primary, 2),
-          errorBorder: borda(PulynColors.danger, 1),
-          focusedErrorBorder: borda(PulynColors.danger, 2),
-          errorText: widget.erro,
-        ),
-        child: selecionada == null
-            ? Text(
-                'Toque para escolher a festa',
-                style: TextStyle(color: PulynColors.textMuted),
-              )
-            : widget.textoDaFesta(selecionada, compacto: true),
-      ),
+    final texto = buffer.toString();
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
     );
   }
 }

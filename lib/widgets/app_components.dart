@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../config/theme.dart';
 
 /// 🎨 COMPONENTES REUTILIZÁVEIS - Pulyn Design System
@@ -333,6 +334,11 @@ class PulynTextField extends StatefulWidget {
   final IconData? prefixIcon;
   final String? Function(String?)? validator;
   final int maxLines;
+  final List<TextInputFormatter>? inputFormatters;
+  final ValueChanged<String>? onChanged;
+
+  /// Botão no fim do campo (ex.: ícone de calendário). Não vale em campo de senha.
+  final Widget? suffixIcon;
 
   const PulynTextField({
     super.key,
@@ -344,6 +350,9 @@ class PulynTextField extends StatefulWidget {
     this.prefixIcon,
     this.validator,
     this.maxLines = 1,
+    this.inputFormatters,
+    this.onChanged,
+    this.suffixIcon,
   });
 
   @override
@@ -379,6 +388,8 @@ class _PulynTextFieldState extends State<PulynTextField> {
           obscureText: _obscureText,
           maxLines: _obscureText ? 1 : widget.maxLines,
           validator: widget.validator,
+          inputFormatters: widget.inputFormatters,
+          onChanged: widget.onChanged,
           decoration: InputDecoration(
             hintText: widget.hint,
             hintStyle: TextStyle(color: PulynColors.textMuted),
@@ -388,7 +399,7 @@ class _PulynTextFieldState extends State<PulynTextField> {
                     icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
                     onPressed: () => setState(() => _obscureText = !_obscureText),
                   )
-                : null,
+                : widget.suffixIcon,
             filled: true,
             fillColor: PulynColors.darkSurface,
             border: OutlineInputBorder(

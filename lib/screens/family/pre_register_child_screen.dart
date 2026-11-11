@@ -123,6 +123,18 @@ class _PreRegisterChildScreenState
     try {
       final apiService = ref.read(apiServiceProvider);
       await apiService.init();
+
+      // Antes de salvar: já existe um cadastro com esta criança, nascimento e responsável (feito na recepção, por exemplo)?
+      final cadastroParecido = await apiService.buscarCadastroParecido(
+        eventoId: _eventoId!,
+        nome: _nomeController.text.trim(),
+        dataNascimento: _dataIso(_nascimento!),
+      );
+      if (cadastroParecido != null) {
+        if (!mounted) return;
+        final continuar = await _avisarCadastroParecido(cadastroParecido);
+        if (continuar != true) return;
+      }
       log.i('[PRE_REGISTER] Enviando cadastro para o evento $_eventoId');
       await apiService.createPreRegisteredChild(
         eventoId: _eventoId!,
@@ -146,6 +158,31 @@ class _PreRegisterChildScreenState
     } finally {
       if (mounted) setState(() => _salvando = false);
     }
+  }
+
+  Future<bool?> _avisarCadastroParecido(String criadoEmIso) {
+    final data = _dataCurta(criadoEmIso);
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Já existe um cadastro parecido'),
+        content: Text(
+          'Já existe um cadastro bem parecido com as suas informações'
+          '${data.isEmpty ? '' : ', criado em $data'}.\n\n'
+          'Seu filho visitou algum evento${data.isEmpty ? '' : ' no dia $data'}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Voltar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Cadastrar mesmo assim'),
+          ),
+        ],
+      ),
+    );
   }
 
   // Status e corpo da resposta do servidor (sem nome da criança, que é dado pessoal).

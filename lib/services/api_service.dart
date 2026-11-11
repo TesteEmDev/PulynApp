@@ -586,6 +586,30 @@ class ApiService {
     return _validateResponseData(response.data);
   }
 
+  /// POST /familias/perfis/verificar - já existe cadastro com a mesma criança, nascimento e responsável?
+  /// Devolve a data de criação (ISO) do cadastro parecido, ou null se não existe. Nunca falha o cadastro:
+  /// qualquer erro na verificação vira "não existe".
+  Future<String?> buscarCadastroParecido({
+    required String eventoId,
+    required String nome,
+    required String dataNascimento,
+  }) async {
+    try {
+      final response = await _dio.post('/familias/perfis/verificar', data: {
+        'eventoId': eventoId,
+        'nome': nome,
+        'dataNascimento': dataNascimento,
+      });
+      final data = response.data;
+      if (data is Map && data['existe'] == true) {
+        return (data['criadoEm'] ?? '').toString();
+      }
+    } catch (_) {
+      // a verificação é só um aviso
+    }
+    return null;
+  }
+
   /// ✅ GET /familias/children/:id/achievements - Com validação
   Future<List<Achievement>> getChildAchievements(String childId) async {
     try {

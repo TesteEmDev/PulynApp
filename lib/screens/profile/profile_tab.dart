@@ -143,13 +143,31 @@ class ProfileTab extends StatelessWidget {
 
               const _SectionHeader(title: 'Minhas crianças'),
               const SizedBox(height: 12),
-              if (list.isEmpty && !loadingFirstTime)
-                const _EmptyChildren()
-              else
-                for (final child in list) ...[
-                  _ChildTile(child: child),
-                  const SizedBox(height: 10),
-                ],
+              // Crianças em evento (abrem o detalhe) e, abaixo, as cadastradas/vinculadas pelo cadastro que ainda não têm
+              // vínculo com um evento deste responsável (levam à lista de todas as crianças).
+              Consumer(
+                builder: (context, ref, _) {
+                  final todas = ref.watch(allChildrenProvider).valueOrNull ?? const <Map<String, dynamic>>[];
+                  final soCadastro = todas
+                      .where((c) => ((c['vinculosEvento'] as num?)?.toInt() ?? 0) == 0)
+                      .toList();
+                  if (list.isEmpty && soCadastro.isEmpty && !loadingFirstTime) {
+                    return const _EmptyChildren();
+                  }
+                  return Column(
+                    children: [
+                      for (final child in list) ...[
+                        _ChildTile(child: child),
+                        const SizedBox(height: 10),
+                      ],
+                      for (final cadastro in soCadastro) ...[
+                        _CadastroTile(cadastro: cadastro),
+                        const SizedBox(height: 10),
+                      ],
+                    ],
+                  );
+                },
+              ),
               const SizedBox(height: 14),
 
               const _SectionHeader(title: 'Preferências'),
@@ -486,6 +504,78 @@ class _ChildTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '$team · ${child.currentScore} pts',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: PulynColors.textMuted, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: PulynColors.textMuted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Criança cadastrada (ou vinculada pelo cadastro) que ainda não tem vínculo com um evento deste responsável.
+class _CadastroTile extends StatelessWidget {
+  final Map<String, dynamic> cadastro;
+
+  const _CadastroTile({required this.cadastro});
+
+  @override
+  Widget build(BuildContext context) {
+    final apelido = (cadastro['apelido'] as String?) ?? '';
+    final nomeCompleto = (cadastro['nome'] as String?) ?? '';
+    final nome = apelido.isNotEmpty ? apelido : nomeCompleto.split(' ').first;
+    final initial = nome.isNotEmpty ? nome[0].toUpperCase() : '?';
+    final pontos = (cadastro['pontosTotais'] as num?)?.toInt() ?? 0;
+    final situacao = switch (cadastro['situacao']) {
+      'com_pulseira' => 'Com pulseira',
+      'no_evento' => 'Sem pulseira',
+      _ => 'Aguardando o buffet',
+    };
+
+    return Material(
+      color: PulynColors.darkCard,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.push('/all-children'),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: PulynColors.darkBorder),
+          ),
+          child: Row(
+            children: [
+              ChildAvatar(
+                avatarId: cadastro['avatar'] as String?,
+                inicial: initial,
+                cor: PulynColors.primary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      nome,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: PulynColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$situacao · $pontos pts',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: PulynColors.textMuted, fontSize: 12),

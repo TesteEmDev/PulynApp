@@ -570,14 +570,12 @@ class ApiService {
 
   /// ✅ POST /familias/perfis - Pré-cadastra a criança no buffet do evento escolhido
   Future<Map<String, dynamic>> createPreRegisteredChild({
-    required String eventoId,
     required String nome,
     String? apelido,
     required int idade,
     String? dataNascimento,
   }) async {
     final response = await _dio.post('/familias/perfis', data: {
-      'eventoId': eventoId,
       'nome': nome,
       'apelido': apelido,
       'idade': idade,
@@ -590,13 +588,11 @@ class ApiService {
   /// Devolve a data de criação (ISO) do cadastro parecido, ou null se não existe. Nunca falha o cadastro:
   /// qualquer erro na verificação vira "não existe".
   Future<String?> buscarCadastroParecido({
-    required String eventoId,
     required String nome,
     required String dataNascimento,
   }) async {
     try {
       final response = await _dio.post('/familias/perfis/verificar', data: {
-        'eventoId': eventoId,
         'nome': nome,
         'dataNascimento': dataNascimento,
       });

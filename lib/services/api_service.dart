@@ -568,6 +568,17 @@ class ApiService {
     return perfis.map((perfil) => perfil as Map<String, dynamic>).toList();
   }
 
+  /// POST /familias/perfis/vincular - o pai confirmou que o cadastro parecido é do filho: liga a conta a ele
+  Future<void> vincularCadastroParecido({
+    required String nome,
+    required String dataNascimento,
+  }) async {
+    await _dio.post('/familias/perfis/vincular', data: {
+      'nome': nome,
+      'dataNascimento': dataNascimento,
+    });
+  }
+
   /// PUT /familias/perfis/:id - edita um cadastro que ainda não entrou em nenhum evento
   Future<void> updatePreRegisteredChild({
     required String perfilCriancaId,

@@ -161,8 +161,22 @@ class _PreRegisterChildScreenState
       );
       if (cadastroParecido != null) {
         if (!mounted) return;
-        final continuar = await _avisarCadastroParecido(cadastroParecido);
-        if (continuar != true) return;
+        final escolha = await _avisarCadastroParecido(cadastroParecido);
+        if (escolha == 'vincular') {
+          await apiService.vincularCadastroParecido(
+            nome: _nomeController.text.trim(),
+            dataNascimento: _dataIso(_nascimento!),
+          );
+          log.i('[PRE_REGISTER] Cadastro existente vinculado ao responsável');
+          if (!mounted) return;
+          showSuccessSnackBar(
+            context,
+            'Cadastro vinculado! Sua criança já aparece no app.',
+          );
+          context.pop(true);
+          return;
+        }
+        if (escolha != 'novo') return;
       }
       log.i('[PRE_REGISTER] Enviando cadastro');
       await apiService.createPreRegisteredChild(
@@ -188,7 +202,8 @@ class _PreRegisterChildScreenState
     }
   }
 
-  Future<bool?> _avisarCadastroParecido(Map<String, String> cadastro) {
+  /// 'vincular' (é meu filho), 'novo' (cadastrar mesmo assim) ou null (voltar)
+  Future<String?> _avisarCadastroParecido(Map<String, String> cadastro) {
     final data = _dataCurta(cadastro['criadoEm']);
     final crianca = cadastro['crianca'] ?? '';
     final responsavel = cadastro['responsavel'] ?? '';
@@ -197,7 +212,7 @@ class _PreRegisterChildScreenState
       if (crianca.isNotEmpty) 'Criança: $crianca',
       if (responsavel.isNotEmpty) 'Responsável: $responsavel',
     ].join('\n');
-    return showDialog<bool>(
+    return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Já existe um cadastro parecido'),
@@ -209,12 +224,16 @@ class _PreRegisterChildScreenState
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context),
             child: const Text('Voltar'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(context, 'novo'),
             child: const Text('Cadastrar mesmo assim'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, 'vincular'),
+            child: const Text('É meu filho: vincular'),
           ),
         ],
       ),

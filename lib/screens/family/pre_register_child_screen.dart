@@ -52,13 +52,13 @@ class _PreRegisterChildScreenState
     super.dispose();
   }
 
-  // A criança tem até 17 anos: a data mais antiga aceita é 17 anos atrás.
+  // Sem limite de idade: só não vale data futura nem anterior a 1900.
   Future<void> _escolherNascimento() async {
     final hoje = DateTime.now();
     final escolhida = await showDatePicker(
       context: context,
       initialDate: _nascimento ?? DateTime(hoje.year - 6, hoje.month, hoje.day),
-      firstDate: DateTime(hoje.year - 17, hoje.month, hoje.day),
+      firstDate: DateTime(1900),
       lastDate: hoje,
       helpText: 'Data de nascimento da criança',
       cancelText: 'Cancelar',
@@ -72,7 +72,7 @@ class _PreRegisterChildScreenState
     });
   }
 
-  // Digitando DD/MM/AAAA: só vale uma data que existe, não é futura e de quem tem até 17 anos.
+  // Digitando DD/MM/AAAA: só vale uma data que existe e que não é futura.
   void _aoDigitarNascimento(String texto) {
     DateTime? data;
     final partes = texto.split('/');
@@ -83,7 +83,7 @@ class _PreRegisterChildScreenState
       if (dia != null && mes != null && ano != null) {
         final candidata = DateTime(ano, mes, dia);
         final hoje = DateTime.now();
-        final maisAntiga = DateTime(hoje.year - 17, hoje.month, hoje.day);
+        final maisAntiga = DateTime(1900);
         final existe = candidata.day == dia && candidata.month == mes;
         if (existe &&
             !candidata.isAfter(hoje) &&
@@ -267,7 +267,7 @@ class _PreRegisterChildScreenState
                       return 'Informe a data de nascimento';
                     }
                     return _nascimento == null
-                        ? 'Data inválida (a criança tem até 17 anos)'
+                        ? 'Data inválida'
                         : null;
                   },
                 ),

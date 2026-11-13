@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/index.dart';
 import '../../config/tema_provider.dart';
 import '../../utils/avatar_utils.dart';
 import '../family/pre_register_child_screen.dart';
+import '../../widgets/avatar_imagem.dart';
 import '../../widgets/brincadeira_selo.dart';
 import '../../models/family_models.dart';
 import '../../config/theme.dart';
@@ -1205,16 +1205,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
-                // Avatar do catálogo (SVG); sem avatar válido, mostra a inicial como antes
-                child: isValidAvatarId(child.profileImage)
+                // Avatar do catálogo (SVG) ou montado pela criança (PNG do backend); sem avatar válido, mostra a inicial
+                child: isAvatarImagem(child.profileImage)
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: SvgPicture.network(
-                          getAvatarUrl(child.profileImage),
-                          width: 44,
-                          height: 44,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => _inicialDoApelido(child),
+                        child: AvatarImagem(
+                          avatarId: child.profileImage,
+                          tamanho: 44,
+                          fallbackBuilder: (context) => _inicialDoApelido(child),
                         ),
                       )
                     : _inicialDoApelido(child),

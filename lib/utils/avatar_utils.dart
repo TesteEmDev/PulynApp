@@ -59,6 +59,38 @@ bool isValidAvatarId(String? avatarId) {
   return avatarId != null && adventurerAvatarIds.contains(avatarId);
 }
 
+/// Avatar montado pela criança no quiosque/recepção (código `pulyn1-` + 15 letras/dígitos).
+/// O app não desenha o personagem: o backend faz isso a partir do código e entrega a imagem pronta
+/// (rota `/avatars/{codigo}.png`).
+final RegExp _avatarMontadoRegex = RegExp(r'^pulyn1-[0-9a-z]{15}$');
+
+bool isAvatarMontado(String? avatarId) {
+  return avatarId != null && _avatarMontadoRegex.hasMatch(avatarId);
+}
+
+/// Avatar que o app sabe mostrar como imagem: um do catálogo ou um montado.
+bool isAvatarImagem(String? avatarId) {
+  return isValidAvatarId(avatarId) || isAvatarMontado(avatarId);
+}
+
+/// Larguras (em pixels) que o backend aceita para o PNG do avatar montado.
+const List<int> tamanhosAvatarMontado = [64, 96, 128, 192, 256, 384];
+
+/// Menor tamanho aceito pelo backend que ainda deixa a imagem nítida na tela
+/// (tamanho lógico x densidade de pixels do aparelho).
+int tamanhoDeImagemDoAvatar(double tamanhoLogico, double pixelRatio) {
+  final necessario = (tamanhoLogico * pixelRatio).ceil();
+  for (final tamanho in tamanhosAvatarMontado) {
+    if (tamanho >= necessario) return tamanho;
+  }
+  return tamanhosAvatarMontado.last;
+}
+
+/// URL do PNG de um avatar montado. [tamanho] precisa ser um dos [tamanhosAvatarMontado].
+String getAvatarMontadoUrl(String codigo, {int tamanho = 128}) {
+  return '${_getBaseUrl()}/avatars/$codigo.png?tamanho=$tamanho';
+}
+
 /// Gets a readable label for an avatar ID
 String getAvatarLabel(String? avatarId) {
   if (avatarId == null) return 'Avatar padrão';

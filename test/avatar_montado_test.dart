@@ -16,6 +16,17 @@ void main() {
       expect(isAvatarMontado('pulyn1-000000000000000'), isTrue);
     });
 
+    test('aceita os quatro tamanhos de código do montador: 22, 26, 28 e 32 caracteres', () {
+      const antigo = 'pulyn1-a1b2c3d4e5f6g7h'; // 22
+      const novo = 'pulyn1-a1b2c3d4e5f6g7h1234'; // 26: + 4 de acessórios
+      final codigos = [antigo, novo, '${antigo}12ab9c', '${novo}12ab9c'];
+      expect(codigos.map((c) => c.length), [22, 26, 28, 32]);
+      for (final codigo in codigos) {
+        expect(isAvatarMontado(codigo), isTrue, reason: codigo);
+        expect(isAvatarImagem(codigo), isTrue, reason: codigo);
+      }
+    });
+
     test('recusa o que não é um avatar montado', () {
       for (final ruim in <String?>[
         null,
@@ -24,6 +35,8 @@ void main() {
         'pulyn1-',
         'pulyn1-a1b2c3d4e5f6g7', // curto
         'pulyn1-a1b2c3d4e5f6g7hh', // longo
+        'pulyn1-a1b2c3d4e5f6g7h12345', // 27: tamanho que o montador nunca gera
+        'pulyn1-a1b2c3d4e5f6g7h1234zz9c12', // cor própria que não é hexadecimal
         'pulyn1-A1B2C3D4E5F6G7H', // maiúsculas
         'pulyn2-a1b2c3d4e5f6g7h',
         '$_montado.png',

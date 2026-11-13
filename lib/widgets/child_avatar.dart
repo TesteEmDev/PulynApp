@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../utils/avatar_utils.dart';
+import 'avatar_imagem.dart';
 
-/// Avatar da criança: o SVG do catálogo quando o cadastro tem um avatar válido,
+/// Avatar da criança: a imagem do catálogo ou do personagem montado por ela quando o cadastro tem um avatar válido,
 /// senão (ou enquanto carrega, ou se falhar) a inicial do nome sobre a cor do time.
 class ChildAvatar extends StatelessWidget {
   final String? avatarId;
@@ -31,16 +30,11 @@ class ChildAvatar extends StatelessWidget {
       ),
     );
 
-    final conteudo = isValidAvatarId(avatarId)
-        ? SvgPicture.network(
-            getAvatarUrl(avatarId),
-            width: tamanho,
-            height: tamanho,
-            fit: BoxFit.cover,
-            placeholderBuilder: (context) => Center(child: textoInicial),
-            errorBuilder: (context, error, stackTrace) => Center(child: textoInicial),
-          )
-        : Center(child: textoInicial);
+    final conteudo = AvatarImagem(
+      avatarId: avatarId,
+      tamanho: tamanho,
+      fallbackBuilder: (context) => Center(child: textoInicial),
+    );
 
     return Container(
       width: tamanho,

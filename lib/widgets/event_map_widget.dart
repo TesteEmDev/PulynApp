@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../models/family_models.dart';
 import '../models/calor_models.dart';
 import '../config/theme.dart';
@@ -12,6 +11,7 @@ import '../providers/index.dart';
 import '../utils/avatar_utils.dart';
 import '../utils/logger.dart';
 import '../utils/text_sanitizer.dart';
+import 'avatar_imagem.dart';
 import 'camada_calor.dart';
 
 /// Zone configuration para o mapa do buffet
@@ -1757,12 +1757,13 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                         ),
                                         child: childData.profileImage != null && childData.profileImage!.isNotEmpty
                                             ? ClipOval(
-                                                child: isValidAvatarId(childData.profileImage)
-                                                    // Avatar do catálogo: o banco guarda só o ID, então montamos a URL do SVG
-                                                    ? SvgPicture.network(
-                                                        getAvatarUrl(childData.profileImage),
-                                                        fit: BoxFit.cover,
-                                                        errorBuilder: (context, error, stackTrace) => Center(
+                                                child: isAvatarImagem(childData.profileImage)
+                                                    // Avatar do catálogo (o banco guarda só o ID) ou montado pela criança
+                                                    // (o banco guarda o código; o backend entrega o PNG)
+                                                    ? AvatarImagem(
+                                                        avatarId: childData.profileImage,
+                                                        tamanho: 34,
+                                                        fallbackBuilder: (context) => Center(
                                                           child: Text(
                                                             initial,
                                                             style: const TextStyle(

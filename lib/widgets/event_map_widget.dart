@@ -296,7 +296,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
     try {
       final apiService = ref.read(apiServiceProvider);
       // A planta é do buffet do evento em exibição (o escolhido no app, ou o evento ativo)
-      final eventoId = widget.eventoId ?? ref.read(activeEventProvider).value?['id'] as String?;
+      final eventoId = widget.eventoId ?? ref.read(activeEventProvider).valueOrNull?['id'] as String?;
       final floorPlanUrl = await apiService.getFloorPlan(eventoId: eventoId);
 
       if (mounted && floorPlanUrl != null && floorPlanUrl.isNotEmpty) {

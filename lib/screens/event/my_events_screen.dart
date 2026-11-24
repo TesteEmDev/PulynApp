@@ -57,7 +57,7 @@ class MyEventsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final eventosAsync = ref.watch(myEventsProvider);
     final escolhido = ref.watch(selectedEventIdProvider);
-    final ativo = ref.watch(activeEventProvider).value?['id'] as String?;
+    final ativo = ref.watch(activeEventProvider).valueOrNull?['id'] as String?;
 
     return Scaffold(
       appBar: AppBar(

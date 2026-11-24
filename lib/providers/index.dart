@@ -34,7 +34,7 @@ final familyEventsProvider = FutureProvider.autoDispose<List<Map<String, dynamic
 final linkEventIdProvider = Provider.autoDispose<String?>((ref) {
   final escolhido = ref.watch(selectedEventIdProvider);
   if (escolhido != null) return escolhido;
-  final eventos = ref.watch(familyEventsProvider).value;
+  final eventos = ref.watch(familyEventsProvider).valueOrNull;
   return (eventos != null && eventos.length == 1) ? eventos.first['id'] as String? : null;
 });
 
@@ -253,7 +253,7 @@ final childLastCheckpointProvider = Provider.autoDispose<Map<String, Map<String,
   final realtimeTracking = ref.watch(realtimeCheckpointTrackingProvider);
 
   final lastCheckpointMap = <String, Map<String, dynamic>>{};
-  final scoreLog = scoreLogAsync.value ?? [];
+  final scoreLog = scoreLogAsync.valueOrNull ?? [];
 
   if (scoreLog.isNotEmpty) {
     // Mais recentes primeiro. O backend já devolve em ordem decrescente de

@@ -94,7 +94,7 @@ final childrenRankingProvider = StreamProvider.autoDispose<List<Child>>((
 /// (ou se der erro sem dados) é falso, para o QR Code não piscar na tela por engano.
 @visibleForTesting
 bool hasNoChildren(AsyncValue<List<Child>> children) =>
-    children.hasValue && (children.value?.isEmpty ?? false);
+    children.hasValue && (children.valueOrNull?.isEmpty ?? false);
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -226,7 +226,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final semCriancaNoEvento = ref.watch(childrenProvider.select(
       (criancas) => eventoEscolhido != null &&
           criancas.hasValue &&
-          !(criancas.value ?? const <Child>[]).any((c) => c.eventoId == eventoEscolhido),
+          !(criancas.valueOrNull ?? const <Child>[]).any((c) => c.eventoId == eventoEscolhido),
     ));
 
     return Scaffold(
@@ -283,7 +283,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// zonas, planta e checkpoints (zonas e planta reagem a mapRefreshProvider;
   /// checkpoints têm cache próprio, por isso são limpos/invalidados na mão).
   Future<void> _handleRefresh(WidgetRef ref) async {
-    final eventoId = ref.read(activeEventProvider).value?['id'] as String?;
+    final eventoId = ref.read(activeEventProvider).valueOrNull?['id'] as String?;
 
     ref.read(childrenRefreshProvider.notifier).refresh();
     ref.read(checkpointsCacheProvider.notifier).clearCache();
@@ -462,10 +462,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildEventHeader(context, activeEventAsync.value),
+        _buildEventHeader(context, activeEventAsync.valueOrNull),
         const SizedBox(height: 16),
 
-        _buildEventSelector(context, ref, activeEventAsync.value?['id'] as String?),
+        _buildEventSelector(context, ref, activeEventAsync.valueOrNull?['id'] as String?),
         childrenAsyncValue.when(
           // Sem isso, cada leitura trocava o mapa pelo spinner: o widget era
           // destruído e recriado (perdendo as posições animadas dos avatares).
@@ -487,8 +487,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               return _buildMapEmptyState();
             }
 
-            final activeEvent = activeEventAsync.value;
-            final activeGame = activeGameAsync.value;
+            final activeEvent = activeEventAsync.valueOrNull;
+            final activeGame = activeGameAsync.valueOrNull;
             final filhosDoEvento = _filhosDoEvento(children, activeEvent?['id'] as String?);
             if (filhosDoEvento.isEmpty) {
               return _buildMapEmptyState(
@@ -598,7 +598,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildEventoDoVinculo(BuildContext context, WidgetRef ref) {
     final eventoId = ref.watch(linkEventIdProvider);
     if (eventoId == null) return const SizedBox.shrink();
-    final eventos = ref.watch(familyEventsProvider).value ?? const <Map<String, dynamic>>[];
+    final eventos = ref.watch(familyEventsProvider).valueOrNull ?? const <Map<String, dynamic>>[];
     final nome = eventos.where((e) => e['id'] == eventoId).map((e) => e['nome'] as String).firstOrNull;
     if (nome == null) return const SizedBox.shrink();
 
@@ -762,7 +762,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String? eventoAtivo,
   ) {
     final eventos =
-        ref.watch(familyEventsProvider).value ?? const <Map<String, dynamic>>[];
+        ref.watch(familyEventsProvider).valueOrNull ?? const <Map<String, dynamic>>[];
     if (eventos.length < 2) return const SizedBox.shrink();
     final valorAtual = eventos.any((e) => e['id'] == eventoAtivo)
         ? eventoAtivo

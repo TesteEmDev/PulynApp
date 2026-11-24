@@ -60,9 +60,11 @@ bool isValidAvatarId(String? avatarId) {
 }
 
 /// Avatar montado pela criança no quiosque/recepção (código `pulyn1-` + 15 letras/dígitos).
+/// Códigos novos levam mais 4 caracteres (óculos, colar, brinco e cor dos acessórios) e quem escolheu
+/// uma cor de fundo fora da paleta leva mais 6 dígitos hexadecimais no fim: 22, 26, 28 ou 32 caracteres.
 /// O app não desenha o personagem: o backend faz isso a partir do código e entrega a imagem pronta
-/// (rota `/avatars/{codigo}.png`).
-final RegExp _avatarMontadoRegex = RegExp(r'^pulyn1-[0-9a-z]{15}$');
+/// (rota `/avatars/{codigo}.png`). Mantenha este formato igual ao do backend (utils/avatarImagem.js).
+final RegExp _avatarMontadoRegex = RegExp(r'^pulyn1-[0-9a-z]{15}(?:[0-9a-z]{4})?(?:[0-9a-f]{6})?$');
 
 bool isAvatarMontado(String? avatarId) {
   return avatarId != null && _avatarMontadoRegex.hasMatch(avatarId);

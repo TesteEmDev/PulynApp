@@ -11,9 +11,15 @@ const _montado = 'pulyn1-a1b2c3d4e5f6g7h';
 
 void main() {
   group('isAvatarMontado', () {
-    test('aceita só o formato pulyn1- + 15 letras minúsculas/dígitos', () {
+    test('aceita o formato pulyn1- + 15 letras minúsculas/dígitos (código antigo, 22 caracteres)', () {
       expect(isAvatarMontado(_montado), isTrue);
       expect(isAvatarMontado('pulyn1-000000000000000'), isTrue);
+    });
+
+    test('aceita os códigos novos: com acessórios (26), com fundo próprio (28 e 32)', () {
+      expect(isAvatarMontado('${_montado}1a2b'), isTrue); // 26: + óculos, colar, brinco e cor
+      expect(isAvatarMontado('${_montado}a1b2c3'), isTrue); // 28: antigo + cor de fundo própria
+      expect(isAvatarMontado('${_montado}1a2ba1b2c3'), isTrue); // 32: acessórios + cor de fundo própria
     });
 
     test('recusa o que não é um avatar montado', () {
@@ -23,7 +29,10 @@ void main() {
         'adventurer-1787066874693',
         'pulyn1-',
         'pulyn1-a1b2c3d4e5f6g7', // curto
-        'pulyn1-a1b2c3d4e5f6g7hh', // longo
+        'pulyn1-a1b2c3d4e5f6g7hh', // 23: tamanho que não existe
+        'pulyn1-a1b2c3d4e5f6g7h1a2', // 25: acessórios incompletos
+        '${_montado}1a2bXYZ123', // 32, mas cor de fundo não é hexadecimal
+        '${_montado}1a2ba1b2c3d', // 33: longo demais
         'pulyn1-A1B2C3D4E5F6G7H', // maiúsculas
         'pulyn2-a1b2c3d4e5f6g7h',
         '$_montado.png',

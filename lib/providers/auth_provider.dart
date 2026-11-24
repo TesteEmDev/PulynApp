@@ -48,7 +48,17 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   Future<void> _ensureInitialized() async {
     if (_initialized) return;
     _initialized = true;
+    ref.read(apiServiceProvider).onSessionExpired = _sessaoExpirou;
     await _init();
+  }
+
+  /// O servidor recusou o token de uma conta logada (expirou, ou é de outro servidor): sai da conta e volta ao login,
+  /// em vez de ficar numa home sem dados com todos os pedidos falhando.
+  void _sessaoExpirou() {
+    if (!mounted || state.valueOrNull == null) return;
+    log.w('[AUTH] 🔒 O servidor recusou o token; voltando ao login');
+    _cachedUser = null;
+    state = const AsyncValue.data(null);
   }
 
   Future<void> _init() async {

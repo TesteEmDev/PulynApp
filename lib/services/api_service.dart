@@ -28,6 +28,12 @@ class ApiService {
   // ✅ Expor SharedPreferences publicamente para uso em helpers
   SharedPreferences get prefs => _prefs;
 
+  /// Chamado (uma vez) quando o servidor recusa o token de uma conta que estava logada: expirou, ou veio de
+  /// outro servidor (por exemplo, a conta entrou no Render e o app passou a apontar para o backend local).
+  /// Quem usa o app decide o que fazer; o AuthNotifier volta para o login.
+  void Function()? onSessionExpired;
+  bool _sessaoExpirada = false;
+
 
   ApiService() {
     _baseUrl = ApiConfig.getApiBaseUrl();
@@ -81,6 +87,7 @@ class ApiService {
     final token = _prefs.getString('auth_token');
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
+      _sessaoExpirada = false; // há um token de novo (novo login): a próxima recusa volta a avisar
     }
     return handler.next(options);
   }
@@ -93,9 +100,17 @@ class ApiService {
     if (err.response?.statusCode == 401) {
       log.e('[API] ❌ 401 Unauthorized - Token inválido');
       log.e('[API] Response: ${err.response?.data}');
-      // Remove token expirado e força logout
+      // Remove o token recusado
       await _prefs.remove('auth_token');
-      // A app saberá fazer logout pela mudança do authProvider
+      // Se o pedido levava token (a conta estava logada), a sessão acabou: avisa uma vez para o app voltar ao login.
+      // Sem isso o app ficava logado com os dados em cache e todo pedido seguinte falhava com "Token não fornecido".
+      // Um 401 sem token (senha errada no login, por exemplo) não conta.
+      final levavaToken = err.requestOptions.headers.containsKey('Authorization');
+      if (levavaToken && !_sessaoExpirada) {
+        _sessaoExpirada = true;
+        await _prefs.remove('cached_user');
+        onSessionExpired?.call();
+      }
     }
     return handler.next(err);
   }

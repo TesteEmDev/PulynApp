@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../utils/logger.dart';
+import '../utils/validadores.dart';
 import 'api_service.dart';
 
 class ValidationService {
@@ -35,6 +36,28 @@ class ValidationService {
       }
       log.e('[VALIDATION] ❌ Erro ao verificar email: $e');
       rethrow;
+    }
+  }
+
+  /// Já existe conta com este e-mail? `null` quando não deu para saber (servidor sem esse recurso ou com falha):
+  /// quem chama segue em frente e deixa o servidor decidir. Falta de rede é relançada, para a tela avisar.
+  Future<bool?> contaExiste(String email) async {
+    try {
+      final response = await _apiService.dio.get(
+        '/auth/check-email',
+        queryParameters: {'email': email.toLowerCase().trim()},
+      );
+      final data = response.data;
+      if (data is Map && data['available'] is bool) return !(data['available'] as bool);
+      return null;
+    } on DioException catch (e) {
+      final semRede = e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout;
+      if (semRede) rethrow;
+      log.w('[VALIDATION] ℹ️ Não foi possível conferir a conta (${e.response?.statusCode}); o servidor decide no login');
+      return null;
     }
   }
 
@@ -93,97 +116,20 @@ class ValidationService {
 
   /// Valida nome completo
   ValidationResult validateName(String nome) {
-    log.i('[VALIDATION] 👤 Validando name: $nome');
-
-    if (nome.isEmpty) {
-      return ValidationResult(
-        valid: false,
-        mensagem: 'Nome é obrigatório',
-      );
-    }
-
-    if (nome.length < 2) {
-      return ValidationResult(
-        valid: false,
-        mensagem: 'Nome deve ter no mínimo 2 caracteres',
-      );
-    }
-
-    if (nome.length > 100) {
-      return ValidationResult(
-        valid: false,
-        mensagem: 'Nome não pode ter mais de 100 caracteres',
-      );
-    }
-
-    // Valida se contém números
-    if (RegExp(r'\d').hasMatch(nome)) {
-      return ValidationResult(
-        valid: false,
-        mensagem: 'Nome não pode conter números',
-      );
-    }
-
-    // Valida se tem pelo menos 2 palavras (nome e sobrenome)
-    final parts = nome.trim().split(RegExp(r'\s+'));
-    if (parts.length < 2) {
-      return ValidationResult(
-        valid: false,
-        mensagem: 'Por favor, insira seu nome completo (nome e sobrenome)',
-      );
-    }
-
-    log.i('[VALIDATION] ✅ Nome válido');
-
-    return ValidationResult(valid: true, mensagem: 'Nome válido');
+    final erro = validarNome(nome);
+    return ValidationResult(valid: erro == null, mensagem: erro ?? 'Nome válido');
   }
 
   /// Valida email
   ValidationResult validateEmail(String email) {
-    log.i('[VALIDATION] 📧 Validando email: $email');
-
-    if (email.isEmpty) {
-      return ValidationResult(
-        valid: false,
-        mensagem: 'Email é obrigatório',
-      );
-    }
-
-    final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
-
-    if (!emailRegex.hasMatch(email)) {
-      return ValidationResult(
-        valid: false,
-        mensagem: 'Email inválido',
-      );
-    }
-
-    log.i('[VALIDATION] ✅ Email válido');
-
-    return ValidationResult(valid: true, mensagem: 'Email válido');
+    final erro = validarEmail(email);
+    return ValidationResult(valid: erro == null, mensagem: erro ?? 'Email válido');
   }
 
   /// Valida confirmação de senha
   ValidationResult validatePasswordMatch(String senha, String confirmPassword) {
-    log.i('[VALIDATION] 🔄 Validando correspondência de senhas');
-
-    if (confirmPassword.isEmpty) {
-      return ValidationResult(
-        valid: false,
-        mensagem: 'Confirmação de senha é obrigatória',
-      );
-    }
-
-    if (senha != confirmPassword) {
-      return ValidationResult(
-        valid: false,
-        mensagem: 'As senhas não correspondem',
-      );
-    }
-
-    log.i('[VALIDATION] ✅ Senhas correspondem');
-
-    return ValidationResult(valid: true, mensagem: 'Senhas correspondem');
+    final erro = validarConfirmacaoSenha(confirmPassword, senha);
+    return ValidationResult(valid: erro == null, mensagem: erro ?? 'Senhas correspondem');
   }
 
   /// Valida CPF (opcional, se necessário)

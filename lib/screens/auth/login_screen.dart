@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../utils/validadores.dart';
 import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/index.dart';
+import 'package:dio/dio.dart';
 import '../../services/api_service.dart';
 import '../../services/validation_service.dart';
 import '../../utils/logger.dart';
@@ -20,12 +22,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
-  late ValidationService _validationService;
 
   @override
   void initState() {
     super.initState();
-    _validationService = ValidationService(ref.read(apiServiceProvider));
   }
 
   @override
@@ -35,11 +35,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  void _showError(String mensagem) {
-    showErrorSnackBar(context, mensagem);
+  /// Texto do alerta para uma falha ao entrar. As mensagens do servidor ("Email ou senha incorretos", etc.)
+  /// já vêm prontas na exceção; erros de rede ganham um texto próprio.
+  String _mensagemDoErro(Object erro) {
+    if (erro is DioException) {
+      final semRede = erro.type == DioExceptionType.connectionError ||
+          erro.type == DioExceptionType.connectionTimeout ||
+          erro.type == DioExceptionType.sendTimeout ||
+          erro.type == DioExceptionType.receiveTimeout;
+      return semRede ? 'Sem conexão com o servidor. Verifique sua internet.' : 'Não foi possível entrar. Tente de novo.';
+    }
+    final texto = erro.toString().replaceFirst('Exception: ', '').trim();
+    return texto.isEmpty ? 'Não foi possível entrar. Tente de novo.' : texto;
   }
 
   Future<void> _handleLogin() async {
+    // O botão continua com a aparência normal enquanto carrega; toques repetidos são ignorados
+    if (_isLoading) return;
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -54,74 +66,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       log.i('[LOGIN] 🔐 Tentando fazer login com email: $email');
 
-      await ref.read(authProvider.notifier).login(email, senha);
-
+      // Varredura antes de entrar: a conta existe? Sem conta, avisa na hora em vez de deixar a pessoa
+      // esperando uma resposta de "senha incorreta" para um e-mail que nunca foi cadastrado.
+      final api = ref.read(apiServiceProvider);
+      await api.init();
+      final contaExiste = await ValidationService(api).contaExiste(email);
       if (!mounted) return;
-
-      // O provedor guarda o erro no estado (não o devolve): a mensagem sai daqui.
-      final estado = ref.read(authProvider);
-      if (estado.hasError) {
-        _showError(estado.error.toString().replaceFirst('Exception: ', ''));
+      if (contaExiste == false) {
+        showErrorSnackBar(context, '❌ Não existe conta com este e-mail. Confira o endereço ou crie uma conta.');
         setState(() => _isLoading = false);
         return;
       }
 
+      await ref.read(authProvider.notifier).login(email, senha);
+
+      // Deu certo: a sessão mudou e o roteador leva para a home (esta tela sai). Não precisa soltar o botão.
       log.i('[LOGIN] ✅ Login realizado com sucesso');
     } on EmailNaoConfirmadoException catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
       ref.read(cadastroPendenteProvider.notifier).state = e.email;
     } catch (e) {
-      if (!mounted) return;
-
       log.e('[LOGIN] ❌ Erro ao fazer login: $e');
-
-      String errorMessage = '❌ Erro ao fazer login';
-
-      final errorStr = e.toString().toLowerCase();
-      if (errorStr.contains('not found') ||
-          errorStr.contains('not registered') ||
-          errorStr.contains('404')) {
-        errorMessage = '❌ Email não registrado. Crie uma conta';
-      } else if (errorStr.contains('invalid senha') ||
-                 errorStr.contains('wrong senha') ||
-                 errorStr.contains('401') ||
-                 errorStr.contains('unauthorized')) {
-        errorMessage = '❌ Senha incorreta. Tente novamente';
-      } else if (errorStr.contains('network') ||
-                 errorStr.contains('connection') ||
-                 errorStr.contains('timeout')) {
-        errorMessage = '❌ Erro de conexão. Verifique sua internet';
-      } else if (errorStr.contains('pending') ||
-                 errorStr.contains('approval')) {
-        errorMessage = '❌ Sua conta está pendente de aprovação';
-      } else if (errorStr.contains('disabled') ||
-                 errorStr.contains('inativo')) {
-        errorMessage = '❌ Sua conta foi desativada';
-      }
-
-      _showError(errorMessage);
+      if (!mounted) return;
+      showErrorSnackBar(context, '❌ ${_mensagemDoErro(e)}');
       setState(() => _isLoading = false);
     }
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email é obrigatório';
-    }
-    final result = _validationService.validateEmail(value);
-    return result.valid ? null : result.mensagem;
-  }
+  String? _validateEmail(String? value) => validarEmail(value);
 
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Senha é obrigatória';
-    }
-    if (value.length < 6) {
-      return 'Senha deve ter no mínimo 6 caracteres';
-    }
-    return null;
-  }
+  String? _validatePassword(String? value) => validarSenha(value);
 
   @override
   Widget build(BuildContext context) {
@@ -204,15 +179,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 24),
 
                 // Login Button
-                _isLoading
-                    ? const SizedBox(
-                        height: 50,
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    : ElevatedButton(
-                        onPressed: _handleLogin,
-                        child: const Text('Fazer Login'),
-                      ),
+                ElevatedButton(
+                  onPressed: _handleLogin,
+                  child: _isLoading
+                      ? const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                            ),
+                            SizedBox(width: 12),
+                            Text('Entrando...'),
+                          ],
+                        )
+                      : const Text('Fazer Login'),
+                ),
 
                 const SizedBox(height: 16),
 

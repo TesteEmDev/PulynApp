@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../widgets/app_components.dart';
+import '../../widgets/ranking_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../config/theme.dart';
 import '../../providers/index.dart';
-import '../../widgets/child_avatar.dart';
 
 class RankingScreen extends ConsumerStatefulWidget {
   const RankingScreen({super.key});
@@ -79,11 +79,11 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     final childrenState = ref.watch(childrenProvider);
 
     return childrenState.when(
-      loading: () => _buildLoadingList(),
-      error: (error, stack) => _buildErrorState('Erro ao carregar ranking de crianças'),
+      loading: () => const CartoesCarregando(),
+      error: (error, stack) => ErroCentralizado(mensagem: 'Erro ao carregar ranking de crianças', onTentarNovamente: () => setState(() {})),
       data: (children) {
         if (children.isEmpty) {
-          return _buildEmptyState('Nenhuma criança encontrada');
+          return EmptyState(icon: Icons.inbox_outlined, title: 'Nenhuma criança encontrada');
         }
         
         // Ordena por pontos (descendente)
@@ -94,8 +94,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
           itemCount: sorted.length,
           itemBuilder: (context, index) {
             final child = sorted[index];
-            final medal = _getMedalForPosition(index);
-            return _buildRankingCard(
+            final medal = medalhaDaPosicao(index);
+            return CartaoRankingCrianca(
               position: index + 1,
               nome: child.apelido.isNotEmpty ? child.apelido : child.nome,
               score: child.currentScore,
@@ -114,8 +114,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     final childrenState = ref.watch(childrenProvider);
 
     return childrenState.when(
-      loading: () => _buildLoadingList(),
-      error: (error, stack) => _buildErrorState('Erro ao carregar ranking de times'),
+      loading: () => const CartoesCarregando(),
+      error: (error, stack) => ErroCentralizado(mensagem: 'Erro ao carregar ranking de times', onTentarNovamente: () => setState(() {})),
       data: (children) {
         // Agrupa crianças por time e soma pontos
         final teamsMap = <String, (String, int, String)>{};
@@ -129,7 +129,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
         }
 
         if (teamsMap.isEmpty) {
-          return _buildEmptyState('Nenhum time encontrado');
+          return EmptyState(icon: Icons.inbox_outlined, title: 'Nenhum time encontrado');
         }
 
         // Ordena por pontos (descendente)
@@ -141,8 +141,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
           itemCount: sorted.length,
           itemBuilder: (context, index) {
             final (teamName, totalScore, teamColor) = sorted[index].value;
-            final medal = _getMedalForPosition(index);
-            return _buildTeamRankingCard(
+            final medal = medalhaDaPosicao(index);
+            return CartaoRankingTime(
               position: index + 1,
               nome: teamName,
               score: totalScore,
@@ -156,272 +156,6 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
     );
   }
 
-  String _getMedalForPosition(int index) {
-    switch (index) {
-      case 0:
-        return '🥇';
-      case 1:
-        return '🥈';
-      case 2:
-        return '🥉';
-      default:
-        return '${index + 1}';
-    }
-  }
-
-  Widget _buildRankingCard({
-    required int position,
-    required String nome,
-    required int score,
-    required String teamColor,
-    required String medal,
-    required bool isTop,
-    String? avatarId,
-  }) {
-    final cor = Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}'));
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isTop ? PulynColors.primary : PulynColors.darkBorder,
-          width: isTop ? 2 : 1,
-        ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          // Medal / Position
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}')),
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: Center(
-              child: Text(
-                medal,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-
-          // Avatar da criança (o nome completo fica ao lado)
-          ChildAvatar(
-            avatarId: avatarId,
-            inicial: nome.isNotEmpty ? nome[0].toUpperCase() : '?',
-            cor: cor,
-            tamanho: 44,
-          ),
-          const SizedBox(width: 12),
-
-          // Name
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nome,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: PulynColors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  'Posição #$position',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: PulynColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Score
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: PulynColors.primary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '$score pts',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: PulynColors.primaryTexto,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTeamRankingCard({
-    required int position,
-    required String nome,
-    required int score,
-    required String teamColor,
-    required String medal,
-    required bool isTop,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: isTop ? PulynColors.darkSurface : PulynColors.darkCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isTop ? PulynColors.primary : PulynColors.darkBorder,
-          width: isTop ? 2 : 1,
-        ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          // Medal / Position
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Color(int.parse('0xFF${teamColor.replaceFirst('#', '')}')),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(
-                medal,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nome,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: PulynColors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  'Pontos totais do time',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: PulynColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Score
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '$score',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: PulynColors.accentTexto,
-                ),
-              ),
-              Text(
-                'pontos',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: PulynColors.textMuted,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: PulynColors.darkCard,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: PulynColors.darkBorder),
-          ),
-          padding: const EdgeInsets.all(16),
-          height: 80,
-        );
-      },
-    );
-  }
-
-  Widget _buildErrorState(String mensagem) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: PulynColors.danger),
-          const SizedBox(height: 16),
-          Text(
-            mensagem,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () {
-              setState(() {});
-            },
-            icon: const Icon(Icons.refresh),
-            label: const Text('Tentar Novamente'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(String mensagem) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
-          const SizedBox(height: 16),
-          Text(
-            mensagem,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // Provider para carregar filhos com seus pontos

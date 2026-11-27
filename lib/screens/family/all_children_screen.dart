@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/data_curta.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,12 +18,6 @@ final allChildrenProvider =
 
 class AllChildrenScreen extends ConsumerWidget {
   const AllChildrenScreen({super.key});
-
-  static String _dataCurta(String? iso) {
-    final data = DateTime.tryParse(iso ?? '');
-    if (data == null) return '';
-    return '${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}/${data.year}';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -103,7 +98,7 @@ class AllChildrenScreen extends ConsumerWidget {
       _ => ('Aguardando o buffet', PulynColors.textMuted),
     };
     final evento = (c['ultimoEventoNome'] as String?) ?? '';
-    final dataEvento = _dataCurta(c['ultimoEventoData'] as String?);
+    final dataEvento = dataCurta(c['ultimoEventoData'] as String?);
     final idade = c['idade'];
     final ultimo = evento.isEmpty
         ? 'Nenhum evento ainda'

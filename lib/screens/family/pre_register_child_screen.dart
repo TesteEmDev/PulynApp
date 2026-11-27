@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../utils/data_curta.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -204,7 +205,7 @@ class _PreRegisterChildScreenState
 
   /// 'vincular' (é meu filho), 'novo' (cadastrar mesmo assim) ou null (voltar)
   Future<String?> _avisarCadastroParecido(Map<String, String> cadastro) {
-    final data = _dataCurta(cadastro['criadoEm']);
+    final data = dataCurta(cadastro['criadoEm']);
     final crianca = cadastro['crianca'] ?? '';
     final responsavel = cadastro['responsavel'] ?? '';
     // Nomes abreviados pelo servidor (privacidade): "Guilherme G. C."
@@ -254,12 +255,6 @@ class _PreRegisterChildScreenState
       if (mensagem is String && mensagem.isNotEmpty) return mensagem;
     }
     return 'Não foi possível cadastrar a criança. Tente novamente.';
-  }
-
-  String _dataCurta(String? iso) {
-    final data = DateTime.tryParse(iso ?? '');
-    if (data == null) return '';
-    return '${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}/${data.year}';
   }
 
   @override

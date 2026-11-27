@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/validadores.dart';
 import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -42,10 +43,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
-  void _showError(String mensagem) {
-    showErrorSnackBar(context, mensagem);
-  }
-
   void _showSuccess(String mensagem) {
     showSuccessSnackBar(context, mensagem);
   }
@@ -57,7 +54,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
 
     if (!_aceitouPrivacidade) {
-      _showError('❌ Aceite a Política de Privacidade para criar a conta');
+      showErrorSnackBar(context, '❌ Aceite a Política de Privacidade para criar a conta');
       return;
     }
 
@@ -70,14 +67,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     // Validação de senhas correspondentes
     if (senha != confirmPassword) {
-      _showError('❌ As senhas não conferem');
+      showErrorSnackBar(context, '❌ As senhas não conferem');
       return;
     }
 
     // Validação de força de senha
     final passwordValidation = _validationService.validatePassword(senha);
     if (!passwordValidation.valid) {
-      _showError('❌ ${passwordValidation.mensagem}');
+      showErrorSnackBar(context, '❌ ${passwordValidation.mensagem}');
       return;
     }
 
@@ -86,9 +83,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     try {
       // Verifica se o email já existe
       final emailAvailable = await _validationService.isEmailAvailable(email);
+      if (!mounted) return;
 
       if (!emailAvailable) {
-        _showError('❌ Este email já foi registrado. Use outro email ou faça login');
+        showErrorSnackBar(context, '❌ Este email já foi registrado. Use outro email ou faça login');
         setState(() => _isLoading = false);
         return;
       }
@@ -127,45 +125,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         errorMessage = '❌ Nome inválido. Use seu nome completo';
       }
 
-      _showError(errorMessage);
+      showErrorSnackBar(context, errorMessage);
       setState(() => _isLoading = false);
     }
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email é obrigatório';
-    }
-    final result = _validationService.validateEmail(value);
-    return result.valid ? null : result.mensagem;
-  }
+  String? _validateEmail(String? value) => validarEmail(value);
 
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Senha é obrigatória';
-    }
-    final result = _validationService.validatePassword(value);
-    return result.valid ? null : result.mensagem;
-  }
+  String? _validatePassword(String? value) => validarSenha(value);
 
-  String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Confirme a senha';
-    }
-    final result = _validationService.validatePasswordMatch(
-      _passwordController.text,
-      value,
-    );
-    return result.valid ? null : result.mensagem;
-  }
+  String? _validateConfirmPassword(String? value) => validarConfirmacaoSenha(value, _passwordController.text);
 
-  String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Nome é obrigatório';
-    }
-    final result = _validationService.validateName(value);
-    return result.valid ? null : result.mensagem;
-  }
+  String? _validateName(String? value) => validarNome(value);
 
   @override
   Widget build(BuildContext context) {

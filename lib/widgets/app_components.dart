@@ -658,6 +658,67 @@ class SkeletonLoader extends StatelessWidget {
   }
 }
 
+/// Lista de cartões vazios enquanto os dados carregam (ranking, filhos, etc.).
+/// `rolavel: false` para usar dentro de outra rolagem.
+class CartoesCarregando extends StatelessWidget {
+  final int itens;
+  final bool rolavel;
+
+  const CartoesCarregando({super.key, this.itens = 5, this.rolavel = true});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: rolavel ? const EdgeInsets.all(16) : EdgeInsets.zero,
+      shrinkWrap: !rolavel,
+      physics: rolavel ? null : const NeverScrollableScrollPhysics(),
+      itemCount: itens,
+      itemBuilder: (context, index) => Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        height: 80,
+        decoration: BoxDecoration(
+          color: PulynColors.darkCard,
+          borderRadius: BorderRadius.circular(PulynMedidas.raioCartao),
+          border: Border.all(color: PulynColors.darkBorder),
+        ),
+      ),
+    );
+  }
+}
+
+/// Erro no meio da tela, com botão de tentar de novo quando houver o que refazer.
+class ErroCentralizado extends StatelessWidget {
+  final String mensagem;
+  final VoidCallback? onTentarNovamente;
+
+  const ErroCentralizado({super.key, required this.mensagem, this.onTentarNovamente});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: PulynColors.dangerTexto),
+            const SizedBox(height: 16),
+            Text(mensagem, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+            if (onTentarNovamente != null) ...[
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: onTentarNovamente,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Tentar Novamente'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ============================================================================
 // 6️⃣ SECTION HEADERS
 // ============================================================================

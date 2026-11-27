@@ -160,8 +160,8 @@ class _LinkChildHeroState extends State<LinkChildHero> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: PulynColors.primary,
-                side: const BorderSide(color: PulynColors.primary),
+                foregroundColor: PulynColors.primaryTexto,
+                side: BorderSide(color: PulynColors.primaryTexto),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
             ),

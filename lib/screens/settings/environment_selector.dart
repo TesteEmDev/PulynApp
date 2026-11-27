@@ -124,9 +124,9 @@ class _EnvironmentSelectorScreenState
                     const SizedBox(height: 8),
                     Text(
                       'Selecionado: ${_selectedEnvironment.toString().split('.').last.toUpperCase()}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: PulynColors.primary,
+                        color: PulynColors.primaryTexto,
                       ),
                     ),
                   ],

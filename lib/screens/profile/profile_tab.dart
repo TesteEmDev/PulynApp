@@ -188,8 +188,8 @@ class ProfileTab extends StatelessWidget {
                 icon: const Icon(Icons.logout_rounded),
                 label: const Text('Sair da conta'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: PulynColors.danger,
-                  side: BorderSide(color: PulynColors.danger.withValues(alpha: 0.6)),
+                  foregroundColor: PulynColors.dangerTexto,
+                  side: BorderSide(color: PulynColors.dangerTexto.withValues(alpha: 0.6)),
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),

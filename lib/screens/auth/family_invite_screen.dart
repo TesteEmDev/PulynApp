@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../utils/validadores.dart';
 import 'package:flutter/material.dart';
 import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,10 +106,6 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
     }
   }
 
-  void _showError(String mensagem) {
-    showErrorSnackBar(context, mensagem);
-  }
-
   void _handleRegister() async {
     if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) {
@@ -128,7 +125,7 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
     final senha = _passwordController.text;
 
     if (senha != _confirmPasswordController.text) {
-      _showError('As senhas não conferem');
+      showErrorSnackBar(context, 'As senhas não conferem');
       return;
     }
 
@@ -203,50 +200,18 @@ class _FamilyInviteScreenState extends ConsumerState<FamilyInviteScreen> {
         errorMessage = 'Convite inválido ou expirado';
       }
 
-      _showError(errorMessage);
+      showErrorSnackBar(context, errorMessage);
       setState(() => _isSubmitting = false);
     }
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email é obrigatório';
-    }
-    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value)) {
-      return 'Email inválido';
-    }
-    return null;
-  }
+  String? _validateEmail(String? value) => validarEmail(value);
 
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Senha é obrigatória';
-    }
-    if (value.length < 6) {
-      return 'Senha deve ter no mínimo 6 caracteres';
-    }
-    return null;
-  }
+  String? _validatePassword(String? value) => validarSenha(value);
 
-  String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Confirme a senha';
-    }
-    if (value != _passwordController.text) {
-      return 'As senhas não conferem';
-    }
-    return null;
-  }
+  String? _validateConfirmPassword(String? value) => validarConfirmacaoSenha(value, _passwordController.text);
 
-  String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Nome é obrigatório';
-    }
-    if (value.length < 2) {
-      return 'Nome deve ter no mínimo 2 caracteres';
-    }
-    return null;
-  }
+  String? _validateName(String? value) => validarNome(value);
 
   /// "2026-10-05" / "2026-10-05T00:00:00Z" -> "05/10/2026" (sem converter fuso, para
   /// não recuar um dia). Se não for uma data reconhecível, mostra como veio.

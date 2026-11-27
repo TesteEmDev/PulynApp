@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/app_components.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/theme.dart';
@@ -57,9 +58,10 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
               error: (error, stack) => _buildErrorCard('Erro ao carregar perfil'),
               data: (child) {
                 if (child == null) {
-                  return _buildEmptyState(
-                    'Criança não encontrada',
-                    'O perfil desta criança não foi encontrado.',
+                  return EmptyState(
+                    icon: Icons.inbox_outlined,
+                    title: 'Criança não encontrada',
+                    subtitle: 'O perfil desta criança não foi encontrado.',
                   );
                 }
                 return _buildChildHeaderCard(child);
@@ -90,13 +92,14 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
             ),
             const SizedBox(height: 12),
             achievementsState.when(
-              loading: () => _buildLoadingList(),
+              loading: () => const CartoesCarregando(itens: 2, rolavel: false),
               error: (error, stack) => _buildErrorCard('Erro ao carregar conquistas'),
               data: (achievements) {
                 if (achievements.isEmpty) {
-                  return _buildEmptyState(
-                    'Nenhuma conquista ainda',
-                    'As conquistas aparecerão aqui quando a criança conquistar!',
+                  return EmptyState(
+                    icon: Icons.inbox_outlined,
+                    title: 'Nenhuma conquista ainda',
+                    subtitle: 'As conquistas aparecerão aqui quando a criança conquistar!',
                   );
                 }
                 return ListView.builder(
@@ -184,47 +187,6 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildEmptyState(String title, String descricao) {
-    return Center(
-      child: Column(
-        children: [
-          Icon(Icons.inbox_outlined, size: 64, color: PulynColors.textMuted),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            descricao,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: PulynColors.textMuted),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 2,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: PulynColors.darkCard,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: PulynColors.darkBorder),
-          ),
-          padding: const EdgeInsets.all(16),
-          height: 80,
-        );
-      },
     );
   }
 

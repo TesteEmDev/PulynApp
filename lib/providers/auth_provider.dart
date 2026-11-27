@@ -166,32 +166,32 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     }
   }
 
+  /// Entra na conta. Não passa por "carregando" nem por "erro" no estado da sessão: isso trocava a tela de login
+  /// pela splash (e recriava o formulário). Quem chama mostra o carregamento no botão e recebe a falha como exceção;
+  /// o estado só muda quando o login dá certo.
   Future<void> login(String email, String senha) async {
-    state = const AsyncValue.loading();
-    // Quando o e-mail ainda não foi confirmado, quem chama precisa levar a pessoa para a confirmação.
-    // Por isso a exceção é relançada, sem marcar erro no estado.
     try {
       await _ensureInitialized();
       final apiService = ref.read(apiServiceProvider);
       await apiService.init();
       final loginResponse = await apiService.login(email, senha);
-      
+
       // ✅ Salva o usuário em cache
       _cachedUser = loginResponse.user;
       _saveUserToCache(loginResponse.user);
-      
+
       // ✅ Garante que o token está salvo ANTES de atualizar o estado
       await _prefs.setString('auth_token', loginResponse.token);
       log.i('[AUTH] ✅ Login bem-sucedido para $email');
-      
+
       state = AsyncValue.data(loginResponse.user);
     } on EmailNaoConfirmadoException catch (e) {
+      // A pessoa precisa ser levada para a confirmação do e-mail
       ref.read(cadastroPendenteProvider.notifier).state = e.email;
-      state = const AsyncValue.data(null);
       rethrow;
-    } catch (e, st) {
+    } catch (e) {
       log.e('[AUTH] ❌ Erro no login: $e');
-      state = AsyncValue.error(e, st);
+      rethrow;
     }
   }
 

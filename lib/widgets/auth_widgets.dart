@@ -338,8 +338,8 @@ class AuthStep extends StatelessWidget {
           ),
           child: Text(
             '$number',
-            style: const TextStyle(
-              color: PulynColors.primary,
+            style: TextStyle(
+              color: PulynColors.primaryTexto,
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),

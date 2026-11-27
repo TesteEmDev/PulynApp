@@ -259,10 +259,10 @@ class _ManageLinkedChildrenScreenState
                                               Navigator.pop(context);
                                               _unlinkChild(child);
                                             },
-                                            child: const Text(
+                                            child: Text(
                                               'Desvincular',
                                               style: TextStyle(
-                                                color: PulynColors.danger,
+                                                color: PulynColors.dangerTexto,
                                               ),
                                             ),
                                           ),

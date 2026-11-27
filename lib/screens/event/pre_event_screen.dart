@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 import '../../utils/top_snackbar.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/pulyn_logo.dart';
@@ -253,13 +254,13 @@ class _ArrivalConfirmed extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.green.shade50,
-        border: Border.all(color: Colors.green),
+        border: Border.all(color: PulynColors.success),
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          const Icon(Icons.check_circle, color: Colors.green, size: 24),
+          const Icon(Icons.check_circle, color: PulynColors.success, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -352,12 +353,12 @@ class _ChildCard extends StatelessWidget {
 
     final statusIcon = status == 'ready' ? '✅' : '⏳';
     final statusText = status == 'ready' ? 'Pronto' : 'Aguardando';
-    final statusColor = status == 'ready' ? Colors.green : Colors.orange;
+    final statusColor = status == 'ready' ? PulynColors.success : Colors.orange;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: PulynColors.darkBorder),
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(12),
@@ -368,7 +369,7 @@ class _ChildCard extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: teamColor != null ? Color(int.parse('0xff${teamColor.replaceFirst('#', '')}')).withValues(alpha: 0.2) : Colors.grey.shade200,
+              color: teamColor != null ? Color(int.parse('0xff${teamColor.replaceFirst('#', '')}')).withValues(alpha: 0.2) : PulynColors.darkBorder,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -392,7 +393,7 @@ class _ChildCard extends StatelessWidget {
                 Text(
                   '$idade anos • Time $teamName',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
+                        color: PulynColors.textMuted,
                       ),
                 ),
               ],
@@ -432,7 +433,7 @@ class _EmptyChildrenMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: PulynColors.darkSurface,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(24),
@@ -455,7 +456,7 @@ class _EmptyChildrenMessage extends StatelessWidget {
             'Escaneie o QR codigo da criança para vinculá-la',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: PulynColors.textMuted,
                 ),
           ),
         ],

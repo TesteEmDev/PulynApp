@@ -76,8 +76,8 @@ class _SecaoView extends StatelessWidget {
         children: [
           Text(
             secao.titulo,
-            style: const TextStyle(
-              color: PulynColors.primary,
+            style: TextStyle(
+              color: PulynColors.primaryTexto,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),

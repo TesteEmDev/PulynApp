@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -125,7 +126,7 @@ class _EnvironmentSelectorScreenState
                       'Selecionado: ${_selectedEnvironment.toString().split('.').last.toUpperCase()}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: Colors.blue,
+                        color: PulynColors.primary,
                       ),
                     ),
                   ],
@@ -333,7 +334,7 @@ class _EnvironmentSelectorScreenState
           color: isSelected ? Colors.blue.shade50 : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
+            color: isSelected ? PulynColors.primary : PulynColors.darkBorder,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -361,7 +362,7 @@ class _EnvironmentSelectorScreenState
                     url,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      color: PulynColors.textMuted,
                       fontFamily: 'monospace',
                     ),
                     maxLines: 1,
@@ -374,7 +375,7 @@ class _EnvironmentSelectorScreenState
               isSelected
                   ? Icons.radio_button_checked
                   : Icons.radio_button_unchecked,
-              color: isSelected ? Colors.blue : Colors.grey,
+              color: isSelected ? PulynColors.primary : PulynColors.textMuted,
               size: 24,
             ),
           ],
@@ -390,9 +391,9 @@ class _EnvironmentSelectorScreenState
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: PulynColors.darkSurface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: PulynColors.darkBorder),
       ),
       padding: const EdgeInsets.all(12),
       child: Row(
@@ -412,7 +413,7 @@ class _EnvironmentSelectorScreenState
                   url,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: PulynColors.textMuted,
                     fontFamily: 'monospace',
                   ),
                   maxLines: 1,

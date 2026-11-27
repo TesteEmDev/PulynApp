@@ -44,7 +44,7 @@ class BrincadeiraSelo extends StatelessWidget {
                 Text(
                   ativa ? 'AO VIVO' : 'SEM BRINCADEIRA',
                   style: TextStyle(
-                    fontSize: 9,
+                    fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.8,
                     color: cor,

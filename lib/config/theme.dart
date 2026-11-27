@@ -19,6 +19,9 @@ class PulynColors {
   // O nome "dark" é mantido por compatibilidade: estas cores são as de fundo, cartão e borda do tema atual.
   static bool claro = false;
 
+  // Fundo dos botões cheios: um azul um pouco mais fundo que o da marca, para o texto branco chegar a 4,5:1 (no azul da marca dá 3,1:1)
+  static const Color botao = Color(0xFF1479B0);
+
   static Color get dark => claro ? const Color(0xFFFAF8F5) : const Color(0xFF121214);
   static Color get darkCard => claro ? const Color(0xFFFFFFFF) : const Color(0xFF1C1C20);
   static Color get darkSurface => claro ? const Color(0xFFF2EFEA) : const Color(0xFF26262B);
@@ -31,10 +34,21 @@ class PulynColors {
   static const Color danger = Color(0xFFE53935);
   static const Color info = Color(0xFF1E9BD7);
 
-  // Text colors
+  // Text colors (todas com contraste mínimo de 4,5:1 sobre fundo, cartão e superfície, nos dois temas)
   static Color get textPrimary => claro ? const Color(0xFF1F1B16) : Colors.white;
-  static Color get textSecondary => claro ? const Color(0xFF5F5A53) : const Color(0xFFB4B2AE);
-  static Color get textMuted => claro ? const Color(0xFF8A847C) : const Color(0xFF7D7B77);
+  static Color get textSecondary => claro ? const Color(0xFF4D4842) : const Color(0xFFB4B2AE);
+  static Color get textMuted => claro ? const Color(0xFF676259) : const Color(0xFF9C9A96);
+
+  // Cores da marca e de status usadas COMO TEXTO ou ícone sobre o fundo do tema. No tema escuro são as próprias cores;
+  // no claro, versões mais escuras, porque o azul, o verde e o laranja originais ficam entre 1,9:1 e 3,1:1 sobre branco.
+  static Color get primaryTexto => claro ? const Color(0xFF0B6A9E) : primary;
+  static Color get secondaryTexto => claro ? const Color(0xFF2E7D32) : secondary;
+  static Color get accentTexto => claro ? const Color(0xFF9A5B00) : accent;
+  static Color get pinkTexto => claro ? const Color(0xFFC2185B) : pink;
+  static Color get successTexto => claro ? const Color(0xFF2E7D32) : success;
+  static Color get warningTexto => claro ? const Color(0xFF9A5B00) : warning;
+  static Color get dangerTexto => claro ? const Color(0xFFC62828) : danger;
+  static Color get infoTexto => claro ? const Color(0xFF0B6A9E) : info;
 }
 
 /// Medidas padronizadas: botões, campos e cartões usam sempre estes valores.
@@ -126,15 +140,15 @@ ThemeData _construirTemaBase(bool claro) {
         borderSide: BorderSide(color: PulynColors.danger, width: 1.5),
       ),
       labelStyle: TextStyle(color: PulynColors.textSecondary),
-      floatingLabelStyle: TextStyle(color: PulynColors.primary),
+      floatingLabelStyle: TextStyle(color: PulynColors.primaryTexto),
       hintStyle: TextStyle(color: PulynColors.textMuted),
       helperStyle: TextStyle(color: PulynColors.textMuted, fontSize: 12),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: PulynColors.primary,
+        backgroundColor: PulynColors.botao,
         foregroundColor: Colors.white,
-        disabledBackgroundColor: PulynColors.primary.withValues(alpha: 0.4),
+        disabledBackgroundColor: PulynColors.botao.withValues(alpha: 0.4),
         minimumSize: const Size.fromHeight(PulynMedidas.alturaBotao),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PulynMedidas.raioBotao)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -144,9 +158,9 @@ ThemeData _construirTemaBase(bool claro) {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: PulynColors.primary,
+        backgroundColor: PulynColors.botao,
         foregroundColor: Colors.white,
-        disabledBackgroundColor: PulynColors.primary.withValues(alpha: 0.4),
+        disabledBackgroundColor: PulynColors.botao.withValues(alpha: 0.4),
         minimumSize: const Size.fromHeight(PulynMedidas.alturaBotao),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PulynMedidas.raioBotao)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -156,9 +170,9 @@ ThemeData _construirTemaBase(bool claro) {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: PulynColors.primary,
+        foregroundColor: PulynColors.primaryTexto,
         minimumSize: const Size.fromHeight(PulynMedidas.alturaBotao),
-        side: BorderSide(color: PulynColors.primary, width: 1.5),
+        side: BorderSide(color: PulynColors.primaryTexto, width: 1.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PulynMedidas.raioBotao)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
@@ -166,7 +180,7 @@ ThemeData _construirTemaBase(bool claro) {
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: PulynColors.primary,
+        foregroundColor: PulynColors.primaryTexto,
         textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     ),
@@ -180,7 +194,7 @@ ThemeData _construirTemaBase(bool claro) {
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: PulynColors.darkCard,
-      selectedItemColor: PulynColors.primary,
+      selectedItemColor: PulynColors.primaryTexto,
       unselectedItemColor: PulynColors.textMuted,
       elevation: 0,
       type: BottomNavigationBarType.fixed,

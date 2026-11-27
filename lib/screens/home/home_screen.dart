@@ -619,7 +619,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Evento atual', style: TextStyle(fontSize: 11, color: PulynColors.textSecondary)),
+                Text('Evento atual', style: TextStyle(fontSize: 12, color: PulynColors.textSecondary)),
                 Text(
                   nome,
                   overflow: TextOverflow.ellipsis,
@@ -737,15 +737,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Text(
           'MAPA DO BUFFET',
-          style: TextStyle(color: PulynColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2),
+          style: TextStyle(color: PulynColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.2),
         ),
         const SizedBox(height: 4),
         Text(
           nome,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: PulynColors.primary,
+          style: TextStyle(
+            color: PulynColors.primaryTexto,
             fontSize: 28,
             fontWeight: FontWeight.w900,
             height: 1.1,
@@ -795,7 +795,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             'EVENTO',
             style: TextStyle(
               color: PulynColors.textSecondary,
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
             ),
@@ -900,7 +900,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: PulynColors.danger),
       ),
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -908,7 +908,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             SizedBox(height: 16),
             Text(
               'Erro ao carregar mapa',
-              style: TextStyle(color: PulynColors.danger),
+              style: TextStyle(color: PulynColors.dangerTexto),
             ),
           ],
         ),
@@ -1056,7 +1056,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Text(
                       'Erro ao carregar',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: PulynColors.danger,
+                        color: PulynColors.dangerTexto,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1266,17 +1266,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   Text(
                     '${child.currentScore}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: PulynColors.accent,
+                      color: PulynColors.accentTexto,
                     ),
                   ),
                   const SizedBox(width: 2),
                   Text(
                     'pts',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       color: PulynColors.textMuted,
                     ),
                   ),
@@ -1386,15 +1386,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Text(
                   '$score',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: PulynColors.primary,
+                    color: PulynColors.primaryTexto,
                   ),
                 ),
                 Text(
                   'pts',
-                  style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
+                  style: TextStyle(fontSize: 12, color: PulynColors.textMuted),
                 ),
               ],
             ),
@@ -1470,15 +1470,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               Text(
                 '$score',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: PulynColors.accent,
+                  color: PulynColors.accentTexto,
                 ),
               ),
               Text(
                 'pontos',
-                style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
+                style: TextStyle(fontSize: 12, color: PulynColors.textMuted),
               ),
             ],
           ),

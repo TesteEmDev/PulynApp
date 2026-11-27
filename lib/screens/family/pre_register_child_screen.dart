@@ -436,7 +436,7 @@ class MenuCadastroPendente extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Excluir', style: TextStyle(color: PulynColors.danger)),
+            child: Text('Excluir', style: TextStyle(color: PulynColors.dangerTexto)),
           ),
         ],
       ),

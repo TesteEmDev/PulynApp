@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 import '../../utils/top_snackbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -276,7 +277,7 @@ class _ChildResultCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: PulynColors.darkBorder),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(16),
@@ -301,7 +302,7 @@ class _ChildResultCard extends StatelessWidget {
                     Text(
                       'Team $teamName',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                            color: PulynColors.textMuted,
                           ),
                     ),
                   ],
@@ -348,7 +349,7 @@ class _ChildResultCard extends StatelessWidget {
               children: badges
                   .map((badge) => Chip(
                         label: Text(badge, style: const TextStyle(fontSize: 12)),
-                        backgroundColor: Colors.grey.shade200,
+                        backgroundColor: PulynColors.darkBorder,
                       ))
                   .toList(),
             ),
@@ -442,7 +443,7 @@ class _ChildrenRankingList extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: PulynColors.darkSurface,
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(12),
@@ -507,7 +508,7 @@ class _TeamsRankingList extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: PulynColors.darkSurface,
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(12),
@@ -552,7 +553,7 @@ class _EmptyResult extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: PulynColors.darkSurface,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(24),
@@ -581,7 +582,7 @@ class _EmptyRanking extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: PulynColors.darkSurface,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(24),
@@ -589,7 +590,7 @@ class _EmptyRanking extends StatelessWidget {
         child: Text(
           'Ranking não disponível',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
+                color: PulynColors.textMuted,
               ),
         ),
       ),

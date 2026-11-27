@@ -134,10 +134,10 @@ class _NavButton extends StatelessWidget {
                               item.label,
                               maxLines: 1,
                               softWrap: false,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
-                                color: PulynColors.primary,
+                                color: PulynColors.primaryTexto,
                               ),
                             ),
                           )

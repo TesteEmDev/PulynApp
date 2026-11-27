@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 import '../../utils/top_snackbar.dart';
 import '../../utils/logger.dart';
 import '../../services/api_service.dart';
@@ -143,10 +144,10 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.child_friendly,
                             size: 64,
-                            color: Colors.grey,
+                            color: PulynColors.textMuted,
                           ),
                           const SizedBox(height: 16),
                           const Text('Nenhuma criança vinculada'),
@@ -156,7 +157,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                             icon: const Icon(Icons.qr_code_2),
                             label: const Text('Escanear QR Code'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
+                              backgroundColor: PulynColors.success,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 24,
                                 vertical: 12,
@@ -179,7 +180,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                     ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openQRScanner,
-        backgroundColor: Colors.green,
+        backgroundColor: PulynColors.success,
         tooltip: 'Vincular Nova Criança',
         child: const Icon(Icons.add),
       ),
@@ -253,7 +254,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                             '${child.idade} anos • ${child.teamName}',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[600],
+                              color: PulynColors.textMuted,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -261,7 +262,7 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
                             'Pontos: ${child.currentScore}',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[500],
+                              color: PulynColors.textMuted,
                             ),
                           ),
                         ],
@@ -292,16 +293,16 @@ class _LinkedChildrenScreenState extends State<LinkedChildrenScreen> {
   }
 
   Color _parseColor(dynamic colorValue) {
-    if (colorValue == null) return Colors.blue;
+    if (colorValue == null) return PulynColors.primary;
     if (colorValue is Color) return colorValue;
     if (colorValue is String) {
       // Parse hex color: "#FF0000"
       try {
         return Color(int.parse(colorValue.replaceFirst('#', '0xff')));
       } catch (e) {
-        return Colors.blue;
+        return PulynColors.primary;
       }
     }
-    return Colors.blue;
+    return PulynColors.primary;
   }
 }

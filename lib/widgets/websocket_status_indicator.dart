@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/websocket_provider.dart';
 
@@ -29,7 +30,7 @@ class WebSocketStatusIndicator extends ConsumerWidget {
               width: 8,
               height: 8,
               decoration: BoxDecoration(
-                color: isConnected ? Colors.green : Colors.grey,
+                color: isConnected ? PulynColors.success : PulynColors.textMuted,
                 shape: BoxShape.circle,
               ),
             ),
@@ -39,7 +40,7 @@ class WebSocketStatusIndicator extends ConsumerWidget {
                 isConnected ? 'Online' : 'Offline',
                 style: TextStyle(
                   fontSize: 12,
-                  color: isConnected ? Colors.green : Colors.grey,
+                  color: isConnected ? PulynColors.success : PulynColors.textMuted,
                   fontWeight: FontWeight.w500,
                 ),
               ),

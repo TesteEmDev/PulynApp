@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 import 'package:go_router/go_router.dart';
 
 /// 🎯 FASE 1: ONBOARDING SCREEN
@@ -82,7 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   decoration: BoxDecoration(
                     color: _currentPage == index
                         ? Theme.of(context).primaryColor
-                        : Colors.grey.shade300,
+                        : PulynColors.darkBorder,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -183,7 +184,7 @@ class _OnboardingCard extends StatelessWidget {
             descricao,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
+                  color: PulynColors.textMuted,
                 ),
           ),
         ),

@@ -241,7 +241,7 @@ class _Etiqueta extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: cor.withValues(alpha: 0.5)),
       ),
-      child: Text(texto, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: cor)),
+      child: Text(texto, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: cor)),
     );
   }
 }

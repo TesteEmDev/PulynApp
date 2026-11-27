@@ -130,7 +130,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.grey[800],
+              color: PulynColors.darkHover,
               borderRadius: BorderRadius.circular(16),
             ),
           ),
@@ -143,7 +143,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                   width: 150,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: Colors.grey[800],
+                    color: PulynColors.darkHover,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -152,7 +152,7 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                   width: 100,
                   height: 16,
                   decoration: BoxDecoration(
-                    color: Colors.grey[800],
+                    color: PulynColors.darkHover,
                     borderRadius: BorderRadius.circular(6),
                   ),
                 ),
@@ -289,10 +289,10 @@ class _ChildDetailScreenState extends ConsumerState<ChildDetailScreen> {
                   ),
                   child: Text(
                     '${child.currentScore} pontos',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: PulynColors.primary,
+                      color: PulynColors.primaryTexto,
                     ),
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 import '../../utils/top_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -76,7 +77,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                 'Acompanhe a jornada do seu filho em tempo real',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey,
+                  color: PulynColors.textMuted,
                 ),
               ),
               
@@ -114,7 +115,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey.shade400,
+                        color: PulynColors.textMuted,
                       ),
                     ),
                   ],
@@ -164,7 +165,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.1),
+                  color: PulynColors.darkSurface,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -182,7 +183,7 @@ class _InviteEntryScreenState extends ConsumerState<InviteEntryScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey.shade400,
+                        color: PulynColors.textMuted,
                       ),
                     ),
                   ],

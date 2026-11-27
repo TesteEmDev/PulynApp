@@ -1082,9 +1082,9 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
             children: [
               const Icon(Icons.error_outline, color: PulynColors.danger, size: 48),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Erro ao carregar mapa',
-                style: TextStyle(color: PulynColors.danger, fontWeight: FontWeight.bold),
+                style: TextStyle(color: PulynColors.dangerTexto, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -1450,7 +1450,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                               'Arraste, pince ou toque 2x para dar zoom',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: PulynColors.textMuted,
-                                fontSize: 10,
+                                fontSize: 12,
                               ),
                             ),
                           ],
@@ -1664,7 +1664,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                               Text(
                                                 checkpoint['nome'],
                                                 style: const TextStyle(
-                                                  fontSize: 10,
+                                                  fontSize: 12,
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.w600,
                                                 ),
@@ -1820,7 +1820,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
                                             child: Text(
                                               displayName,
                                               style: const TextStyle(
-                                                fontSize: 9,
+                                                fontSize: 11,
                                                 color: Colors.yellow,
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -1988,7 +1988,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         showCheckmark: false,
         labelStyle: TextStyle(
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
           color: ativo ? Colors.white : PulynColors.textMuted,
         ),
@@ -2011,7 +2011,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
           Text(
             'Por onde seus filhos passaram (mais fraco = faz mais tempo)',
             maxLines: 2,
-            style: TextStyle(fontSize: 11, color: PulynColors.textMuted),
+            style: TextStyle(fontSize: 12, color: PulynColors.textMuted),
           ),
           const SizedBox(height: 4),
           Wrap(
@@ -2045,7 +2045,7 @@ class _EventMapWidgetState extends ConsumerState<EventMapWidget>
         Text(
           label,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             color: PulynColors.textMuted,
             fontWeight: FontWeight.w500,
           ),

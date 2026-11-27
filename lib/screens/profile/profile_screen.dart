@@ -278,10 +278,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           child: Text(
             user.perfil.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: PulynColors.primary,
+              color: PulynColors.primaryTexto,
             ),
           ),
         ),

@@ -257,10 +257,10 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             ),
             child: Text(
               '$score pts',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: PulynColors.primary,
+                color: PulynColors.primaryTexto,
               ),
             ),
           ),
@@ -342,16 +342,16 @@ class _RankingScreenState extends ConsumerState<RankingScreen>
             children: [
               Text(
                 '$score',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: PulynColors.accent,
+                  color: PulynColors.accentTexto,
                 ),
               ),
               Text(
                 'pontos',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   color: PulynColors.textMuted,
                 ),
               ),

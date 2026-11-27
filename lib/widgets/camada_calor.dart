@@ -159,18 +159,21 @@ class LegendaCalor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final estilo = TextStyle(fontSize: 11, color: PulynColors.textMuted, fontWeight: FontWeight.w500);
+    final estilo = TextStyle(fontSize: 12, color: PulynColors.textMuted, fontWeight: FontWeight.w500);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text('Pouco tempo', style: estilo),
         const SizedBox(width: 8),
-        Container(
-          width: 96,
-          height: 8,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            gradient: LinearGradient(colors: [for (final t in [0.0, 0.33, 0.66, 1.0]) corDoCalor(t)]),
+        // A barra encolhe quando falta largura (os rótulos, agora em 12, não podem estourar a linha)
+        Flexible(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 96),
+            height: 8,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              gradient: LinearGradient(colors: [for (final t in [0.0, 0.33, 0.66, 1.0]) corDoCalor(t)]),
+            ),
           ),
         ),
         const SizedBox(width: 8),

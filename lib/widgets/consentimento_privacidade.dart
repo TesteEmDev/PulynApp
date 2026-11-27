@@ -49,8 +49,8 @@ class _ConsentimentoPrivacidadeState extends State<ConsentimentoPrivacidade> {
             const TextSpan(text: 'Li e concordo com a '),
             TextSpan(
               text: 'Política de Privacidade',
-              style: const TextStyle(
-                color: PulynColors.primary,
+              style: TextStyle(
+                color: PulynColors.primaryTexto,
                 fontWeight: FontWeight.w700,
                 decoration: TextDecoration.underline,
               ),

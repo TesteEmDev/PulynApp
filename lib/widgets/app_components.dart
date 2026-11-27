@@ -171,7 +171,7 @@ class AvatarCard extends StatelessWidget {
                     '$badge',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -248,7 +248,7 @@ class PulynButton extends StatelessWidget {
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  isSecondary ? PulynColors.primary : Colors.white,
+                  isSecondary ? PulynColors.primaryTexto : Colors.white,
                 ),
               ),
             )
@@ -256,13 +256,13 @@ class PulynButton extends StatelessWidget {
       label: Text(isLoading ? 'Carregando...' : label),
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor ??
-            (isSecondary ? Colors.transparent : PulynColors.primary),
-        foregroundColor: isSecondary ? PulynColors.primary : Colors.white,
+            (isSecondary ? Colors.transparent : PulynColors.botao),
+        foregroundColor: isSecondary ? PulynColors.primaryTexto : Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: isSecondary
-              ? const BorderSide(color: PulynColors.primary, width: 2)
+              ? BorderSide(color: PulynColors.primaryTexto, width: 2)
               : BorderSide.none,
         ),
         elevation: isSecondary ? 0 : 4,
@@ -472,7 +472,7 @@ class ScoreBadge extends StatelessWidget {
             Text(
               label!,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 color: PulynColors.textMuted,
               ),
             ),
@@ -605,7 +605,7 @@ class ErrorState extends StatelessWidget {
           Text(
             'Algo deu errado',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: PulynColors.danger,
+                  color: PulynColors.dangerTexto,
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -838,12 +838,12 @@ class NotificationCard extends StatelessWidget {
                         color: PulynColors.primary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Novo',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: PulynColors.primary,
+                          color: PulynColors.primaryTexto,
                         ),
                       ),
                     ),

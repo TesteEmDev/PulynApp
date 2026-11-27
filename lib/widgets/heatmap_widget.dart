@@ -129,7 +129,7 @@ class CheckpointHeatmapWidget extends StatelessWidget {
                 nome,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: isConquered ? PulynColors.success : PulynColors.textMuted,
                 ),

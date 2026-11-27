@@ -138,7 +138,7 @@ class AllChildrenScreen extends ConsumerWidget {
                 rotulo,
                 style: TextStyle(
                   color: cor,
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),
